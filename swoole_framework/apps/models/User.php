@@ -12,9 +12,10 @@ class User extends Swoole\Model
 
     function test()
     {
-        $a = model('Test');
-        $key = '1234';
-        $this->swoole->cache->delete($key);
-        $this->db->getAffectedRows();
+        // $a = model('Test');
+        // $key = '1234';
+        // $this->swoole->cache->delete($key);
+        // $this->db->getAffectedRows();
+        return 1;
     }
 }
