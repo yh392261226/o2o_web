@@ -3,13 +3,14 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-01 16:53:04
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-02 16:48:30
+ * @Last Modified time: 2017-08-03 11:04:15
  */
 namespace App\Model;
 use Swoole;
 
 class Manager extends Swoole\Model
 {
+    public $table = 'managers';
     /* 获取角色列表 */
     public function get_role_list()
     {
@@ -26,7 +27,7 @@ class Manager extends Swoole\Model
         $data['m_pass'] = $password;
         $data['m_status'] = 0;
         $data['m_in_time'] = time();
-        $data['m_inip'] = $_SERVER["REMOTE_ADDR"];
+        $data['m_inip'] =  ip2long($_SERVER["REMOTE_ADDR"]);
         $data['m_author'] = $_SESSION['manager_id'];
         $data['mpg_id'] = $select_role;
         if($this->db->insert($data,'managers')){
@@ -36,5 +37,30 @@ class Manager extends Swoole\Model
         }
 
 
+    }
+
+    /**
+     * 检查用户名是否存在
+     * @param  [type]  $name 管理员名称
+     * @return  int    大于0存在
+     */
+
+    public function has_manager_name($name)
+    {
+        $where = array('m_name'=>$name);
+        $res = $this->select('m_id')->where($where)->fetch();
+        return $res;
+    }
+
+    /**
+     * [del_manager description]
+     * @param  [type] $m_id 管理员id
+     * @return [type] bool
+     */
+
+    public function del_manager($m_id){
+        $data = array('m_status'=>'-2');
+        $res = $this->set($m_id,$data,'m_id');
+        return $res;
     }
 }
