@@ -1,5 +1,4 @@
 # 目录结构
-.
 ├── framework                       框架
 ├── dao                             dao层
 ├── manage                          后台
