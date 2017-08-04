@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>后台管理员</title>
+</head>
+<body>
+{{foreach from=$list item=val}}
+	{{if $val.m_id eq 1}}
+		{{$val.m_name}}
+	{{else}}
+		{{$val.m_pass}}
+	{{/if}}
+{{/foreach}}
+{{$page}}
+</body>
+</html>
