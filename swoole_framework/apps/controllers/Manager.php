@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-01 16:26:47
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-03 13:27:13
+ * @Last Modified time: 2017-08-04 10:58:19
  */
 namespace App\Controller;
 use Swoole;
@@ -39,10 +39,12 @@ class Manager extends \App\AdminBase\AdminBase
             echo "请选择角色";
             die;
         }
-        if(!preg_match('/^[\w\x80-\xff]{3,15}$/', $m_name)){
+        if(!preg_match('/^[a-zA-Z0-9_]{3,16}$/', $m_name))
+        {
             exit('错误：用户名不符合规定.');
         }
-        if(strlen($password) < 6){
+        if(strlen($password) < 6)
+        {
             exit('错误：密码长度不符合规定.');
         }
 
@@ -50,7 +52,8 @@ class Manager extends \App\AdminBase\AdminBase
         $manager = model('Manager');
         //检查管理员名是否存在
         $res = $manager->has_manager_name($m_name);
-        if($res['m_id']){
+        if($res['m_id'])
+        {
             echo "管理员名已经存在,请更换管理员名称";die;
         }
         $manager->manager_insert($m_name,$password,$select_role);

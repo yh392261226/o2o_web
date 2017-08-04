@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-01 16:53:04
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-03 11:04:15
+ * @Last Modified time: 2017-08-04 09:25:10
  */
 namespace App\Model;
 use Swoole;
@@ -53,12 +53,13 @@ class Manager extends Swoole\Model
     }
 
     /**
-     * [del_manager description]
+     * [del_manager description]删除管理员
      * @param  [type] $m_id 管理员id
      * @return [type] bool
      */
 
-    public function del_manager($m_id){
+    public function del_manager($m_id)
+    {
         $data = array('m_status'=>'-2');
         $res = $this->set($m_id,$data,'m_id');
         return $res;
