@@ -1,29 +1,36 @@
 ## 目录结构
 .
 ```
-├── framework                       框架
-├── dao                             dao层
-├── manage                          后台
-│   ├── cache                       后台缓存
-│   ├── controllers                 后台控制器
-│   ├── index.php                   后台入口文件
-│   └── views                       后台视图
-│       ├── css                     css样式
-│       ├── images                  图片
-│       ├── js                      javascript
-│       └── templates               模板
-├── models                          公共model
-├── public                          公共函数或类
-├── library                         第三方库
-└── web                             前台
-    ├── cache
-    ├── controllers
-    ├── index.php
-    └── views
-        ├── css
-        ├── images
-        ├── js
-        └── templates
+
+├── framework                           框架
+├── apps                                应用
+│   ├── dao                             dao层
+│   │   └── test.php
+│   ├── manage                          后台
+│   │   ├── controllers                 后台控制器
+│   │   │   └── controller.php
+│   │   ├── index.php
+│   │   └── views                       后台视图
+│   │       └── index.html
+│   ├── models                          公共model
+│   │   └── test.php
+│   ├── public                          公共函数或类
+│   │   └── public.php
+│   └── web                             前台
+│       ├── controllers                 前台控制器
+│       │   └── controller.php
+│       ├── index.php
+│       └── views                       前台视图
+│           └── index.html
+├── libraries                           第三方库
+│   └── library.php
+└── static                              静态文件(js css 图片等)
+    ├── css
+    │   └── index.html
+    ├── images
+    │   └── index.html
+    └── js
+        └── index.html
 ```
 
 
