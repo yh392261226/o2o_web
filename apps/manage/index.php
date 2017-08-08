@@ -1,7 +1,9 @@
 <?php
 define('WEBPATH', dirname(__FILE__));
-require WEBPATH . '/configs/config.php';
+define('CONFIGPATH', WEBPATH . '/configs');
+require CONFIGPATH . '/config.php';
 require FRAMEWORKPATH . '/libs/lib_config.php';
-Swoole::$php->setAppPath(APPPATH);
-//Swoole::$php->runMVC();
-Swoole::$php->runConsole();
+require CONFIGPATH . '/db.php';
+Swoole::$php->config['db'] = $db;
+Swoole::$php->setAppPath(WEBPATH);
+Swoole::$php->runMVC();
