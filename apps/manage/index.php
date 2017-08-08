@@ -3,7 +3,23 @@ define('WEBPATH', dirname(__FILE__));
 define('CONFIGPATH', WEBPATH . '/configs');
 require CONFIGPATH . '/config.php';
 require FRAMEWORKPATH . '/libs/lib_config.php';
-require CONFIGPATH . '/db.php';
-Swoole::$php->config['db'] = $db;
-Swoole::$php->setAppPath(WEBPATH);
+
+// config配置文件目录
+Swoole::$php->config->setPath(__DIR__.'/configs');
+
+// apppath路径设置
+Swoole::$php->setAppPath(APPPATH);
+//controller目录设置
+Swoole::$php->setControllerPath(WEBPATH."/controllers/");
+//view目录设置
+Swoole::$php->tpl->template_dir = WEBPATH."/views";
+
+Swoole\Loader::addNameSpace("DAO", APPPATH."/DAO");
+echo WEBPATH."/classes";///data/wwwroot/gangjian/swoole_test/apps/manage/classes
+Swoole\Loader::addNameSpace("CLASSES", WEBPATH."/classes");
+//默认访问地址
+Swoole::$php->router(function(){
+    return array('controller' => 'Index', 'view' => 'index');
+});
+
 Swoole::$php->runMVC();
