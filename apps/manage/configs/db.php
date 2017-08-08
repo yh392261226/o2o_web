@@ -16,5 +16,5 @@ $db['master'] = array(
         //array('host' => '127.0.0.1', 'port' => '3309', 'weight' => 98,),
             ),
         );
-
-Swoole::$php->config['db'] = $db;
+return $db;
+//Swoole::$php->config['db'] = $db;
