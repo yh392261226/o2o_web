@@ -20,8 +20,15 @@ class Manager
         }
 		$manager = model('Managers');
     	$ret_info['list'] = $manager->findAll($where,$filed,$first_page,$last_page);
-        $ret_info['page'] = $manager->page();   
-        // var_dump($where);     
+    	if (!empty($ret_info['list']))
+        {
+            $ret_info['page'] = $manager->page();
+        }
+        else
+        {
+            $ret_info['page'] = array();
+        }
+        // var_dump($where);
         // $ret_info = $manager->getAll($where); 
         // var_dump($ret_info)       ;exit();
         return $ret_info;
