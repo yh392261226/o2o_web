@@ -17,9 +17,5 @@ Swoole::$php->tpl->template_dir = WEBPATH."/views";
 Swoole\Loader::addNameSpace("DAO", APPPATH."/DAO");
 //定义class文件夹位置
 Swoole\Loader::addNameSpace("CLASSES", WEBPATH."/classes");
-//默认访问地址
-Swoole::$php->router(function(){
-    return array('controller' => 'Manager', 'view' => 'add');
-});
 
 Swoole::$php->runMVC();
