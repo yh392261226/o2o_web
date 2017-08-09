@@ -20,7 +20,16 @@ class Manager
         }
 		$manager = model('Managers');
     	$ret_info['list'] = $manager->findAll($where,$filed,$first_page,$last_page);
+
         $ret_info['page'] = $manager->page();
+        if (!empty($ret_info['list']))
+        {
+            $ret_info['page'] = $manager->page();
+        }
+        else
+        {
+            $ret_info['page'] = array();
+        }
         // var_dump($where);
         // $ret_info = $manager->getAll($where);
         // var_dump($ret_info)       ;exit();
@@ -30,7 +39,7 @@ class Manager
     {
         # code...
     }
- /*管理员添加操作*/
+    /*管理员添加操作*/
     public function managerInsert($m_name,$password,$select_role)
     {
         $data = array();
@@ -47,7 +56,8 @@ class Manager
      /* 获取角色列表 */
     public function getRoleList()
     {
-         // return $this->db->query("SELECT mpg_id, mpg_name, mpm_ids FROM managers_privileges_group")->fetchall();
         return table('managers_privileges_group')->select('mpg_id, mpg_name, mpm_ids')->fetchall();
     }
+
+
 }
