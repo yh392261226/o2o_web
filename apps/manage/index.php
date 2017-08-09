@@ -10,7 +10,7 @@ Swoole::$php->config->setPath(__DIR__.'/configs');
 // apppath路径设置
 Swoole::$php->setAppPath(APPPATH);
 //controller目录设置
-Swoole::$php->setControllerPath(WEBPATH."/controllers/");
+Swoole::$php->setControllerPath(WEBPATH."/controllers");
 //view目录设置
 Swoole::$php->tpl->template_dir = WEBPATH."/views";
 //新增命名空间
@@ -19,7 +19,7 @@ Swoole\Loader::addNameSpace("DAO", APPPATH."/DAO");
 Swoole\Loader::addNameSpace("CLASSES", WEBPATH."/classes");
 //默认访问地址
 Swoole::$php->router(function(){
-    return array('controller' => 'Index', 'view' => 'index');
+    return array('controller' => 'Manager', 'view' => 'add');
 });
 
 Swoole::$php->runMVC();
