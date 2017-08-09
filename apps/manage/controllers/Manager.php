@@ -12,6 +12,7 @@ class Manager extends \CLASSES\AdminBase
     public function __construct($swoole)
     {
         parent::__construct($swoole);
+        $this->managers = new \DAO\Manager();
     }
 	public function index()
 	{
@@ -19,7 +20,7 @@ class Manager extends \CLASSES\AdminBase
 
         $get_page = !empty($_GET['page']) ? $_GET['page'] : 1;
         $m_name= !empty($_GET['m_name']) ? $_GET['m_name'] : false;
-        $this->managers = new \DAO\Manager();
+       
         $info = $this->managers->show_index($get_page,$m_name);
 
         $this->tpl->assign("list",$info['list']);
@@ -28,8 +29,7 @@ class Manager extends \CLASSES\AdminBase
 	}
 	public function edit_manager_info()
 	{
-        // $table  = table('managers');
-        $table  = Model('Managers');
+        // $this->managers->edit_manager_info()
         $m_id = $_GET['m_id'] = 1;
         $manager_info = $table->get($m_id);
         $managers_privileges_group_list = table('managers_privileges_group')->select('*')->where(array("mpg_status" => 2))->fetchall();

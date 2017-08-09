@@ -20,14 +20,24 @@ class Manager
         }
 		$manager = model('Managers');
     	$ret_info['list'] = $manager->findAll($where,$filed,$first_page,$last_page);
-        $ret_info['page'] = $manager->page();   
-        // var_dump($where);     
+    	if (!empty($ret_info['list']))
+        {
+            $ret_info['page'] = $manager->page();
+        }
+        else
+        {
+            $ret_info['page'] = array();
+        }
+        // var_dump($where);
         // $ret_info = $manager->getAll($where); 
         // var_dump($ret_info)       ;exit();
         return $ret_info;
     }
-    public function edit_manager_info()
-    {
-        # code...
-    }
+    // public function select_manager_info($m_id)
+    // {
+    //     $manager  = Model('Managers'); 
+    //     $mpg = model('managers_privileges_group');
+    //     $ret_info['m_info'] = $manager->findOne(array("m_id" => $m_id));
+    //     $ret_info['mpg_list'] = $mpg->findAll(array("mpg_status" => 2))；
+    // }
 }
