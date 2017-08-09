@@ -33,8 +33,11 @@ class Manager
         // var_dump($ret_info)       ;exit();
         return $ret_info;
     }
-    public function edit_manager_info()
-    {
-        # code...
-    }
+    // public function select_manager_info($m_id)
+    // {
+    //     $manager  = Model('Managers'); 
+    //     $mpg = model('managers_privileges_group');
+    //     $ret_info['m_info'] = $manager->findOne(array("m_id" => $m_id));
+    //     $ret_info['mpg_list'] = $mpg->findAll(array("mpg_status" => 2))；
+    // }
 }
