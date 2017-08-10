@@ -20,10 +20,17 @@ class AdminBase extends Swoole\Controller
     {
         parent::__construct($swoole);
         $this->session->start();
+        $this->public_assign();
     }
     protected function encrypt($password)
     {
         return md5($password);
+    }
+    public function public_assign()
+    {
+        if (defined("MANAGEURL")) {
+            $this->tpl->assign("manageurl",MANAGEURL);
+        }
     }
     /**
      * 默认跳转操作 支持错误导向和正确跳转

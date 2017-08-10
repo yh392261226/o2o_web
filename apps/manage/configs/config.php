@@ -13,3 +13,9 @@ if (! defined('WEBPATH'))
 
 define('FRAMEWORKPATH', WEBPATH . '/../../framework');
 define('APPPATH', WEBPATH . '/..');
+define('STATICPATH', WEBPATH . '/../../static');
+
+define('STATICURL', 'http://devstatic.gangjianwang.com');
+
+define('MANAGEURL', STATICURL . '/manager/');
+define('UPLOADURL', STATICURL . '/uploads/');
