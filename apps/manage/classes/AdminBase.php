@@ -20,11 +20,21 @@ class AdminBase extends Swoole\Controller
     {
         parent::__construct($swoole);
         $this->session->start();
+
+        $this->public_assign();
+
         $_SESSION['manager_id'] = 0;//管理员添加时记录管理员id现在只是临时数据 等longin功能完成后再做修改;
+
     }
     protected function encrypt($password)
     {
         return md5($password);
+    }
+    public function public_assign()
+    {
+        if (defined("MANAGEURL")) {
+            $this->tpl->assign("manageurl",MANAGEURL);
+        }
     }
     /**
      * 默认跳转操作 支持错误导向和正确跳转
