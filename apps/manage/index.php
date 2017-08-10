@@ -13,6 +13,7 @@ Swoole::$php->setAppPath(APPPATH);
 Swoole::$php->setControllerPath(WEBPATH."/controllers");
 //view目录设置
 Swoole::$php->tpl->template_dir = WEBPATH."/views";
+Swoole::$php->template_dir = WEBPATH."/views";
 //新增命名空间
 Swoole\Loader::addNameSpace("DAO", APPPATH."/DAO");
 //定义class文件夹位置
