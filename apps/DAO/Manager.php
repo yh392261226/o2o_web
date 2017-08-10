@@ -20,7 +20,9 @@ class Manager
         }
 		$manager = model('Managers');
     	$ret_info['list'] = $manager->findAll($where,$filed,$first_page,$last_page);
-    	if (!empty($ret_info['list']))
+
+        $ret_info['page'] = $manager->page();
+        if (!empty($ret_info['list']))
         {
             $ret_info['page'] = $manager->page();
         }
@@ -29,15 +31,33 @@ class Manager
             $ret_info['page'] = array();
         }
         // var_dump($where);
-        // $ret_info = $manager->getAll($where); 
+        // $ret_info = $manager->getAll($where);
         // var_dump($ret_info)       ;exit();
         return $ret_info;
     }
-    // public function select_manager_info($m_id)
-    // {
-    //     $manager  = Model('Managers'); 
-    //     $mpg = model('managers_privileges_group');
-    //     $ret_info['m_info'] = $manager->findOne(array("m_id" => $m_id));
-    //     $ret_info['mpg_list'] = $mpg->findAll(array("mpg_status" => 2))；
-    // }
+    public function edit_manager_info()
+    {
+        # code...
+    }
+    /*管理员添加操作*/
+    public function managerInsert($m_name,$password,$select_role)
+    {
+        $data = array();
+        $data['m_name'] = $m_name;
+        $data['m_pass'] = $password;
+        $data['m_status'] = 0;
+        $data['m_in_time'] = time();
+        $data['m_inip'] =  ip2long($_SERVER["REMOTE_ADDR"]);
+        $data['m_author'] = $_SESSION['manager_id'];
+        $data['mpg_id'] = $select_role;
+        $m_manager = model('Managers');
+        return $m_manager->put($data);
+    }
+     /* 获取角色列表 */
+    public function getRoleList()
+    {
+        return table('managers_privileges_group')->select('mpg_id, mpg_name, mpm_ids')->fetchall();
+    }
+
+
 }

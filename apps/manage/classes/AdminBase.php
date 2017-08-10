@@ -20,7 +20,11 @@ class AdminBase extends Swoole\Controller
     {
         parent::__construct($swoole);
         $this->session->start();
+
         $this->public_assign();
+
+        $_SESSION['manager_id'] = 0;//管理员添加时记录管理员id现在只是临时数据 等longin功能完成后再做修改;
+
     }
     protected function encrypt($password)
     {
@@ -43,7 +47,7 @@ class AdminBase extends Swoole\Controller
      * @access private
      * @return void
      */
-    protected function show_msg($message,$status=1,$jumpUrl='',$time = 3) {
+   protected function show_msg($message,$status=1,$jumpUrl='',$time = 3) {
         // if(true === $ajax) {// AJAX提交$ajax=false
         //     $data           =   is_array($ajax)?$ajax:array();
         //     $data['info']   =   $message;
@@ -54,30 +58,29 @@ class AdminBase extends Swoole\Controller
         // if(is_int($ajax)) $this->assign('waitSecond',$ajax);
         if(!empty($jumpUrl)) $this->assign('jumpUrl',$jumpUrl);
         // 提示标题
-        $this->assign('msgTitle',$status ? "操作成功" : "操作失败");
+        $this->tpl->assign('msgTitle',$status ? "操作成功" : "操作失败");
 
-        $this->assign('status',$status);   // 状态
-      
+        $this->tpl->assign('status',$status);   // 状态
+
         if($status) { //发送成功信息
-            $this->assign('message',$message);// 提示信息
+            $this->tpl->assign('message',$message);// 提示信息
             // 成功操作后默认停留3秒
-            $this->assign('waitSecond',$time);
+            $this->tpl->assign('waitSecond',$time);
             // 默认操作成功自动返回操作前页面
             if (empty($jumpUrl)) {
-                $this->assign("jumpUrl",$_SERVER["HTTP_REFERER"]);
+                $this->tpl->assign("jumpUrl",$_SERVER["HTTP_REFERER"]);
             }
-            $this->display("show_msg.php");
+            $this->tpl->display("manager/show_msg.php");
             exit ;
         }else{
-            $this->assign('error',$message);// 提示信息
+            $this->tpl->assign('error',$message);// 提示信息
             //发生错误时候默认停留3秒
-            $this->assign('waitSecond',$time);
+            $this->tpl->assign('waitSecond',$time);
             // 默认发生错误的话自动返回上页
-            $this->assign('jumpUrl',"javascript:history.back(-1);");
-            $this->display("show_msg.php");
+            $this->tpl->assign('jumpUrl',"javascript:history.back(-1);");
+            $this->tpl->display("manager/show_msg.php");
             // 中止执行  避免出错后继续执行
             exit ;
         }
     }
-
 }
