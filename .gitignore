@@ -7,3 +7,5 @@ themes/classic/views/
 .idea
 sftp-config.json
 .descfile
+.tags
+.tags_sorted_by_file

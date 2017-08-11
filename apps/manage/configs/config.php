@@ -6,8 +6,7 @@
  *
  *
  */
-if (! defined('WEBPATH'))
-{
+if (!defined('WEBPATH')) {
     exit('WEBPATH does not defined !!!');
 }
 
@@ -19,3 +18,4 @@ define('STATICURL', 'http://devstatic.gangjianwang.com');
 
 define('MANAGEURL', STATICURL . '/manager/');
 define('UPLOADURL', STATICURL . '/uploads/');
+define('HOSTURL', 'http://' . $_SERVER['HTTP_HOST']);
