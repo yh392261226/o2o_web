@@ -3,7 +3,7 @@ define('WEBPATH', dirname(__FILE__));
 define('CONFIGPATH', WEBPATH . '/configs');
 require CONFIGPATH . '/config.php';
 require FRAMEWORKPATH . '/libs/lib_config.php';
-
+require APPPATH.'/public/public.php';
 // config配置文件目录
 Swoole::$php->config->setPath(__DIR__.'/configs');
 
