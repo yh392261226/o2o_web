@@ -3,31 +3,25 @@ namespace CLASSES;
 
 use Swoole;
 
-/**
- * @action   管理员增删改查
- * @author   户连超
- * @addtime  2017.08.01
- * @e-mail   zrkjhlc@gmail.com
- */
 class AdminBase extends Swoole\Controller
 {
-    /**
-     * 消息数据
-     * @var
-     */
-    private $msgData;
-
     public function __construct($swoole)
     {
         parent::__construct($swoole);
         $this->session->start();
 
+        /*不需要验证登录状态的控制器数组*/
+        // $not_required_validate = array();
+        // $not_required_validate = array('Login');
+        // if (!in_array($this->swoole->env['mvc']['controller'], $not_required_validate)) {
+        //     /*判断是否登录*/
+        //     if (!isset($_SESSION['m_id']) || empty($_SESSION['m_id'])) {
+        //         header('location:' . HOSTURL . '/Login/index');
+        //         exit;
+        //     }
+        // }
+
         $this->public_assign();
-
-        if (!isset($_SESSION['m_id']) || empty($_SESSION['m_id'])) {
-            header('location:' . HOSTURL . '/Login/index');
-        }
-
     }
     protected function encrypt($password)
     {
@@ -37,6 +31,9 @@ class AdminBase extends Swoole\Controller
     {
         if (defined("MANAGEURL")) {
             $this->tpl->assign("manageurl", MANAGEURL);
+        }
+        if (defined('HOSTURL')) {
+            $this->tpl->assign("host_url", HOSTURL);
         }
     }
     /**
