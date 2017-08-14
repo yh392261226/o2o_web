@@ -6,7 +6,7 @@ use Swoole;
 class ModelBase extends Swoole\Model
 {
     protected $paras = array(
-        'where'       => 1,
+        'where'       => array('1'),
         'fields'      => '*',
         'limit_start' => 1,
         'limit_end'   => PAGESIZE,
@@ -94,8 +94,12 @@ class ModelBase extends Swoole\Model
     public function saveData($data = array())
     {
         if (!empty($data)) {
+            $where = $data['where'];
+            unset($data['where']);
+            $id = $data[$this->primary];
+            unset($data[$this->primary]);
             $this->setdatas($data);
-            return $this->update($data[$this->primary], $data, $this->table, $data['where']);
+            return $this->db->update($id, $data, $this->table, $where);
         }
         return false;
     }

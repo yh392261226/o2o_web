@@ -67,15 +67,36 @@ function msg($message, $status = 1, $jumpUrl = '', $time = 3)
 
 function deepAddslashes($data = array())
 {
-    if (!get_magic_quotes_gpc()) {
-        return array_walk($data, 'addslashes', $data);
+    if (get_magic_quotes_gpc()) {
+        return $data;
     }
+
+    if (is_array($data)) {
+        foreach ($data as $key => $val) {
+            $data[$key] = deepAddslashes($val);
+        }
+    } else {
+        $data = addslashes($data);
+    }
+
     return $data;
 }
 
 function deepStripslashes($data = array())
 {
-    return array_walk($data, 'stripslashes', $data);
+    if (get_magic_quotes_gpc()) {
+        return $data;
+    }
+
+    if (is_array($data)) {
+        foreach ($data as $key => $val) {
+            $data[$key] = deepStripslashes($val);
+        }
+    } else {
+        $data = stripslashes($data);
+    }
+
+     return $data;
 }
 
 /*

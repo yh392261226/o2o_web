@@ -68,97 +68,98 @@ class Manager extends \CLASSES\AdminBase
     //     $this->tpl->display('manager/edit_manager_info.html');
     // }
 
-    // // 添加加管理员页面
-    // public function add()
-    // {
-    //     $this->managers = new \DAO\Manager();
-    //     $role_list      = $this->managers->getRoleList();
-    //     $this->tpl->assign('role_list', $role_list);
-    //     $this->tpl->display('manager/add.php');
-    // }
-    // //添加管理员数据库操作
-    // public function insert()
-    // {
-    //     $m_name      = trim($_POST['manager_name']);
-    //     $password    = trim($_POST['password']);
-    //     $pwd_confirm = trim($_POST['pwd_confirm']);
-    //     $select_role = intval(trim($_POST['select_role']));
-    //     //注册信息判断
-    //     if (empty($m_name) || empty($password) || empty($pwd_confirm)) {
-    //         $message = '用户名或密码不能为空';
-    //         $jumpUrl = '/manager/add';
-    //         $this->show_msg($message, $status = 0, $jumpUrl);
-    //         exit;
-    //     } elseif ($password !== $pwd_confirm) {
-    //         $message = '两次输入的密码不一致';
-    //         $jumpUrl = '/manager/add';
-    //         $this->show_msg($message, $status = 0, $jumpUrl);
-    //         exit;
-    //     } elseif ($select_role == 0) {
-    //         $message = '请选择角色';
-    //         $jumpUrl = '/manager/add';
-    //         $this->show_msg($message, $status = 0, $jumpUrl);
-    //         exit;
-    //     }
-    //     if (!preg_match('/^[a-zA-Z0-9_]{3,16}$/', $m_name)) {
-    //         $message = '用户名不符合规定!';
-    //         $jumpUrl = '/manager/add';
-    //         $this->show_msg($message, $status = 0, $jumpUrl);
-    //         exit;
-    //     }
-    //     if (strlen($password) < 6) {
-    //         $message = '密码长度不符合规定!';
-    //         $jumpUrl = '/manager/add';
-    //         $this->show_msg($message, $status = 0, $jumpUrl);
-    //         exit;
-    //     }
+    /*添加加管理员页面*/
+    public function add()
+    {
+        $this->managers = new \DAO\Manager();
+        $role_list      = $this->managers->getRoleList();
+        $this->tpl->assign('role_list', $role_list);
+        $this->tpl->display('manager/add.php');
+    }
+    /*添加管理员数据库操作*/
+    public function insert()
+    {
+        $m_name      = trim($_POST['manager_name']);
+        $password    = trim($_POST['password']);
+        $pwd_confirm = trim($_POST['pwd_confirm']);
+        $select_role = intval(trim($_POST['select_role']));
+        /*注册信息判断*/
+        if (empty($m_name) || empty($password) || empty($pwd_confirm)) {
+            $message = '用户名或密码不能为空';
+            $jumpUrl = '/manager/add';
+            $this->show_msg($message, $status = 0, $jumpUrl);
+            exit;
+        } elseif ($password !== $pwd_confirm) {
+            $message = '两次输入的密码不一致';
+            $jumpUrl = '/manager/add';
+            $this->show_msg($message, $status = 0, $jumpUrl);
+            exit;
+        } elseif ($select_role == 0) {
+            $message = '请选择角色';
+            $jumpUrl = '/manager/add';
+            $this->show_msg($message, $status = 0, $jumpUrl);
+            exit;
+        }
+        if (!preg_match('/^[a-zA-Z0-9_]{3,16}$/', $m_name)) {
+            $message = '用户名不符合规定!';
+            $jumpUrl = '/manager/add';
+            $this->show_msg($message, $status = 0, $jumpUrl);
+            exit;
+        }
+        if (strlen($password) < 6) {
+            $message = '密码长度不符合规定!';
+            $jumpUrl = '/manager/add';
+            $this->show_msg($message, $status = 0, $jumpUrl);
+            exit;
+        }
 
-    //     $password = $this->encrypt($password);
-    //     $manager  = model('Managers');
-    //     //检查管理员名是否存在
-    //     $res = $manager->hasManagerName($m_name);
-    //     if ($res['m_id']) {
-    //         $message = '管理员名已经存在,请更换管理员名称！';
-    //         $jumpUrl = '/manager/add';
-    //         $this->show_msg($message, $status = 0, $jumpUrl);
-    //         exit;
-    //     }
-    //     $this->managers = new \DAO\Manager();
-    //     $res            = $this->managers->managerInsert($m_name, $password, $select_role);
-    //     if ($res) {
-    //         $message = '会员添加成功！';
-    //         $this->show_msg($message, $status = 1);
-    //         exit;
-    //     } else {
-    //         $message = '会员添加失败！';
-    //         $jumpUrl = '/manager/add';
-    //         $this->show_msg($message, $status = 1, $jumpUrl);
-    //         exit;
-    //     }
-    // }
+        $password = $this->encrypt($password);
+        $manager  = new \DAO\Manager();
+        /*检查管理员名是否存在*/
+        $res = $manager->hasManagerName($m_name);
+        if ($res['m_id']) {
+            $message = '管理员名已经存在,请更换管理员名称！';
+            $jumpUrl = '/manager/add';
+            $this->show_msg($message, $status = 0, $jumpUrl);
+            exit;
+        }
+        $this->managers = new \DAO\Manager();
+        $res            = $this->managers->managerInsert($m_name, $password, $select_role);
+        if ($res) {
+            $message = '会员添加成功！';
+            $this->show_msg($message, $status = 1);
+            exit;
+        } else {
+            $message = '会员添加失败！';
+            $jumpUrl = '/manager/add';
+            $this->show_msg($message, $status = 1, $jumpUrl);
+            exit;
+        }
+    }
 
-    // //删除管理员
-    // public function del()
-    // {
-    //     $m_id = intval(trim($_GET['m_id']));
-    //     if ($m_id > 0) {
-    //         $res = model('Managers')->delManager($m_id);
-    //         if ($res) {
-    //             $message = '管理员删除成功!';
-    //             $jumpUrl = '/manager/index';
-    //             $this->show_msg($message, $status = 1, $jumpUrl);
-    //             exit;
-    //         } else {
-    //             $message = '管理员删除失败!';
-    //             $jumpUrl = '/manager/index';
-    //             $this->show_msg($message, $status = 0, $jumpUrl);
-    //             exit;
-    //         }
-    //     } else {
-    //         $message = '你传入的数据有误!';
-    //         $jumpUrl = '/manager/index';
-    //         $this->show_msg($message, $status = 0, $jumpUrl);
-    //         exit;
-    //     }
-    // }
+    /*删除管理员*/
+    public function del()
+    {
+        $m_id = intval(trim($_GET['m_id']));
+        if ($m_id > 0) {
+            $manager = new \DAO\Manager();
+            $res = $manager ->delManager($m_id);
+            if ($res) {
+                $message = '管理员删除成功!';
+                $jumpUrl = '/manager/index';
+                $this->show_msg($message, $status = 1, $jumpUrl);
+                exit;
+            } else {
+                $message = '管理员删除失败!';
+                $jumpUrl = '/manager/index';
+                $this->show_msg($message, $status = 0, $jumpUrl);
+                exit;
+            }
+        } else {
+            $message = '你传入的数据有误!';
+            $jumpUrl = '/manager/index';
+            $this->show_msg($message, $status = 0, $jumpUrl);
+            exit;
+        }
+    }
 }
