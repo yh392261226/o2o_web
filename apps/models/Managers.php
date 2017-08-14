@@ -31,8 +31,6 @@ class Managers extends \CLASSES\ModelBase
             if (!isset($data['m_status'])) {
                 $data['m_status'] = -2;
             }
-
-            $this->setdatas($data);
             return $this->set($data[$this->primary], $data, $this->primary);
         }
     }
