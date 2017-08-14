@@ -11,15 +11,15 @@ class AdminBase extends Swoole\Controller
         $this->session->start();
 
         /*不需要验证登录状态的控制器数组*/
-        // $not_required_validate = array();
-        // $not_required_validate = array('Login');
-        // if (!in_array($this->swoole->env['mvc']['controller'], $not_required_validate)) {
-        //     /*判断是否登录*/
-        //     if (!isset($_SESSION['m_id']) || empty($_SESSION['m_id'])) {
-        //         header('location:' . HOSTURL . '/Login/index');
-        //         exit;
-        //     }
-        // }
+        $not_required_validate = array('login');
+        $controller = strtolower($this->swoole->env['mvc']['controller']);
+        if (!in_array($controller , $not_required_validate)) {
+            /*判断是否登录*/
+            if (!isset($_SESSION['m_id']) || empty($_SESSION['m_id'])) {
+                header('location:' . HOSTURL . '/Login/index');
+                exit;
+            }
+        }
 
         $this->public_assign();
     }
