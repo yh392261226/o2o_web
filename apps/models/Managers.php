@@ -1,21 +1,8 @@
 <?php
 namespace App\Model;
 
-// use Swoole;
-
 class Managers extends \CLASSES\ModelBase
 {
-    //    public $table = 'managers';
-    //    public $primary = "m_id";
-    // protected $where = "1";
-    // protected $field = '*';
-    // protected $first_page = 0;
-    // protected $last_page = 30;
-
-    /**
-     * 测试开始
-     */
-
     public $table   = 'managers';
     public $primary = "m_id";
 

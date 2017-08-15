@@ -15,6 +15,33 @@ class Index extends \CLASSES\AdminBase
     }
     public function index()
     {
+        $menu = $this->config['menu'];
+        // foreach ($menu as $key => $variable) {
+
+        //     echo $variable['name']."<br/>";
+
+        //     if (isset($variable['sub_menu']) && $variable['sub_menu'] != '') {
+
+        //         foreach ($variable['sub_menu'] as $key => $value) {
+
+        //             echo "&nbsp;&nbsp;&nbsp;&nbsp;".$value['name']."<br>";
+
+        //             if (isset($value['sub_menu']) && $value['sub_menu'] != '') {
+
+        //                 foreach ($value['sub_menu'] as $ke => $val) {
+
+        //                     echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".$val['name']."<br>";
+
+        //                 }
+
+        //             }
+
+        //         }  
+
+        //     }
+            
+        // }
+        $this->tpl->assign('menu_list', $menu);
         $this->tpl->display("Index/index.html");
     }
     public function welcome()
