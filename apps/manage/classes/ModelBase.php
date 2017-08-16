@@ -2,16 +2,17 @@
 namespace CLASSES;
 
 use Swoole;
+
 /**
  * @action   model层基础类
  */
 class ModelBase extends Swoole\Model
 {
     protected $paras = array(
-        'where'       => array('1'),
-        'fields'      => '*',
+        'where' => array('1'),
+        'fields' => '*',
         'limit_start' => 1,
-        'limit_end'   => PAGESIZE,
+        'limit_end' => PAGESIZE,
     );
 
     /**
@@ -44,7 +45,7 @@ class ModelBase extends Swoole\Model
     public function listDatas($data = array())
     {
         $this->setdatas($data);
-        $pager          = null;
+        $pager = null;
         $result['data'] = $this->gets($data, $pager);
         //$total_num表示符合条件的总的记录条数
         $result['page']['total_num'] = $pager->total;
@@ -52,7 +53,7 @@ class ModelBase extends Swoole\Model
         $result['page']['total_page'] = (int) $pager->totalpage;
         //$current_page表示当前取的是第几页的数据
         $result['page']['current_page'] = $pager->page;
-        $result['page']                 = $pager->render();
+        $result['page'] = $pager->render();
         return $result;
     }
 
@@ -93,7 +94,7 @@ class ModelBase extends Swoole\Model
      * @author Ross
      * @desc 新增/修改管理员
      */
-    public function saveData($data = array())
+    public function updateData($data = array())
     {
         if (!empty($data)) {
             $where = $data['where'];
@@ -105,6 +106,29 @@ class ModelBase extends Swoole\Model
         }
         return false;
     }
+    /**
+     * [saveData description] 添加
+     * @author 户连超
+     * @e-mail zrkjhlc@gmail.com
+     * @date   2017-08-16
+     * @param  array             $data [description]
+     * @return [type]                  [description]
+     */
+    public function saveData($data = array())
+    {
+        if (!empty($data)) {
+            $this->setdatas($data);
+            return $this->db->insert($data, $this->table);
+        }
+        return false;
+    }
+    /**
+     * [lastInsertId description] 获取刚添加的id
+     * @author 户连超
+     * @e-mail zrkjhlc@gmail.com
+     * @date   2017-08-16
+     * @return [type]            [description]
+     */
     public function lastInsertId()
     {
         return $this->db->_db->insert_id;
