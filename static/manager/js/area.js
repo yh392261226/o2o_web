@@ -2,7 +2,7 @@
 * @Author: Zhaoyu
 * @Date:   2017-08-15 15:06:12
 * @Last Modified by:   Zhaoyu
-* @Last Modified time: 2017-08-16 09:33:15
+* @Last Modified time: 2017-08-16 13:32:16
 */
 
 
@@ -21,7 +21,7 @@
          if(data.code =="1" ){
             region.response(data['data']);
          }else{
-             alert(data.message);
+             // alert(data.message);
          }
         },
         error : function() {
@@ -77,13 +77,18 @@
     region.changed = function(obj, type, selName)
     {
       var parent = obj.options[obj.selectedIndex].value;
-      region.loadRegions(parent, type, selName);
+      if(parent!=""){
+        document.getElementById('area_id').value = parent;
+      }
+      if(type!=4){
+        region.loadRegions(parent, type, selName);
+      }
+
     }
 
     region.response = function(result, text_result)
     {
       var sel = document.getElementById(result.target);
-      console.log(sel);
       sel.length = 1;
       sel.selectedIndex = 0;
       sel.style.display = (result.regions.length == 0 && ! region.isAdmin && result.type + 0 == 3) ? "none" : '';
