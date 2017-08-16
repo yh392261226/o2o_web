@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title> - 项目</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+
+    <link rel="shortcut icon" href="favicon.ico"> <link href="{{$manageurl}}css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="{{$manageurl}}css/font-awesome.css?v=4.4.0" rel="stylesheet">
+
+    <link href="{{$manageurl}}css/animate.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/style.css?v=4.1.0" rel="stylesheet">
+    <link href="{{$manageurl}}css/plugins/iCheck/custom.css" rel="stylesheet">
+    <script type="text/javascript" src="{{$manageurl}}js/area.js"></script>
+
+</head>
+
+<body class="gray-bg">
+
+
+    <div class="wrapper wrapper-content animated fadeInUp">
+        <div class="row">
+            <div class="col-sm-12">
+
+                <div class="ibox">
+                    <div class="ibox-title">
+                        <h5>文章管理</h5>
+                        <div class="ibox-tools">
+                            <a href="projects.html" class="btn btn-primary btn-xs">文章分类列表</a>
+                        </div>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="row m-b-sm m-t-sm">
+                            <div class="col-md-1">
+                                <button type="button" id="loading-example-btn" class="btn btn-white btn-sm"><i class="fa fa-refresh"></i> 刷新</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+                <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>文章分类添加 <small></small></h5>
+                    </div>
+                    <div class="ibox-content">
+                        <form method="post" class="form-horizontal" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">分类名称:</label>
+
+                                <div class="col-sm-4">
+                                    <input type="text" name="ac_name" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">是否启用:
+                                    <br/>
+                                    <small class="text-navy"></small>
+                                </label>
+
+                                <div class="col-sm-4">
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" checked="" value="1" id="optionsRadios1" name="ac_status">已启用</label>
+                                    </div>
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" value="0" id="optionsRadios2" name="ac_status">未启用</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="hr-line-dashed"></div>
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">父分类:</label>
+
+                                <div class="col-sm-4">
+                                    <select class="form-control m-b" name="ac_pid">
+                                        <option>选项 1</option>
+                                        <option>选项 2</option>
+                                        <option>选项 3</option>
+                                        <option>选项 4</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">分类图标:</label>
+
+                                <div class="col-sm-4">
+                                    <input class="form-control" id="fileInput" type="file" name="ac_img">
+                                </div>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">分类描述:</label>
+
+                                <div class="col-sm-4">
+                                    <textarea class="form-control" rows="3" name="ac_desc"></textarea>
+                                </div>
+                            </div>
+
+
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">地区选择:(不选择默认为全国)</label>
+
+                                <div class="col-sm-2">
+                                    <select class="form-control m-b" name="province" id="selProvinces" onchange="region.changed(this, 2, 'selCities')">
+                                    <option value="">请选择</option>
+                                    {{foreach from=$area_provinces item=value}}
+                                        <option value="{{$value.region_id}}">{{$value.region_name}}</option>
+                                    {{/foreach}}
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <select class="form-control m-b" name="city" id="selCities" onchange="region.changed(this, 3, 'selDistricts')">
+                                        <option value="">请选择</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <select class="form-control m-b" name="district" id="selDistricts" onchange="region.changed(this, 4)">
+                                        <option value="">请选择</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <div class="col-sm-4 col-sm-offset-2">
+                                    <input type="hidden" name="r_id" id="area_id" value="1">
+                                    <button class="btn btn-primary" type="submit">保存内容</button>
+                                    <button class="btn btn-white" type="submit">取消</button>
+                                </div>
+                            </div>
+
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全局js -->
+    <script src="{{$manageurl}}js/jquery.min.js?v=2.1.4"></script>
+    <script src="{{$manageurl}}js/bootstrap.min.js?v=3.3.6"></script>
+
+
+    <!-- 自定义js -->
+    <script src="{{$manageurl}}js/content.js?v=1.0.0"></script>
+    <!-- iCheck -->
+    <script src="{{$manageurl}}js/plugins/iCheck/icheck.min.js"></script>
+
+
+    <script>
+        $(document).ready(function(){
+
+            $('#loading-example-btn').click(function () {
+                btn = $(this);
+                simpleLoad(btn, true)
+
+                // Ajax example
+//                $.ajax().always(function () {
+//                    simpleLoad($(this), false)
+//                });
+
+                simpleLoad(btn, false)
+            });
+        });
+
+        function simpleLoad(btn, state) {
+            if (state) {
+                btn.children().addClass('fa-spin');
+                btn.contents().last().replaceWith(" Loading");
+            } else {
+                setTimeout(function () {
+                    btn.children().removeClass('fa-spin');
+                    btn.contents().last().replaceWith(" Refresh");
+                }, 2000);
+            }
+        }
+    </script>
+
+
+
+    </body>
+</html>

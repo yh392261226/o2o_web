@@ -106,11 +106,11 @@ class ModelBase extends Swoole\Model
     }
     
     /**
-     * @param array $data
-     * @param array $params
-     * @param number $type
-     * @return boolean
-     * @更新数据
+     * @author 户连超
+     * @e-mail zrkjhlc@gmail.com
+     * @date   2017-08-16
+     * @param  array             $data [description]
+     * @return [type]                  [description]
      */
     public function updateData($data = array(), $params = array(), $type = 0)
     {
