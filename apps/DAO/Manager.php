@@ -1,6 +1,6 @@
 <?php
 namespace DAO;
-error_reporting(E_ALL^E_NOTICE^E_WARNING);
+
 /**
  * Class UsManagerer
  * example: $user = new App\DAO\Manager();  $user->get();
@@ -84,7 +84,7 @@ class Manager
         $data['where'] = array("m_name" => $username, "m_pass" => $password);
         $data['fields'] = 'm_id,m_name,m_status';
         $res    = model("Managers")->infoDatas($data);
-        if ($res['m_id'] > 0 && $res['status'] >= 0) {
+        if ($res['m_id'] > 0 && $res['m_status'] >= 0) {
             model("Managers")->
             saveData(
                 array(
