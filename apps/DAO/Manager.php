@@ -78,8 +78,9 @@ class Manager
              * leftjoin 数组 两值  第一个表, 第二个关联的内容
              */
             $info['leftjoin'] = array('manager_privileges_modules_desc',"manager_privileges_modules.mpm_id = manager_privileges_modules_desc.mpm_id");
-
+            // $info['pagesize'] = 1;
             $mpm_data = model("ManagerPrivilegesModules")->listDatas($info);
+            $mpm_data = deepStripslashes($mpm_data);
             if (!empty($mpm_data)) {
                 return $mpm_data;
             }else{
@@ -98,10 +99,16 @@ class Manager
      */
     public function managerPrivilegesModulesInsert($data)
     {
+        /**
+         * 如果传输过来的数据是空, 出错
+         */
         if (empty($data)) {
             return false;
             $this->http->finish();
         }
+        /**
+         * 处理完的数据是空, 出错
+         */
         $data = deepAddslashes($data);
         if (!is_array($data)) {
             return false;
@@ -116,7 +123,10 @@ class Manager
         }
         unset($data['mpm_desc']);
         $mpm_ret = $mpm->addData($data);
-        $desc['mpm_id'] = $mpm->lastInsertId();
+        /**
+         * 获取刚添加数据的id
+         */
+        $desc['mpm_id'] = $mpm_ret;
         model("ManagerPrivilegesModulesDesc")->addData($desc);
 
         return $mpm_ret;

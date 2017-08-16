@@ -69,8 +69,10 @@ function msg($message, $status = 1, $jumpUrl = '', $time = 3)
         Swoole::$php->tpl->assign('error', $message); // 提示信息
         //发生错误时候默认停留3秒
         Swoole::$php->tpl->assign('waitSecond', $time);
-        // 默认发生错误的话自动返回上页
-        Swoole::$php->tpl->assign('jumpUrl', "javascript:history.back(-1);");
+        // 默认发生错误的话自动返回上页 
+        if (empty($jumpUrl)) {
+            Swoole::$php->tpl->assign('jumpUrl', "javascript:history.back(-1);");
+        }
         Swoole::$php->tpl->display("show_msg.php");
         // 中止执行  避免出错后继续执行
         exit;
