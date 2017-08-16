@@ -10,9 +10,7 @@ class ModelBase extends Swoole\Model
 {
     protected $paras = array(
         'where' => array('1'),
-        'fields' => '*',
-        'limit_start' => 1,
-        'limit_end' => PAGESIZE,
+        'pagesize' => PAGESIZE,
     );
 
     /**
@@ -30,7 +28,7 @@ class ModelBase extends Swoole\Model
                     $paras[$key] = $val;
                 }
             }
-            $this->paras = $paras;
+            $this->paras += $paras;
             return true;
         }
         return false;
@@ -46,13 +44,18 @@ class ModelBase extends Swoole\Model
     {
         $this->setdatas($data);
         $pager = null;
-        $result['data'] = $this->gets($data, $pager);
+        $result['data'] = $this->gets($this->paras, $pager);
         //$total_num表示符合条件的总的记录条数
         $result['page']['total_num'] = $pager->total;
         //$total_page表示总共有几页数据
         $result['page']['total_page'] = (int) $pager->totalpage;
         //$current_page表示当前取的是第几页的数据
         $result['page']['current_page'] = $pager->page;
+
+        $pager->set_class("first","btn btn-white");
+        $pager->set_class("previous","btn btn-white");
+        $pager->set_class("next","btn btn-white");
+        $pager->set_class("last","btn btn-white");
         $result['page'] = $pager->render();
         return $result;
     }
@@ -87,38 +90,37 @@ class ModelBase extends Swoole\Model
             }
         }
     }
-
     /**
      * @param array $data
-     * @return bool
-     * @author Ross
-     * @desc 新增/修改管理员
+     * @param array $fields
+     * @return boolean|number
+     * @添加数据
      */
-    public function updateData($data = array())
+    public function addData($data = array(), $fields = array())
     {
-        if (!empty($data)) {
-            $where = $data['where'];
-            unset($data['where']);
-            $id = $data[$this->primary];
-            unset($data[$this->primary]);
-            $this->setdatas($data);
-            return $this->db->update($id, $data, $this->table, $where);
+        if (count($data) > 0 && count($fields) > 0) 
+        {
+            return $this->puts($fields, $data);
         }
-        return false;
+        return $this->put($data);
     }
+    
     /**
-     * [saveData description] 添加 
-     * @author 户连超
-     * @e-mail zrkjhlc@gmail.com
-     * @date   2017-08-16
-     * @param  array             $data [description]
-     * @return [type]                  [description]
+     * @param array $data
+     * @param array $params
+     * @param number $type
+     * @return boolean
+     * @更新数据
      */
-    public function saveData($data = array())
+    public function updateData($data = array(), $params = array(), $type = 0)
     {
-        if (!empty($data)) {
-            $this->setdatas($data);
-            return $this->db->insert($data, $this->table);
+        if (!empty($data) && !empty($params))
+        {
+            if (intval($type) == 0) //更新单条
+            {
+                return $this->set($params['id'], $data, $params['where']);
+            }
+            return $this->sets($data, $params);
         }
         return false;
     }
