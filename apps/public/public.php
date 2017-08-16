@@ -13,7 +13,7 @@
  */
 function encyptController($controllerName)
 {
-    return md5(md5($controllerName) . get_rand_str(6));
+    return md5(md5($controllerName));
 }
 
 /*
@@ -63,7 +63,7 @@ function msg($message, $status = 1, $jumpUrl = '', $time = 3)
         if (empty($jumpUrl)) {
             Swoole::$php->tpl->assign("jumpUrl", $_SERVER["HTTP_REFERER"]);
         }
-        Swoole::$php->tpl->display("manager/show_msg.php");
+        Swoole::$php->tpl->display("show_msg.php");
         exit;
     } else {
         Swoole::$php->tpl->assign('error', $message); // 提示信息
@@ -71,7 +71,7 @@ function msg($message, $status = 1, $jumpUrl = '', $time = 3)
         Swoole::$php->tpl->assign('waitSecond', $time);
         // 默认发生错误的话自动返回上页
         Swoole::$php->tpl->assign('jumpUrl', "javascript:history.back(-1);");
-        Swoole::$php->tpl->display("manager/show_msg.php");
+        Swoole::$php->tpl->display("show_msg.php");
         // 中止执行  避免出错后继续执行
         exit;
     }
@@ -218,4 +218,26 @@ function createOrderNumber($prefix = '')
 {
     $time = microtime();
     return encyptPassword($prefix . $time);
+}
+/**
+ * [logs description] 记录日志
+ * @author 户连超
+ * @e-mail zrkjhlc@gmail.com
+ * @date   2017-08-16
+ * @param  [string]            $path 路径
+ * @param  [array || string]            $msg  要记录的信息
+ */
+function logs($path, $msg)
+{
+    if (!is_dir($path)) {
+        mkdir($path);
+    }
+    $filename = $path . '/' . date('YmdHis') . '.txt';
+    if (is_array($msg)) {
+        $info = json_encode($msg);
+    } else {
+        $info = $msg;
+    }
+    $content = "------------------" . date("Y-m-d H:i:s") . "------------------" . "\r\n" . $info . "\r\n \r\n";
+    file_put_contents($filename, $content, FILE_APPEND);
 }
