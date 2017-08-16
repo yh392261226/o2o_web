@@ -61,9 +61,33 @@ class Manager
      * @date   2017-08-14
      * @return [type]            [description]
      */
-    public function managerPrivilegesModulesData()
+    public function managerPrivilegesModulesData($data = array())
     {
-        # code...
+        if(!empty($data)){
+            $info = array();
+            /**
+             * 分页
+             */
+            (isset($data['page']) && !empty($data['page'])) ? $info['page'] = $data['page'] : false;
+            /**
+             * where语句
+             */
+            (isset($data['mpm_name']) && !empty($data['mpm_name'])) ? $info['where']['mpm_name'] = $data['mpm_name'] : false;
+            (isset($data['mpm_status']) && !empty($data['mpm_status'])) ? $info['where']['mpm_status'] = $data['mpm_status'] : false;
+            /**
+             * leftjoin 数组 两值  第一个表, 第二个关联的内容
+             */
+            $info['leftjoin'] = array('manager_privileges_modules_desc',"manager_privileges_modules.mpm_id = manager_privileges_modules_desc.mpm_id");
+
+            $mpm_data = model("ManagerPrivilegesModules")->listDatas($info);
+            if (!empty($mpm_data)) {
+                return $mpm_data;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
     }
     /**
      * 权限模块添加
@@ -72,9 +96,30 @@ class Manager
      * @date   2017-08-14
      * @return [type]            [description]
      */
-    public function managerPrivilegesModulesInsert()
+    public function managerPrivilegesModulesInsert($data)
     {
-        # code...
+        if (empty($data)) {
+            return false;
+            $this->http->finish();
+        }
+        $data = deepAddslashes($data);
+        if (!is_array($data)) {
+            return false;
+            $this->http->finish();
+        }
+        $mpm = model("ManagerPrivilegesModules");
+        /**
+         * 如果有描述的话 把描述添加进去
+         */
+        if (isset($data['mpm_desc']) && !empty($data['mpm_desc'])) {
+            $desc['mpm_desc'] = $data['mpm_desc'];
+        }
+        unset($data['mpm_desc']);
+        $mpm_ret = $mpm->addData($data);
+        $desc['mpm_id'] = $mpm->lastInsertId();
+        model("ManagerPrivilegesModulesDesc")->addData($desc);
+
+        return $mpm_ret;
     }
     /**
      * 权限模块修改

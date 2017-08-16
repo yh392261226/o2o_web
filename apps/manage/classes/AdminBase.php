@@ -26,7 +26,12 @@ class AdminBase extends Swoole\Controller
                 exit;
             }
         }
-
+        if (isset($_GET['debug']) && $_GET['debug'] > 0) {
+            echo $this->showTrace(true);
+        }
+        if (isset($_GET['showSql']) && $_GET['showSql'] > 0) {
+            $this->db->debug = true;
+        }
         $this->public_assign();
     }
     /**

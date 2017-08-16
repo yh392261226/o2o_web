@@ -14,6 +14,8 @@ define('FRAMEWORKPATH', WEBPATH . '/../../framework');
 define('APPPATH', WEBPATH . '/..');
 define('STATICPATH', WEBPATH . '/../../static');
 
+define("UPLOADPATH", STATICPATH.'/uploads/');
+
 define('STATICURL', 'http://devstatic.gangjianwang.com');
 
 define('MANAGEURL', STATICURL . '/manager/');//定义后台静态文件路径
