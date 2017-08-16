@@ -256,7 +256,9 @@ class Manager
         $username = deepAddslashes(trim($username));
         $data['where'] = array("m_name" => $username, "m_pass" => $password);
         $data['fields'] = 'm_id,m_name,m_status';
-        $res = model("Managers")->infoDatas($data);
+
+        $res    = model("Managers")->infoDatas($data);
+
         if ($res['m_id'] > 0 && $res['m_status'] >= 0) {
             model("Managers")->
                 saveData(

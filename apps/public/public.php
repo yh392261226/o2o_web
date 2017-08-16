@@ -241,3 +241,4 @@ function logs($path, $msg)
     $content = "------------------" . date("Y-m-d H:i:s") . "------------------" . "\r\n" . $info . "\r\n \r\n";
     file_put_contents($filename, $content, FILE_APPEND);
 }
+
