@@ -3,6 +3,18 @@
  * 公共函数库
  *
  */
+/**
+ * 模块值 加密方式
+ * @author   户连超
+ * @Email    zrkjhlc@gmail.com
+ * @DateTime 2017-08-14
+ * @param    string            $controllerName
+ * @return string
+ */
+function encyptController($controllerName)
+{
+    return md5(md5($controllerName) . get_rand_str(6));
+}
 
 /*
  * 处理大小写
@@ -96,7 +108,7 @@ function deepStripslashes($data = array())
         $data = stripslashes($data);
     }
 
-     return $data;
+    return $data;
 }
 
 /*
@@ -187,7 +199,7 @@ function get_rand_str($randLength = 6, $addtime = 1, $includenumber = 0)
     } else {
         $chars = 'abcdefghijklmnopqrstuvwxyz';
     }
-    $len     = strlen($chars);
+    $len = strlen($chars);
     $randStr = '';
     for ($i = 0; $i < $randLength; $i++) {
         $randStr .= $chars[rand(0, $len - 1)];
@@ -207,6 +219,7 @@ function createOrderNumber($prefix = '')
     $time = microtime();
     return encyptPassword($prefix . $time);
 }
+
 
 /**
  * CURL请求
@@ -295,3 +308,4 @@ function area($parent=1,$type="1",$target="selProvinces")
     $res['target'] = $target;
     return $res;
 }
+

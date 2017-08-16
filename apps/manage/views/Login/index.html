@@ -73,10 +73,10 @@ function check_login() {
             data:{manager_name:manager_name,manager_passwd:manager_passwd},
             dataType:'json',
             success:function(info){
-                if (info.data.err_code != '1') {
+                if (info.code != '1') {
                     swal({
                         title: "登录失败!",
-                        text: info.err_msg
+                        text: info.message
                     });
                 }else{
                     window.location.href = '/index/index';

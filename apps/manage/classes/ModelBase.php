@@ -2,7 +2,9 @@
 namespace CLASSES;
 
 use Swoole;
-
+/**
+ * @action   model层基础类
+ */
 class ModelBase extends Swoole\Model
 {
     protected $paras = array(
