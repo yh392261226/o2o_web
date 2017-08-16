@@ -107,7 +107,6 @@ class ModelBase extends Swoole\Model
         return false;
     }
     /**
-     * [saveData description] 添加 
      * @author 户连超
      * @e-mail zrkjhlc@gmail.com
      * @date   2017-08-16
