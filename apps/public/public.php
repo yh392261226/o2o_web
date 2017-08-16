@@ -265,3 +265,33 @@ function httpRequest($url, $method, $postfields = null, $headers = array(), $deb
     curl_close($ci);
     return $response;
 }
+
+/**
+ * 地区三级联动公共函数
+ * @author zhaoyu
+ * @e-mail zhaoyu8292@qq.com
+ * @date   2017-08-15
+ * $parent 父id
+ * $type 编号:  1是国家,2省份,3城市,
+ * $target 列表框的id名称
+ * @return [type]            [description]
+ */
+function area($parent=1,$type="1",$target="selProvinces")
+{
+    if(!is_file("../../area.php")){
+        return false;
+    }
+    $data = unserialize(file_get_contents("../../area.php"));
+    $res = array();
+    $area_arr = array();
+    foreach ($data as $key => $value) {
+        if($value['r_pid'] == $parent){
+            $area_arr[] = array('region_id'=>$value['r_id'],'region_name'=>$value['r_name']);
+
+        }
+    }
+    $res['regions'] = $area_arr;
+    $res['type'] = $type;
+    $res['target'] = $target;
+    return $res;
+}

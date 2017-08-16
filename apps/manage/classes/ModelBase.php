@@ -103,4 +103,8 @@ class ModelBase extends Swoole\Model
         }
         return false;
     }
+    public function lastInsertId()
+    {
+        return $this->db->_db->insert_id;
+    }
 }
