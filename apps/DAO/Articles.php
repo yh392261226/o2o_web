@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 16:06:30
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-14 17:31:20
+ * @Last Modified time: 2017-08-16 16:19:52
  */
 namespace DAO;
 
@@ -63,9 +63,9 @@ class Articles
         return $tree;
     }
 
-    /*获取地区数组*/
-    public function area()
-    {
-        $data = model('articlesCatgory');
-    }
+   /*添加文章分类*/
+   public function saveArticeCat($data)
+   {
+       return model('ArticlesCategory')->saveData($data);
+   }
 }

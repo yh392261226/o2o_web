@@ -4,7 +4,7 @@
  * @param  string  name 中文名称(每级菜单都有中文名称)
  * @param  string  icon 图标(只有二级菜单有图标)
  * @param  string  link 链接地址(二级菜单,三级菜单才会有, 二级菜单可有可没有)
- * @param  array   sub_menu 下级菜单数组 
+ * @param  array   sub_menu 下级菜单数组
  * @return array $menu 菜单数组
  * @author 户连超
  * @e-mail zrkjhlc@gmail.com
