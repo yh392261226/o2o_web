@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 16:06:30
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-16 16:19:52
+ * @Last Modified time: 2017-08-17 17:20:42
  */
 namespace DAO;
 
@@ -23,7 +23,8 @@ class Articles
      */
      /*递归引用*/
     public function getChildren($catid){
-        $data = $this->select();
+        $m_ac = model('ArticlesCategory');
+        $data = $m_ac->infoDatas();
         return $this->_getChildren($data,$catid,true);
     }
     /*递归处理 输出所有子分类id*/
@@ -33,9 +34,10 @@ class Articles
             $child = array();
         }
         foreach ($data as $k => $v) {
-            if($v['parent_id'] == $catid){
-                $child[] = $v['id'];
-                $this->_getChildren($data,$v['id']);
+            var_dump($v);
+            if($v['ac_pid'] == $catid){
+                $child[] = $v['ac_id'];
+                $this->_getChildren($data,$v['ac_id']);
             }
         }
         return $child;
@@ -67,5 +69,15 @@ class Articles
    public function saveArticeCat($data)
    {
        return model('ArticlesCategory')->saveData($data);
+   }
+
+   /*通过分类名查找分类id*/
+   public function getIdByName($name)
+   {
+
+        $data['fields'] = 'ac_id';
+        $data['where'] = array('ac_name'=>$name);
+
+        return model('ArticlesCategory')->infoDatas($data);
    }
 }

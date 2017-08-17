@@ -271,3 +271,4 @@ function area($parent=1,$type="1",$target="selProvinces")
     $res['target'] = $target;
     return $res;
 }
+

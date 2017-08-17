@@ -1,9 +1,8 @@
 <?php
-define('STATICPATH', WEBPATH . '/../../static');
-define('STATICURL', 'http://devstatic.gangjianwang.com');
+
 $upload = array(
-    'base_dir' => STATICPATH.'/manager',
-    'base_url' => STATICURL,
+    'base_dir' => WEBPATH.'/../uploads/images',
+    'base_url' => "/",
 );
-var_dump($upload);
+// var_dump($upload);die;
 return $upload;
