@@ -15,7 +15,8 @@ class AdminBase extends Swoole\Controller
     {
         parent::__construct($swoole);
         $this->session->start();
-
+        $_SESSION['m_id'] = 1;
+        $_SESSION['m_name'] = 'admin';
         /*不需要验证登录状态的控制器数组*/
         $not_required_validate = array('login');
         $controller = strtolower($this->swoole->env['mvc']['controller']);

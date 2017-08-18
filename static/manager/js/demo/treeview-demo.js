@@ -2,8 +2,8 @@ $(function () {
 
     var defaultData = [
         {
-            text: '父节点 1',
-            href: '#parent1',
+            text: '父节点 0',
+            href: 'www.baidu.com',
             tags: ['4'],
             nodes: [
                 {
@@ -18,8 +18,8 @@ $(function () {
                   },
                         {
                             text: '孙子节点 2',
-                            href: '#grandchild2',
-                            tags: ['0']
+                            href: 'http',
+                            tags: ['<a href="www.baidu.com">haha</a>',1111]
                   }
                 ]
               },
@@ -140,7 +140,13 @@ $(function () {
 
 
     $('#treeview1').treeview({
-        data: defaultData
+
+        color: "#428bca",
+        // showTags: true,
+        data: defaultData,
+        onNodeSelected: function (event, node) {
+            alert('<p>您单击了 ' + node.tags + '</p>');
+        }
     });
 
     $('#treeview2').treeview({
