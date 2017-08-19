@@ -95,13 +95,34 @@ class Manager extends \CLASSES\AdminBase
      */
     public function managerPrivilegesModulesAdd()
     {
+        // $data[0][]= 1;
+        // $data[0][] = 1;
+        // $data[0][] = 1;
+
+        // $data[1][]= 1;
+        // $data[1][] = 1;
+        // $data[1][] = 1;
+
+        // $data[2][]= 1;
+        // $data[2][] = 1;
+        // $data[2][] = 1;
+        // $data[3][]= 1;
+        // $data[3][] = 1;
+        // $data[3][] = 1;
+        // $data[4][]= 1;
+        // $data[4][] = 1;
+        // $data[4][] = 1;
+        // $field[] = 'mpm_name';
+        // $field[] = 'mpm_value';
+        // $field[] = 'mpm_status';
+        $ret = $this->managers->managerPrivilegesModulesInsert($data);
         /**
          * 接到数组证明是添加动作
          */
         if ($_POST) {
 
             $error_jump = '/manager/managerPrivilegesModulesAdd';
-            $success_jump = 'manager/managerPrivilegesModulesList';
+            $success_jump = '/manager/managerPrivilegesModulesList';
             
             $data = array();
             (isset($_POST['mpm_name']) && !empty($_POST['mpm_name'])) ? $data['mpm_name'] = $_POST['mpm_name'] : msg("权限模块名不能为空!", $status = 0, $error_jump);
