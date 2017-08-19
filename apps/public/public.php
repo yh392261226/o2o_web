@@ -244,6 +244,7 @@ function logs($path, $msg)
 
 /**
  * 地区三级联动公共函数
+ * 如果传$area_id返回当前id的地区名,如果不传返回p_id下的地区id和名称;
  * @author zhaoyu
  * @e-mail zhaoyu8292@qq.com
  * @date   2017-08-15
@@ -252,23 +253,88 @@ function logs($path, $msg)
  * $target 列表框的id名称
  * @return [type]            [description]
  */
-function area($parent=1,$type="1",$target="selProvinces")
+function area($parent=1,$type="1",$target="selProvinces",$area_id = "")
 {
     if(!is_file("../../area.php")){
         return false;
     }
     $data = unserialize(file_get_contents("../../area.php"));
-    $res = array();
-    $area_arr = array();
-    foreach ($data as $key => $value) {
-        if($value['r_pid'] == $parent){
-            $area_arr[] = array('region_id'=>$value['r_id'],'region_name'=>$value['r_name']);
-
+    if(!empty($area_id)){
+        $area_name = "";
+        foreach ($data as $key => $value) {
+            if($value['r_id'] == $area_id){
+                $area_name = $value['r_name'];
+            }
+            return $area_name;
         }
+    }else{
+        $res = array();
+        $area_arr = array();
+        foreach ($data as $key => $value) {
+            if($value['r_pid'] == $parent){
+                $area_arr[] = array('region_id'=>$value['r_id'],'region_name'=>$value['r_name']);
+            }
+        }
+        $res['regions'] = $area_arr;
+        $res['type'] = $type;
+        $res['target'] = $target;
+        return $res;
     }
-    $res['regions'] = $area_arr;
-    $res['type'] = $type;
-    $res['target'] = $target;
-    return $res;
+
 }
 
+/**
+ * 获取数组维度 或 验证数组是否是一维数组
+ */
+function getArrayDeep($data = array(), $type = 0) {
+    if (!is_array($data)) {
+        return 0;
+    } else {
+        if ($type == 0) {
+            if (count($array)==count($array, 1)) {
+                return true; //一维数组
+            } else {
+                return false; //非一维数组
+            }
+        } else { //获取数组深度
+            $max1 = 0;
+            foreach ($data as $item1) {
+                $t1 = getArrayDeep($item1);
+                if ($t1 > $max1) {
+                    $max1 = $t1;
+                }
+
+            }
+            return $max1+1;
+        }
+    }
+}
+
+
+/**
+ * 递归处理 输出所有子分类id
+ * @author zhaoyu
+ * @e-mail zhaoyu8292@qq.com
+ * @date   2017-08-19
+ * @param  [type]            $data    查找的数据
+ * @param  [type]            $catid   id
+ * @param  [type]            $key_id  子id字段名
+ * @param  [type]            $key_pid 父id字段名
+ * @param  boolean           $isClear 是否初始化静态变量
+ * @return [type]            所有子分类id   例如:Array ( [0] => 22 [1] => 17 [2] => 23 [3] => 25 [4] => 24 )
+ */
+function getChildren($data,$catid,$key_id,$key_pid,$isClear=false)
+{
+    static $child = array();
+    if($isClear){
+        $child = array();
+    }
+    foreach ($data as $k => $v) {
+
+        if($v[$key_pid] == $catid){
+            $child[] = $v[$key_id];
+            getChildren($data,$v[$key_id],$key_id,$key_pid);
+        }
+    }
+    return $child;
+}

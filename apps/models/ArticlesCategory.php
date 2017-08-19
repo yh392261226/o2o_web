@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 16:07:50
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-17 17:26:16
+ * @Last Modified time: 2017-08-19 15:49:19
  */
 namespace App\Model;
 
@@ -28,4 +28,16 @@ class ArticlesCategory extends \CLASSES\ModelBase
         $paras = $this->paras;
         return $this->select($paras['fields'])->where($paras['where'])->fetchAll();
     }
+
+    /**
+     * @param array $data
+     * @return array
+     * @author Me
+     * @desc 多条详情
+     */
+    // public function listDatas($data = array())
+    // {
+    //     $result= $this->gets($data);
+    //     return $result;
+    // }
 }

@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-17 17:16:11
+ * @Last Modified time: 2017-08-19 16:59:43
  */
 
 namespace App\Controller;
@@ -14,26 +14,32 @@ class Articles extends \CLASSES\AdminBase
     {
         parent::__construct($swoole);
     }
-    public function index()
+    public function categoryList()
     {
         $dao_article = new \DAO\Articles();
         /*获取分类数组*/
-        $arr_ac = $dao_article->getChildren(1);
-        var_dump($arr_ac);die;
-        $this->tpl->display("Articles/index.html");
+        $arr_ac = $dao_article->getChildTree(0);
+        $this->tpl->assign('ac_data',json_encode($arr_ac));
+        $this->tpl->display("Articles/categoryList.html");
     }
     /*加载文章分类添加模板*/
-    public function addCategory()
+    public function categoryAdd()
     {
         /*获取地区数组*/
         $area = area(1);
+
+        /*获取分类树*/
+        $dao_article = new \DAO\Articles();
+        $ac_tree = $dao_article->getTree();
+
+        $this->tpl->assign("ac_tree",$ac_tree);
         $this->tpl->assign("area_provinces",$area['regions']);
-        $this->tpl->display("Articles/addCategory.html");
+        $this->tpl->display("Articles/categoryAdd.html");
     }
     /*处理文章添加数据*/
-    public function doAddCategory()
+    public function docategoryAdd()
     {
-        $jump = "/Articles/addCategory";
+        $jump = "/Articles/categoryAdd";
         $dao_article = new \DAO\Articles();
         if(!isset($_POST['ac_name']) || !isset($_POST['ac_pid']) || empty($_POST['ac_pid']) || empty($_POST['ac_name'])){
             msg("请填写分类名并选择父分类名", $status = 0, $jump);
@@ -129,6 +135,109 @@ class Articles extends \CLASSES\AdminBase
         {
             return false;
         }
+    }
+
+    /**
+     * 删除文章分类
+     * @author zhaoyu
+     * @e-mail zhaoyu8292@qq.com
+     * @date   2017-08-18
+     * @return bool           [description]
+     */
+    public function categoryDel()
+    {
+        $jump = "/Articles/categoryList";
+        $ac_id = isset($_GET['ac_id']) ? intval($_GET['ac_id']) : 0;
+        if($ac_id == 0)
+        {
+            msg("参数错误,删除失败!", $status = 0, $jump);
+        }else{
+            /*判断有没有子集和该分类内有没有文件如果有删除失败*/
+            $dao_article = new \DAO\Articles();
+            $child_cat_id = $dao_article->catChild($ac_id);
+            if(!$child_cat_id)
+            {
+
+                $child_art_id = $dao_article->artChild($ac_id);
+                if(!$child_art_id)
+                {
+
+                    $res = $dao_article->delCategory($ac_id);
+                    if($res)
+                    {
+                        msg("分类删除成功!", $status = 1, $jump);
+                    }else{
+                        msg("分类删除失败!", $status = 0, $jump);
+                    }
+                }else{
+                    msg("该分类下有文章,请先将文章修改或删除!", $status = 0, $jump);
+                }
+            }else{
+                msg("该分类下有子分类,请先将子分类修改或删除!", $status = 0, $jump);
+            }
+
+
+        }
+
+
+    }
+
+    /*文章分类修改*/
+    public function categoryEdit()
+    {
+        $jump = "/Articles/categoryList";
+        $ac_id = isset($_GET['ac_id']) ? intval($_GET['ac_id']) : 0;
+
+        if($ac_id == 0){
+            msg("参数错误!", $status = 0, $jump);
+        }
+
+        /*获取地区数组*/
+        $area = area(1);
+
+        /*获取除了自己子集的分类树*/
+        $dao_article = new \DAO\Articles();
+        $ac_tree = $dao_article->getTreeExceptChild($ac_id);
+
+        $self_data = $dao_article->getCategory($ac_id);
+        $self_data = $self_data[0];
+        $r_name = "";
+        if($self_data['r_id'])
+        {
+            $r_name = area('','','',$self_data['r_id']);
+        }
+        $self_data['r_name'] = !empty($r_name) ? $r_name : "地区未定义";
+
+
+        $this->tpl->assign("self_data",$self_data);
+        $this->tpl->assign("ac_tree",$ac_tree);
+        $this->tpl->assign("area_provinces",$area['regions']);
+        $this->tpl->display("Articles/categoryEdit.html");
+    }
+
+    /*文章分类修改数据操作*/
+    public function doCategoryEdit()
+    {
+        $jump = "/Articles/categoryEdit";
+        $ac_id = isset($_POST['ac_id']) ? intval($_POST['ac_id']) : 0;
+        if($ac_id == 0){
+            msg("参数错误修改失败!", $status = 0, $jump);
+        }else{
+
+        }
+    }
+
+    /**
+     * 通过分类id查看文章id
+     * @author zhaoyu
+     * @e-mail zhaoyu8292@qq.com
+     * @date   2017-08-18
+     * @param  [type]            $ac_id [description]
+     * @return array                  [description]
+     */
+    public function categoryArticles($ac_id)
+    {
+        echo 1;
     }
 
 }

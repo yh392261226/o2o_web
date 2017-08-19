@@ -9,7 +9,7 @@ use Swoole;
 class ModelBase extends Swoole\Model
 {
     protected $paras = array(
-        'where' => array('1'),
+        'where' => '1',
         'fields' => '*',
         'limit_start' => 1,
         'limit_end' => PAGESIZE,
@@ -21,7 +21,7 @@ class ModelBase extends Swoole\Model
      * @author Me
      * @desc 设置参数
      */
-    private function setdatas($data = array())
+    protected function setdatas($data = array())
     {
         if (!empty($data)) {
             $paras = array();
@@ -81,7 +81,9 @@ class ModelBase extends Swoole\Model
         if (!empty($data)) {
             $this->setdatas($data);
             if ($type == 0) {
-                return $this->del($data[$this->primary], $this->primary);
+                $val = isset($data[$this->primary])? $data[$this->primary] : $data['val'];
+                $key = isset($data['key']) ? $data['key'] : $this->primay;
+                return $this->del($val, $key);
             } else {
                 return $this->dels($data);
             }
