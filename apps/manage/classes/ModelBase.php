@@ -10,7 +10,7 @@ class ModelBase extends Swoole\Model
 {
     protected $paras = array(
 
-        'where' => array('1'),
+        'where' => '1',
         'pagesize' => PAGESIZE,
 
     );

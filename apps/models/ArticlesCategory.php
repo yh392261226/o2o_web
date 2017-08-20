@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 16:07:50
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-19 15:49:19
+ * @Last Modified time: 2017-08-20 15:59:00
  */
 namespace App\Model;
 
@@ -24,20 +24,28 @@ class ArticlesCategory extends \CLASSES\ModelBase
      */
     public function infoDatas($data=array())
     {
-        $this->setdatas($data);
-        $paras = $this->paras;
-        return $this->select($paras['fields'])->where($paras['where'])->fetchAll();
+
+        $fields = isset($data['fields'])&&!empty($data['fields'])? $data['fields'] : "*";
+        $where = isset($data['where'])&&!empty($data['where'])? $data['where'] : "1";
+
+        return $this->select($fields)->where($where)->fetchAll();
     }
 
+
     /**
-     * @param array $data
-     * @return array
-     * @author Me
-     * @desc 多条详情
+     * 获取单条数据
+     * @author zhaoyu
+     * @e-mail zhaoyu8292@qq.com
+     * @date   2017-08-17
+     * @param  二维array           $value [description]
      */
-    // public function listDatas($data = array())
-    // {
-    //     $result= $this->gets($data);
-    //     return $result;
-    // }
+    public function infoData($data=array())
+    {
+
+        $fields = isset($data['fields'])&&!empty($data['fields'])? $data['fields'] : "*";
+        $where = isset($data['where'])&&!empty($data['where'])? $data['where'] : "1";
+
+        return $this->select($fields)->where($where)->fetch();
+    }
+
 }

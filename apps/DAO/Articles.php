@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 16:06:30
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-19 16:55:18
+ * @Last Modified time: 2017-08-20 17:07:36
  */
 namespace DAO;
 
@@ -26,6 +26,7 @@ class Articles
     public function getTreeExceptChild($catid)
     {
         $m_ac = model('ArticlesCategory');
+
         $data = $m_ac->infoDatas();
         $child_arr = getChildren($data,$catid,"ac_id","ac_pid",true);
 
@@ -109,7 +110,7 @@ class Articles
         $data['fields'] = 'ac_id';
         $data['where'] = array('ac_name'=>$name);
 
-        return model('ArticlesCategory')->infoDatas($data);
+        return model('ArticlesCategory')->infoData($data);
    }
 
 /**
@@ -120,7 +121,7 @@ class Articles
         $data['fields'] = 'ac_id';
         $data['where'] = array('ac_pid'=>$ac_id);
 
-        return model('ArticlesCategory')->infoDatas($data);
+        return model('ArticlesCategory')->infoData($data);
    }
 
 /**
@@ -131,7 +132,7 @@ class Articles
         $data['fields'] = 'a_id';
         $data['where'] = array('ac_id'=>$ac_id);
 
-        return model('Articles')->infoDatas($data);
+        return model('Articles')->infoData($data);
    }
 
 /*删除文章分类*/
@@ -142,14 +143,61 @@ class Articles
         return model('ArticlesCategory')->delData($data);
    }
 
-/*查找分类详情*/
-public function getCategory($ac_id)
-{
-    $data['fields'] = '*';
-    $data['where'] = array('ac_id'=>$ac_id);
+    /*查找分类详情*/
+    public function getCategory($ac_id)
+    {
+        $data['fields'] = '*';
+        $data['where'] = array('ac_id'=>$ac_id);
 
-    return model('ArticlesCategory')->infoDatas($data);
-}
+        return model('ArticlesCategory')->infoDatas($data);
+    }
+
+
+    /*修改文章分类信息*/
+    public function updateArticeCat($data,$where)
+    {
+        return model('ArticlesCategory')->updateData($data,$where);
+    }
+
+    /*通过分类id查看文章id*/
+    public function getArticlesByCateId($ac_id)
+    {
+        $m_ac = model('ArticlesCategory');
+
+        $data = $m_ac->infoDatas();
+        $child_arr = getChildren($data,$ac_id,"ac_id","ac_pid",true);
+        $child_arr[] = "{$ac_id}";
+
+        $ins = implode(',', $child_arr);
+        $m_art = model('Articles');
+        return $m_art -> infoDatas(array('fields'=>'a_id,a_title,a_info',"where"=>"`ac_id` IN ({$ins})"));
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

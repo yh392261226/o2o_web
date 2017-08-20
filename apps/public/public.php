@@ -69,7 +69,7 @@ function msg($message, $status = 1, $jumpUrl = '', $time = 3)
         Swoole::$php->tpl->assign('error', $message); // 提示信息
         //发生错误时候默认停留3秒
         Swoole::$php->tpl->assign('waitSecond', $time);
-        // 默认发生错误的话自动返回上页 
+        // 默认发生错误的话自动返回上页
         if (empty($jumpUrl)) {
             Swoole::$php->tpl->assign('jumpUrl', "javascript:history.back(-1);");
         }
@@ -266,8 +266,9 @@ function area($parent=1,$type="1",$target="selProvinces",$area_id = "")
         foreach ($data as $key => $value) {
             if($value['r_id'] == $area_id){
                 $area_name = $value['r_name'];
+                return $area_name;
             }
-            return $area_name;
+
         }
     }else{
         $res = array();

@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-19 16:59:43
+ * @Last Modified time: 2017-08-20 17:15:09
  */
 
 namespace App\Controller;
@@ -215,16 +215,78 @@ class Articles extends \CLASSES\AdminBase
         $this->tpl->display("Articles/categoryEdit.html");
     }
 
-    /*文章分类修改数据操作*/
+
+     /*处理文章添加数据*/
     public function doCategoryEdit()
     {
-        $jump = "/Articles/categoryEdit";
+
+        $jump = "/Articles/categoryList";
         $ac_id = isset($_POST['ac_id']) ? intval($_POST['ac_id']) : 0;
         if($ac_id == 0){
             msg("参数错误修改失败!", $status = 0, $jump);
-        }else{
-
         }
+
+        $dao_article = new \DAO\Articles();
+        if(!isset($_POST['ac_name']) || !isset($_POST['ac_pid']) || empty($_POST['ac_pid']) || empty($_POST['ac_name'])){
+            msg("请填写分类名并选择父分类名", $status = 0, $jump);
+        }else{
+            /*判断分类名是否存在*/
+
+            $res = $dao_article->getIdByName($_POST['ac_name']);
+
+            if(intval($res['ac_id']) > 0 && $res['ac_id'] != $ac_id){
+                msg("分类名已经存在!", $status = 0, $jump);
+            }
+        }
+
+        $data = array();
+        $data['ac_pid'] = intval($_POST['ac_pid']);
+        $data['ac_name'] = trim($_POST['ac_name']);
+        $data['ac_desc'] = isset($_POST['ac_desc'])&&!empty($_POST['ac_desc'])?deepAddslashes(htmlspecialchars($_POST['ac_desc'])):"";
+        $data['ac_status'] = isset($_POST['ac_status'])?intval($_POST['ac_status']):0;
+        if(isset($_FILES['ac_img']['name'])&&!empty($_FILES['ac_img']['name'])){
+
+            /*获取文件后缀名*/
+            // $mime = $_FILES['ac_img']['type'];
+            // $filetype = $this->getMimeType($mime);
+            /*文件名*/
+            $file_name = 'ac_'.time().rand(1000,9999);
+            /*子目录*/
+            // $this->upload->sub_dir = 'images';
+            /*子目录生成参数*/
+            $this->upload->shard_argv = 'Y/m/d';
+            /*子目录生成方法，可以使用randomkey，或者date,user*/
+            $this->upload->shard_type = 'date';
+             //自动压缩图片
+            $this->upload->max_width = 60; /*约定图片的最大宽度*/
+            $this->upload->max_height = 60; /*约定图片的最大高度*/
+            $this->upload->max_qulitity = 90; /*图片压缩的质量*/
+            /*第一个参数是文件name名;第二个参数是自定义的文件名;第三个参数不知道干啥的*/
+            $up_pic = $this->upload->save('ac_img',$file_name);
+            if (empty($up_pic))
+            {
+                msg("文件上传失败!", $status = 0, $jump);
+            }else{
+                $data['ac_img'] = $up_pic['url'];
+
+                //删除原图标
+
+            }
+        }
+        $data['ac_last_edit_time'] = time();
+        $data['ac_last_editor'] = $_SESSION['m_id'];
+        $data['r_id'] = isset($_POST['r_id'])&&!empty($_POST['r_id'])?intval($_POST['r_id']):1;
+
+        $where = array();
+        $where['id'] = $ac_id;
+        $where['where'] = 'ac_id';
+        $res = $dao_article->updateArticeCat($data,$where);
+        if($res){
+            msg("分类修改成功", $status = 1, $jump);
+        }else{
+            msg("分类修改失败!", $status = 0, $jump);
+        }
+
     }
 
     /**
@@ -235,9 +297,30 @@ class Articles extends \CLASSES\AdminBase
      * @param  [type]            $ac_id [description]
      * @return array                  [description]
      */
-    public function categoryArticles($ac_id)
+    public function getArticlesByCateId($ac_id)
     {
-        echo 1;
+        $dao_article = new \DAO\Articles();
+        return $dao_article->getArticlesByCateId($ac_id);
+    }
+
+
+
+    /*文章列表默认为首页*/
+    public function index()
+    {
+
+    }
+
+    /*文章添加*/
+    public function articleAdd()
+    {
+
+    }
+
+    /*文章添加数据操作*/
+    public function doArticleAdd()
+    {
+
     }
 
 }
