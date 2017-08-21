@@ -1,0 +1,138 @@
+<?php
+namespace MMODEL;
+
+/**
+ * @action   model层基础类
+ */
+
+class ModelBase extends \Swoole\Model 
+{
+    public $primary;
+    
+    public function __construct(\Swoole $swoole, $db_key = 'master') 
+    {
+        parent::__construct($swoole, $db_key);
+    }
+    
+    /**
+     * @param array $data
+     * @return array
+     * @author Me
+     * @desc 多条详情
+     *https://worthy.gitbooks.io/swoole-framework-db-api/content/%E6%9F%A5%E8%AF%A2.html
+     */
+    public function getDatas($data = array()) 
+    {
+        if (!empty($data)) 
+        {
+            if (is_array($data)) 
+            {
+                $type = getArrayDeep($data);
+                if ($type < 1) 
+                {
+                    return $this->get($data['val'], $data['key']);
+                } 
+                else 
+                {
+                    if (isset($data['pager']) && $data['pager']) 
+                    {
+                        $pager = null;
+                        unset($data['pager']);
+                        $data = $this->gets($data, $pager);
+                        return array('data' => $data, 'pager' => $pager);
+                    }
+                    return $this->gets($data);
+                }
+            }
+            return $this->get($data);//直接传主键值
+        }
+        return $this->gets();
+    }
+    
+    /**
+     * @param array $data 一维数组 键值对  name=123
+     * @return bool
+     * @author Ross
+     * @desc 删除管理员
+     */
+    public function delData($data = array()) 
+    {
+        if (!empty($data)) 
+        {
+            if (!is_array($data)) 
+            {
+                return $this->del($data);
+            } 
+            else 
+            {
+                $type = getArrayDeep($data);
+                if ($type < 1) 
+                {
+                    return $this->del($data['val'], $data['key']);
+                } 
+                else 
+                {
+                    return $this->dels($data);
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * @param array $data
+     * @param array $fields
+     * @return boolean|number
+     * @添加数据
+     */
+    public function addData($data = array(), $fields = array()) 
+    {
+        if (!empty($data)) 
+        {
+            $type = getArrayDeep($data);
+            if ($type < 1) 
+            {
+                return $this->put($data);
+            } 
+            else 
+            {
+                if (count($data) > 0 && count($fields) > 0) 
+                {
+                    return $this->puts($fields, $data);
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * @param array $data
+     * @param array $params
+     * @param number $type
+     * @return boolean
+     * @更新数据
+     */
+    public function updateData($data = array(), $params = array()) 
+    {
+        if (!empty($data)) 
+        {
+            $type = getArrayDeep($data);
+            if ($type < 1) 
+            {
+                $where = isset($params['where'])?trim($params['where']):'';
+                return $this->set($params[$this->primary], $data, $where);
+            }
+            return $this->sets($data, $params);
+        }
+    }
+    
+    /**
+     * @param array $data
+     * @return boolean|number
+     * @查询条数
+     */
+    public function countData($data = array()) 
+    {
+        return $this->count($data);
+    }
+}

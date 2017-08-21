@@ -129,6 +129,7 @@ function getIp($type = 0)
     } else {
         $ip = $_SERVER['REMOTE_ADDR'];
     }
+    if ('' == $ip) $ip = \Swoole::$php->request->getClientIP();
     if ($ip != '') {
         if ($type == 0) {
             return ip2long($ip);
@@ -137,12 +138,74 @@ function getIp($type = 0)
     }
 }
 
-/*
- * 验证
+/**
+ * 获取数组维度 或 验证数组是否是一维数组
  */
-function validatas($data = array())
-{
+function getArrayDeep($data = array(), $type = 0) {
+    if (!is_array($data)) {
+        return 0;
+    } else {
+        if ($type == 0) {
+            if (count($data)==count($data, 1)) {
+                return true; //一维数组
+            } else {
+                return false; //非一维数组
+            }
+        } else { //获取数组深度
+            $max1 = 0;
+            foreach ($data as $item1) {
+                $t1 = getArrayDeep($item1);
+                if ($t1 > $max1) {
+                    $max1 = $t1;
+                }
+                
+            }
+            return $max1+1;
+        }
+    }
+}
 
+
+// function deepArrayFilter($data = array(), $index, $value){
+//     if(is_array($array) && count($array)>0)
+//     {
+//         foreach(array_keys($array) as $key){
+//             $temp[$key] = $array[$key][$index];
+            
+//             if ($temp[$key] == $value){
+//                 $newarray[$key] = $array[$key];
+//             }
+//         }
+//     }
+//     return $newarray;
+// } 
+
+function deepArrayFilter($data = array(), $filter = '')
+{
+    if (!empty($data))
+    {
+        $deep = getArrayDeep($data, 0);
+        if (!$deep)
+        {
+            //多维数组
+            foreach ($data as $key => $val)
+            {
+                if (getArrayDeep($val, 0))
+                {
+                   $data[$key] = array_filter($val, $filter);
+                }
+                if (is_array($val))
+                {
+                    $data[$key] = deepArrayFilter($val, $filter);
+                }
+            }
+        }
+        else 
+        {
+            return array_filter($data);
+        }
+    }
+    return $data;
 }
 
 /*

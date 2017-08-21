@@ -1,24 +1,21 @@
-<?php
+<?php 
 namespace App\Model;
-
-class Managers extends \CLASSES\ModelBase
+class Managers extends \MMODEL\ModelBase
 {
     public $table   = 'managers';
     public $primary = "m_id";
-
+    
+    
     /**
-     * @param array $data
-     * @return bool
-     * @author Ross
-     * @desc 删除管理员
+     * 删除管理员(只能按照管理员id删除)
+     * {@inheritDoc}
+     * @see \App\Model\ModelBase::delData()
      */
-    public function delData($data = array(),$type=0)
+    public function delData($data = array())
     {
-        if (!empty($data)) {
-            if (!isset($data['m_status'])) {
-                $data['m_status'] = -2;
-            }
-            return $this->set($data[$this->primary], $data, $this->primary);
+        if (!empty($data)) 
+        {
+            return $this->updateData(array('m_status' => -2), $data);
         }
     }
 }
