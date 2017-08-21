@@ -60,7 +60,8 @@ class Manager extends \CLASSES\AdminBase
     public function managerDel()
     {
 
-    }/**
+    }
+    /**
      * 权限模块列表
      * @author 户连超
      * @e-mail zrkjhlc@gmail.com
@@ -69,21 +70,28 @@ class Manager extends \CLASSES\AdminBase
      */
     public function managerPrivilegesModulesList()
     {
-        $data['page'] = !empty($_GET['page']) ? $_GET['page'] : 1;
-        !empty($_GET['mpm_name']) ? $data['mpm_name'] = $_GET['mpm_name'] : false;
-        !empty($_GET['mpm_status']) ? $data['mpm_status'] = $_GET['mpm_status'] : false;
+        $data = array();
+        (isset($_REQUEST['page']) && !empty($_REQUEST['page'])) ? $data['page'] = $_REQUEST['page'] : $data['page'] = 1;
+        (isset($_POST['mpm_name']) && !empty($_POST['mpm_name'])) ? ($data['mpm_name'] = $_POST['mpm_name']) : false;
+        (isset($_POST['mpm_status']) && $_POST['mpm_status'] >= "0") ? ($data['mpm_status'] = $_POST['mpm_status']) : false;
         /**
          * 查询数据
          * @return array $ret_info
          */
         $ret_info = $this->managers->managerPrivilegesModulesData($data);
+
         if (false !== $ret_info) {
             $this->tpl->assign("list", $ret_info['data']);
             $this->tpl->assign("page", $ret_info['page']);
-        }else{
+        } else {
             $this->tpl->assign("list", '');
             $this->tpl->assign("page", '');
         }
+        if (empty($data)) {
+            $data["mpm_status"] = '';
+            $data['mpm_name'] = '';
+        }
+        $this->tpl->assign("data", $data);
         $this->tpl->display("manager/managerPrivilegesModulesList.html");
     }
     /**
@@ -95,35 +103,14 @@ class Manager extends \CLASSES\AdminBase
      */
     public function managerPrivilegesModulesAdd()
     {
-        // $data[0][]= 1;
-        // $data[0][] = 1;
-        // $data[0][] = 1;
-
-        // $data[1][]= 1;
-        // $data[1][] = 1;
-        // $data[1][] = 1;
-
-        // $data[2][]= 1;
-        // $data[2][] = 1;
-        // $data[2][] = 1;
-        // $data[3][]= 1;
-        // $data[3][] = 1;
-        // $data[3][] = 1;
-        // $data[4][]= 1;
-        // $data[4][] = 1;
-        // $data[4][] = 1;
-        // $field[] = 'mpm_name';
-        // $field[] = 'mpm_value';
-        // $field[] = 'mpm_status';
-        $ret = $this->managers->managerPrivilegesModulesInsert($data);
         /**
          * 接到数组证明是添加动作
          */
-        if ($_POST) {
+        if (isset($_POST) && !empty($_POST)) {
 
             $error_jump = '/manager/managerPrivilegesModulesAdd';
             $success_jump = '/manager/managerPrivilegesModulesList';
-            
+
             $data = array();
             (isset($_POST['mpm_name']) && !empty($_POST['mpm_name'])) ? $data['mpm_name'] = $_POST['mpm_name'] : msg("权限模块名不能为空!", $status = 0, $error_jump);
             (isset($_POST['mpm_value']) && !empty($_POST['mpm_value']) && false !== strpos($_POST['mpm_value'], "@")) ? $data['mpm_value'] = encyptController($_POST['mpm_value']) : msg("权限模块英文名填写有误!", $status = 0, $error_jump);
@@ -155,7 +142,47 @@ class Manager extends \CLASSES\AdminBase
      */
     public function managerPrivilegesModulesEdit()
     {
-        # code...
+        if (isset($_REQUEST['id']) && $_REQUEST['id'] > 0) {
+            $id = $_REQUEST['id'];
+            $mpm_info = $this->managers->managerPrivilegesModuleInfo($id);
+        }
+
+        if (isset($_POST) && !empty($_POST)) {
+            $error_jump = '/manager/managerPrivilegesModulesEdit?id=' . $id;
+            $success_jump = '/manager/managerPrivilegesModulesList';
+
+            $data = array();
+
+            (isset($_POST['mpm_name']) && !empty($_POST['mpm_name'])) ? $data['mpm_name'] = $_POST['mpm_name'] : msg("权限模块名不能为空!", $status = 0, $error_jump);
+
+            if (isset($_POST['mpm_value']) && !empty($_POST['mpm_value'])) {
+                if ($_POST['mpm_value'] == $mpm_info['data'][0]['mpm_value']) {
+                    $data['mpm_value'] = $_POST['mpm_value'];
+                } elseif (false !== strpos($_POST['mpm_value'], "@")) {
+                    msg("权限模块英文名填写有误!", $status = 0, $error_jump);
+                } else {
+                    $data['mpm_value'] = encyptController($_POST['mpm_value']);
+                }
+            }
+            (isset($_POST['mpm_status']) && 'on' == $_POST['mpm_status']) ? $data['mpm_status'] = 1 : $data['mpm_status'] = 0;
+            (isset($_POST['mpm_desc'])) ? $data['mpm_desc'] = $_POST['mpm_desc'] : $data['mpm_desc'] = '';
+            (isset($_POST['id'])) ? $info['id'] = $_POST['id'] : msg("数据传输错误,请重试!", $status = 0, $error_jump);
+
+            $ret_info = $this->managers->managerPrivilegesModulesUpdate($info, $data);
+            if (false === $ret_info) {
+                msg("修改失败,请重试!", $status = 0, $error_jump);
+            } else {
+                msg("修改成功!", $status = 1, $success_jump);
+            }
+            $this->http->finish();
+        }
+
+        if (isset($mpm_info['data'][0]) && $mpm_info['data'][0]) {
+            $this->tpl->assign("mpm_info", $mpm_info['data'][0]);
+        } else {
+            $this->tpl->assign("mpm_info", "");
+        }
+        $this->tpl->display("manager/managerPrivilegesModulesEdit.html");
     }
     /**
      * 权限模块删除
@@ -166,7 +193,15 @@ class Manager extends \CLASSES\AdminBase
      */
     public function managerPrivilegesModulesDel()
     {
-        # code...
+        $error_jump = '/manager/managerPrivilegesModulesList';
+        $success_jump = '/manager/managerPrivilegesModulesList';
+        (isset($_GET['id']) && !empty($_GET['id'])) ? $id = $_GET['id'] : false;
+        $ret_info = $this->managers->managerPrivilegesModulesDelete($id);
+        if ($ret_info) {
+            msg("删除成功!", $status = 1, $success_jump);
+        } else {
+            msg("删除失败,请重试!", $status = 0, $error_jump);
+        }
     }
     /**
      * 管理员分组列表
@@ -177,7 +212,33 @@ class Manager extends \CLASSES\AdminBase
      */
     public function managersPrivilegesGroupList()
     {
-        # code...
+        $data = array();
+        (isset($_REQUEST['page']) && !empty($_REQUEST['page'])) ? $data['page'] = $_REQUEST['page'] : $data['page'] = 1;
+        (isset($_POST['mpg_name']) && !empty($_POST['mpg_name'])) ? ($data['mpg_name'] = $_POST['mpg_name']) : false;
+        (isset($_POST['mpg_status']) && $_POST['mpg_status'] >= -1) ? ($data['mpg_status'] = $_POST['mpg_status']) : false;
+        (isset($_POST['mpg_author']) && !empty($_POST['mpg_author'])) ? ($data['mpg_author'] = $_POST['mpg_author']) : false;
+        (isset($_POST['mpg_editor']) && !empty($_POST['mpg_editor'])) ? ($data['mpg_editor'] = $_POST['mpg_editor']) : false;
+        /**
+         * 查询数据
+         * @return array $ret_info
+         */
+        $ret_info = $this->managers->managersPrivilegesGroupData($data);
+
+        echo "<pre>";
+        var_dump($ret_info);
+        if (false !== $ret_info) {
+            $this->tpl->assign("list", $ret_info['data']);
+            $this->tpl->assign("page", $ret_info['page']);
+        } else {
+            $this->tpl->assign("list", '');
+            $this->tpl->assign("page", '');
+        }
+        if (empty($data)) {
+            $data["mpm_status"] = '';
+            $data['mpm_name'] = '';
+        }
+        $this->tpl->assign("data", $data);
+        $this->tpl->display("manager/managersPrivilegesGroupList.html");
     }
     /**
      * 添加分组
@@ -188,7 +249,27 @@ class Manager extends \CLASSES\AdminBase
      */
     public function managersPrivilegesGroupAdd()
     {
-        # code...
+        if (isset($_POST) && !empty($_POST)) {
+            $error_jump = '/manager/managersPrivilegesGroupAdd';
+            $success_jump = '/manager/managersPrivilegesGroupList';
+
+            $data = array();
+            (isset($_POST['mpg_name']) && !empty($_POST['mpg_name'])) ? $data['mpg_name'] = $_POST['mpg_name'] : msg("分组名不能为空!", $status = 0, $error_jump);
+            (isset($_POST['mpg_status']) && !empty($_POST['mpg_status'])) ? $data['mpg_status'] = $_POST['mpg_status'] : false;
+            (isset($_POST['mpm_ids']) && !empty($_POST['mpm_ids'])) ? $data['mpm_ids'] = implode(",", $_POST['mpm_ids']) : false;
+            $data['mpg_author'] = $_SESSION['m_id'];
+            $data['mpg_editor'] = $_SESSION['m_id'];
+            $ret = $this->managers->managersPrivilegesGroupInsert($data);
+            if (false == $ret) {
+                msg("添加失败请重试!!!", $status = 0, $error_jump);
+            } else {
+                msg("添加成功!", $status = 1, $success_jump);
+            }
+            $this->http->finish();
+        }
+        $mpm_list = $this->managers->managerPrivilegesModulesData('', 1);
+        $this->tpl->assign("mpm_list", $mpm_list["data"]);
+        $this->tpl->display("manager/managersPrivilegesGroupAdd.html");
     }
     /**
      * 修改分组信息

@@ -9,8 +9,8 @@ use Swoole;
  * @date   2017-08-14
  * @return [type]            [description]
  */
-class ManagersPrivilegesGroupList extends Swoole\Model
+class ManagersPrivilegesGroup extends \CLASSES\ModelBase
 {
-	public $table = 'managers_privileges_group_list';
+	public $table = 'managers_privileges_group';
     public $primary = "mpg_id";
 }
