@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 16:06:30
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-17 17:20:42
+ * @Last Modified time: 2017-08-20 17:07:36
  */
 namespace DAO;
 
@@ -21,46 +21,78 @@ class Articles
      * @date   2017-08-14
      * @return [type]            [description]
      */
+
+    /*获取所有除了自己子集的分类树*/
+    public function getTreeExceptChild($catid)
+    {
+        $m_ac = model('ArticlesCategory');
+
+        $data = $m_ac->infoDatas();
+        $child_arr = getChildren($data,$catid,"ac_id","ac_pid",true);
+
+        if($child_arr){
+            $ins = implode(',', $child_arr);
+            $no_child_arr = $m_ac->infoDatas(array('fields'=>'ac_id,ac_name,ac_pid',"where"=>"`ac_id` NOT IN ({$ins})"));
+        }else{
+            $no_child_arr = $data;
+        }
+
+        return $this->_getTree($no_child_arr,0,0,true);
+
+    }
      /*递归引用*/
-    public function getChildren($catid){
+    public function getCategotyChildren($catid)
+    {
         $m_ac = model('ArticlesCategory');
         $data = $m_ac->infoDatas();
-        return $this->_getChildren($data,$catid,true);
-    }
-    /*递归处理 输出所有子分类id*/
-    public function _getChildren($data,$catid,$isClear=false){
-        static $child = array();
-        if($isClear){
-            $child = array();
-        }
-        foreach ($data as $k => $v) {
-            var_dump($v);
-            if($v['ac_pid'] == $catid){
-                $child[] = $v['ac_id'];
-                $this->_getChildren($data,$v['ac_id']);
-            }
-        }
-        return $child;
+        return getChildren($data,$catid,"ac_id","ac_pid",true);
+
     }
 
-    /*递归引用输出树状模型*/
-    public function getTree($catid){
-        $data = $this->select();
+    /*递归引用输出前台树状模型(带level)*/
+    public function getTree($catid=0){
+        $m_ac = model('ArticlesCategory');
+        $data = $m_ac->infoDatas(array('fields'=>'ac_id,ac_name,ac_pid','where' => '1'));
         return $this->_getTree($data,$catid,0,true);
     }
 
-    /*递归引用输出树状模型*/
+    /*递归引用输出前台树状模型(带level)*/
     public function _getTree($data,$pid,$level=0,$isClear=false){
         static $tree = array();
         if($isClear){
             $tree = array();
         }
         foreach ($data as $k => $v) {
-            if($pid == $v['parent_id']){
+            if($pid == $v['ac_pid']){
                 $v['level'] = $level;
                 $tree[] = $v;
-                $this->_getTree($data,$v['id'],$level+1);
+                $this->_getTree($data,$v['ac_id'],$level+1);
             }
+        }
+        return $tree;
+    }
+
+    /*递归引用输出树状模型*/
+    public function getChildTree($catid){
+        $m_ac = model('ArticlesCategory');
+        $data = $m_ac->infoDatas(array('fields'=>'ac_id as tags ,ac_name as text,ac_pid','where' => '1'));
+        return $this->_getChildTree($data,$catid);
+    }
+    /*递归引用输出树状模型*/
+    public function _getChildTree($data,$pid){
+
+        $tree = array();
+
+        foreach ($data as $k => $v) {
+            if($pid == $v['ac_pid']){
+                $res = $this->_getChildTree($data,$v['tags']);
+                if($res){
+                   $v['nodes'] =  $res;
+                }
+                unset($v['ac_pid']);
+                $tree[] = $v;
+            }
+
         }
         return $tree;
     }
@@ -78,6 +110,122 @@ class Articles
         $data['fields'] = 'ac_id';
         $data['where'] = array('ac_name'=>$name);
 
-        return model('ArticlesCategory')->infoDatas($data);
+        return model('ArticlesCategory')->infoData($data);
    }
+
+/**
+ * 判断分类下是否存在子分类
+ */
+   public function catChild($ac_id)
+   {
+        $data['fields'] = 'ac_id';
+        $data['where'] = array('ac_pid'=>$ac_id);
+
+        return model('ArticlesCategory')->infoData($data);
+   }
+
+/**
+ * 判断分类下是否存在文章
+ */
+   public function artChild($ac_id)
+   {
+        $data['fields'] = 'a_id';
+        $data['where'] = array('ac_id'=>$ac_id);
+
+        return model('Articles')->infoData($data);
+   }
+
+/*删除文章分类*/
+   public function delCategory($ac_id)
+   {
+        $data['val'] = $ac_id;
+        $data['key'] = 'ac_id';
+        return model('ArticlesCategory')->delData($data);
+   }
+
+    /*查找分类详情*/
+    public function getCategory($ac_id)
+    {
+        $data['fields'] = '*';
+        $data['where'] = array('ac_id'=>$ac_id);
+
+        return model('ArticlesCategory')->infoDatas($data);
+    }
+
+
+    /*修改文章分类信息*/
+    public function updateArticeCat($data,$where)
+    {
+        return model('ArticlesCategory')->updateData($data,$where);
+    }
+
+    /*通过分类id查看文章id*/
+    public function getArticlesByCateId($ac_id)
+    {
+        $m_ac = model('ArticlesCategory');
+
+        $data = $m_ac->infoDatas();
+        $child_arr = getChildren($data,$ac_id,"ac_id","ac_pid",true);
+        $child_arr[] = "{$ac_id}";
+
+        $ins = implode(',', $child_arr);
+        $m_art = model('Articles');
+        return $m_art -> infoDatas(array('fields'=>'a_id,a_title,a_info',"where"=>"`ac_id` IN ({$ins})"));
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
