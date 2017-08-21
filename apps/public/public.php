@@ -245,6 +245,8 @@ function logs($path, $msg)
 }
 
 /**
+<<<<<<< HEAD
+=======
  * 地区三级联动公共函数
  * 如果传$area_id返回当前id的地区名,如果不传返回p_id下的地区id和名称;
  * @author zhaoyu
@@ -287,6 +289,7 @@ function area($parent=1,$type="1",$target="selProvinces",$area_id = "")
 }
 
 /**
+>>>>>>> 42f74c7c1e297b40df9ce1ada2f83f366a41ded3
  * 获取数组维度 或 验证数组是否是一维数组
  */
 function getArrayDeep($data = array(), $type = 0) {
@@ -306,12 +309,28 @@ function getArrayDeep($data = array(), $type = 0) {
                 if ($t1 > $max1) {
                     $max1 = $t1;
                 }
-
             }
             return $max1+1;
         }
     }
 }
+/**
+ * [checkUserPermissions description]检查用户权限
+ * @author 户连超
+ * @e-mail zrkjhlc@gmail.com
+ * @date   2017-08-18
+ * @return [type]            [description]
+ * 未完待续......
+ */
+function checkUserPermissions()
+{
+    if (isset($_GET['s'])) {
+        $permissions = explode("/", trim($_GET['s'],"/"));
+        $str = implode("@", $permissions);
+        encyptController($str);
+
+    }
+=======
 
 
 /**
@@ -340,4 +359,5 @@ function getChildren($data,$catid,$key_id,$key_pid,$isClear=false)
         }
     }
     return $child;
+>>>>>>> 42f74c7c1e297b40df9ce1ada2f83f366a41ded3
 }

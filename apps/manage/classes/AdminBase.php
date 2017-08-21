@@ -34,6 +34,7 @@ class AdminBase extends Swoole\Controller
             $this->db->debug = true;
         }
         $this->public_assign();
+        checkUserPermissions();
     }
     /**
      * 前台模板公共赋值

@@ -12,13 +12,17 @@ class ManagerPrivilegesModules extends \CLASSES\ModelBase
      * @author Ross
      * @desc 删除管理员
      */
-    public function delData($data = array(),$type=0)
+    public function delData($data = array(), $params = array(), $type = 0)
     {
-        if (!empty($data)) {
-            if (!isset($data['mpm_status'])) {
-                $data['mpm_status'] = 0;
+        if (!empty($data) && !empty($params))
+        {
+            if (intval($type) == 0) //更新单条
+            {
+                $where = isset($params['where']) ? $params['where'] : '';
+                return $this->set($params['id'], $data, $where);
             }
-            return $this->set($data[$this->primary], $data, $this->primary);
+            return $this->sets($data, $params);
         }
+        return false;
     }
 }
