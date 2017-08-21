@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-20 17:15:09
+ * @Last Modified time: 2017-08-21 11:07:15
  */
 
 namespace App\Controller;
@@ -289,6 +289,17 @@ class Articles extends \CLASSES\AdminBase
 
     }
 
+
+
+
+
+
+
+/**********************************************************文章部分******************************************************************/
+
+
+
+
     /**
      * 通过分类id查看文章id
      * @author zhaoyu
@@ -314,13 +325,22 @@ class Articles extends \CLASSES\AdminBase
     /*文章添加*/
     public function articleAdd()
     {
+        /*获取地区数组*/
+        $area = area(1);
 
+        /*获取分类树*/
+        $dao_article = new \DAO\Articles();
+        $ac_tree = $dao_article->getTree();
+
+        $this->tpl->assign("ac_tree",$ac_tree);
+        $this->tpl->assign("area_provinces",$area['regions']);
+        $this->tpl->display("Articles/articleAdd.html");
     }
 
     /*文章添加数据操作*/
     public function doArticleAdd()
     {
-
+        var_dump($_POST);
     }
 
 }
