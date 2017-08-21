@@ -4,7 +4,7 @@
  * @param  string  name 中文名称(每级菜单都有中文名称)
  * @param  string  icon 图标(只有二级菜单有图标)
  * @param  string  link 链接地址(二级菜单,三级菜单才会有, 二级菜单可有可没有)
- * @param  array   sub_menu 下级菜单数组 
+ * @param  array   sub_menu 下级菜单数组
  * @return array $menu 菜单数组
  * @author 户连超
  * @e-mail zrkjhlc@gmail.com
@@ -63,6 +63,31 @@ $menu = array(
                     ),
                     1 => array(
                         'name' => '模块添加', 'icon' => '', 'link' => '/manager/managerPrivilegesModulesAdd',
+                    ),
+                ),
+            ),
+        ),
+    ),
+    /*文章管理*/
+    2 => array(
+        'name' => '文章管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
+            0 => array(
+                "name" => '文章分类管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                    0 => array(
+                        'name' => '文章分类列表', 'icon' => '', 'link' => '/Articles/categoryList',
+                    ),
+                    1 => array(
+                        'name' => '文章分类添加', 'icon' => '', 'link' => '/Articles/categoryAdd',
+                    ),
+                ),
+            ),
+            1 => array(
+                "name" => '文章管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                    0 => array(
+                        'name' => '文章列表', 'icon' => '', 'link' => '/Articles/index',
+                    ),
+                    1 => array(
+                        'name' => '文章添加', 'icon' => '', 'link' => '/Articles/articlesAdd',
                     ),
                 ),
             ),
