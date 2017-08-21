@@ -330,9 +330,7 @@ function checkUserPermissions()
         encyptController($str);
 
     }
-=======
-
-
+}
 /**
  * 递归处理 输出所有子分类id
  * @author zhaoyu
@@ -359,5 +357,4 @@ function getChildren($data,$catid,$key_id,$key_pid,$isClear=false)
         }
     }
     return $child;
->>>>>>> 42f74c7c1e297b40df9ce1ada2f83f366a41ded3
 }
