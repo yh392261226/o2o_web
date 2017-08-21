@@ -51,7 +51,7 @@ class Managers
     {
         if (!empty($data))
         {
-            return $this->manager->getData($data);
+            return $this->manager->getDatas($data);
         }
         return array();
     }
