@@ -244,3 +244,46 @@ function logs($path, $msg)
     file_put_contents($filename, $content, FILE_APPEND);
 }
 
+/**
+ * 获取数组维度 或 验证数组是否是一维数组
+ */
+function getArrayDeep($data = array(), $type = 0) {
+    if (!is_array($data)) {
+        return 0;
+    } else {
+        if ($type == 0) {
+            if (count($array)==count($array, 1)) {
+                return true; //一维数组
+            } else {
+                return false; //非一维数组
+            }
+        } else { //获取数组深度
+            $max1 = 0;
+            foreach ($data as $item1) {
+                $t1 = getArrayDeep($item1);
+                if ($t1 > $max1) {
+                    $max1 = $t1;
+                }
+                
+            }
+            return $max1+1;
+        }
+    }
+}
+/**
+ * [checkUserPermissions description]检查用户权限
+ * @author 户连超
+ * @e-mail zrkjhlc@gmail.com
+ * @date   2017-08-18
+ * @return [type]            [description]
+ * 未完待续......
+ */
+function checkUserPermissions()
+{
+    if (isset($_GET['s'])) {
+        $permissions = explode("/", trim($_GET['s'],"/"));
+        $str = implode("@", $permissions);
+        encyptController($str);
+
+    }
+}

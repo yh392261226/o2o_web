@@ -26,16 +26,16 @@
             <div class="col-sm-12">
                 <div class="ibox float-e-margins">
                     <div class="ibox-title">
-                        <h5>管理员权限列表</h5>
+                        <h5>管理员分组列表</h5>
                         <div class="ibox-tools" style="margin-right: 15px;">
                             <a class="close-link" href="/index/welcome">
                                 <i class="fa fa-times"></i>
                             </a>
                         </div>
                         <div class="ibox-tools" style="margin-right: 15px;">
-                            <a href="/manager/managerPrivilegesModulesAdd">
+                            <a href="/manager/managersPrivilegesGroupAdd">
                                 <i class="fa fa-plus"></i>
-                                添加管理员模块
+                                添加管理员分组
                             </a>
                         </div>
                     </div>
@@ -43,15 +43,31 @@
                         <div class="row">
                             <form action="" method="post">
                                 <div class="col-sm-2 m-b-xs">
-                                    <select class="input-sm form-control input-s-sm inline" name="mpm_status">
-                                        <option value="">请选择</option>
-                                        <option value="0"{{if $data.mpm_status eq '0'}}selected{{/if}}>关闭</option>
-                                        <option value="1"{{if $data.mpm_status eq '1'}}selected{{/if}}>开启</option>
+                                    <select class="input-sm form-control input-s-sm inline" name="mpg_status" style="height: 31px;">
+                                        <option value="">请选择状态</option>
+                                        <option value="-1"{{if $data.mpm_status eq '-1'}}selected{{/if}}>已废弃</option>
+                                        <option value="0"{{if $data.mpm_status eq '0'}}selected{{/if}}>不可用</option>
+                                        <option value="1"{{if $data.mpm_status eq '1'}}selected{{/if}}>未开启</option>
+                                        <option value="2"{{if $data.mpm_status eq '2'}}selected{{/if}}>正常</option>
                                     </select>
                                 </div>
                                 <div class="col-sm-2">
+                                        <select class="form-control input-s-sm inline" name="mpg_author" style="height: 31px;">
+                                            <option value="">请选择添加人</option>
+                                            <option value="-1"{{if $data.mpm_status eq '-1'}}selected{{/if}}>已废弃</option>
+                                        </select>
+                                </div>
+                                <div class="col-sm-2">
                                     <div class="input-group">
-                                        <input type="text" placeholder="请输入关键词" class="input-sm form-control" name="mpm_name" value="{{$data.mpm_name}}"> <span class="input-group-btn">
+                                        <select class="input-sm form-control input-s-sm inline" name="mpg_editor" style="height: 31px;">
+                                            <option value="">请选择修改人</option>
+                                            <option value="-1"{{if $data.mpm_status eq '-1'}}selected{{/if}}>已废弃</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="input-group">
+                                        <input type="text" placeholder="请输入关键词" class="input-sm form-control" name="mpg_name" value="{{$data.mpg_name}}"> <span class="input-group-btn">
                                             <button type="submit" class="btn btn-sm btn-primary"> 搜索</button> </span>
                                     </div>
                                 </div>
@@ -63,9 +79,12 @@
                                     <tr>
 
                                         <th>ID</th>
-                                        <th>模块名</th>
-                                        <th>模块值</th>
-                                        <th>描述</th>
+                                        <th>权限组名称</th>
+                                        <th>权限组状态</th>
+                                        <th>添加人</th>
+                                        <th>添加时间</th>
+                                        <th>修改人</th>
+                                        <th>修改时间</th>
                                         <th>操作</th>
                                     </tr>
                                 </thead>
@@ -73,20 +92,29 @@
                                     {{foreach from=$list item=info}}
                                         <tr>
                                             <td>
-                                                <input type="checkbox" class="i-checks" name="mpm_id[]" value="{{$info.mpm_id}}">
+                                                <input type="checkbox" class="i-checks" name="mpg_id[]" value="{{$info.mpg_id}}">
                                             </td>
                                             <td>
-                                                {{$info.mpm_name}}
+                                                {{$info.mpg_name}}
                                             </td>
                                             <td>
-                                                {{$info.mpm_value}}
+                                                {{$info.mpg_status}}
                                             </td>
                                             <td>
-                                                {{$info.mpm_desc}}
+                                                {{$info.mpg_author_name}}
                                             </td>
                                             <td>
-                                                <a href="/manager/managerPrivilegesModulesEdit?id={{$info.mpm_id}}"><i class="fa fa-wrench text-navy"></i> </a>&nbsp;&nbsp;
-                                                <a href="/manager/managerPrivilegesModulesDel?id={{$info.mpm_id}}"><i class="fa fa-close text-navy"></i> </a>
+                                                {{$info.mpg_in_time}}
+                                            </td>
+                                            <td>
+                                                {{$info.mpg_editor_name}}
+                                            </td>
+                                            <td>
+                                                {{$info.mpg_edit_time}}
+                                            </td>
+                                            <td>
+                                                <a href="/manager/managersPrivilegesGroupEdit?id={{$info.mpg_id}}"><i class="fa fa-wrench text-navy"></i> </a>&nbsp;&nbsp;
+                                                <a href="/manager/managersPrivilegesGroupDel?id={{$info.mpg_id}}"><i class="fa fa-close text-navy"></i> </a>
                                             </td>
                                         </tr>
                                     {{/foreach}}
