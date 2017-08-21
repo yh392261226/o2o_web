@@ -313,6 +313,7 @@
 				}
 
 				// Add tags as badges
+				node.tags = new Array(node.tags);
 				if (self.options.showTags && node.tags) {
 					$.each(node.tags, function addTag(id, tag) {
 						treeItem
@@ -403,7 +404,7 @@
 			icon: '<i></i>',
 			link: '<a href="#" style="color:inherit;"></a>',
 			badge: '<span class="badge"></span>',
-			btn:'<button onclick="delAc($this)">删除</button>'
+			btn:'<button onclick="delAc(this)">删除</button>'
 		},
 
 		_css: '.list-group-item{cursor:pointer;display:inline-block;width:90%;}span.indent{margin-left:10px;margin-right:10px}span.icon{margin-right:5px}'

@@ -15,7 +15,7 @@
     <meta http-equiv="refresh" content="0;ie.html" />
     <![endif]-->
 
-    <link rel="shortcut icon" href="{{$manageurl}}favicon.ico"> 
+    <link rel="shortcut icon" href="{{$manageurl}}favicon.ico">
     <link href="{{$manageurl}}css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
     <link href="{{$manageurl}}css/font-awesome.min.css?v=4.4.0" rel="stylesheet">
     <link href="{{$manageurl}}css/animate.css" rel="stylesheet">
@@ -49,10 +49,10 @@
                         <li class="hidden-folded padder m-t m-b-sm text-muted text-xs">
                             <span class="ng-scope">{{$variable.name}}</span>
                         </li>
-                        
+
                         {{if isset($variable.sub_menu) and $variable.sub_menu neq null}}
                             {{foreach from=$variable.sub_menu item=value}}
-                                
+
                                 <li>
                                     <a href="{{if !isset($value.sub_menu) and $value.sub_menu eq null}}{{$value.link}}{{/if}}">
                                         <i class="{{$value.icon}}"></i>
