@@ -258,7 +258,7 @@
 					.addClass((node === self.selectedNode) ? 'node-selected' : '')
 					.attr('data-nodeid', node.nodeId)
 					.attr('style', self._buildStyleOverride(node));
-
+				var btn = $(self._template.btn);
 				// Add indent/spacer to mimic tree structure
 				for (var i = 0; i < (level - 1); i++) {
 					treeItem.append(self._template.indent);
@@ -313,6 +313,7 @@
 				}
 
 				// Add tags as badges
+				node.tags = new Array(node.tags);
 				if (self.options.showTags && node.tags) {
 					$.each(node.tags, function addTag(id, tag) {
 						treeItem
@@ -321,10 +322,15 @@
 							);
 					});
 				}
-
+				if(node.tags){
+					$.each(node.tags, function addTag(id, tag) {
+						btn
+							.attr("ac_id",tag);
+					});
+				}
 				// Add item to the tree
 				self.$wrapper.append(treeItem);
-
+				self.$wrapper.append(btn);
 				// Recursively add child ndoes
 				if (node.nodes) {
 					return self._buildTree(node.nodes, level);
@@ -392,15 +398,16 @@
 
 		_template: {
 			list: '<ul class="list-group"></ul>',
-			item: '<li class="list-group-item"></li>',
+			item: '<li class="list-group-item"></li> ',
 			indent: '<span class="indent"></span>',
 			iconWrapper: '<span class="icon"></span>',
 			icon: '<i></i>',
 			link: '<a href="#" style="color:inherit;"></a>',
-			badge: '<span class="badge"></span>'
+			badge: '<span class="badge"></span>',
+			btn:'<button onclick="delAc(this)">删除</button>'
 		},
 
-		_css: '.list-group-item{cursor:pointer;}span.indent{margin-left:10px;margin-right:10px}span.icon{margin-right:5px}'
+		_css: '.list-group-item{cursor:pointer;display:inline-block;width:90%;}span.indent{margin-left:10px;margin-right:10px}span.icon{margin-right:5px}'
 		// _css: '.list-group-item{cursor:pointer;}.list-group-item:hover{background-color:#f5f5f5;}span.indent{margin-left:10px;margin-right:10px}span.icon{margin-right:5px}'
 
 	};
