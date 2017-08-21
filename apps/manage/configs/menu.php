@@ -68,6 +68,31 @@ $menu = array(
             ),
         ),
     ),
+    /*文章管理*/
+    2 => array(
+        'name' => '文章管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
+            0 => array(
+                "name" => '文章分类管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                    0 => array(
+                        'name' => '文章分类列表', 'icon' => '', 'link' => '/Articles/categoryList',
+                    ),
+                    1 => array(
+                        'name' => '文章分类添加', 'icon' => '', 'link' => '/Articles/categoryAdd',
+                    ),
+                ),
+            ),
+            1 => array(
+                "name" => '文章管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                    0 => array(
+                        'name' => '文章列表', 'icon' => '', 'link' => '/Articles/index',
+                    ),
+                    1 => array(
+                        'name' => '文章添加', 'icon' => '', 'link' => '/Articles/articlesAdd',
+                    ),
+                ),
+            ),
+        ),
+    ),
 );
 
 return $menu;
