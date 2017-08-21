@@ -9,8 +9,6 @@ use Swoole;
 class ModelBase extends Swoole\Model
 {
     protected $paras = array(
-
-        'where' => '1',
         'pagesize' => PAGESIZE,
 
     );
@@ -42,23 +40,25 @@ class ModelBase extends Swoole\Model
      * @author Me
      * @desc 多条详情
      */
-    public function listDatas($data = array())
+    public function listDatas($data = array(),$type = 0)
     {
         $this->setdatas($data);
         $pager = null;
-        $result['data'] = $this->gets($this->paras, $pager);
-        //$total_num表示符合条件的总的记录条数
-        $result['page']['total_num'] = $pager->total;
-        //$total_page表示总共有几页数据
-        $result['page']['total_page'] = (int) $pager->totalpage;
-        //$current_page表示当前取的是第几页的数据
-        $result['page']['current_page'] = $pager->page;
+        $result['data'] = $this->gets($data, $pager);
+        if ($type == 0) {
+            //$total_num表示符合条件的总的记录条数
+            $result['page']['total_num'] = $pager->total;
+            //$total_page表示总共有几页数据
+            $result['page']['total_page'] = (int) $pager->totalpage;
+            //$current_page表示当前取的是第几页的数据
+            $result['page']['current_page'] = $pager->page;
 
-        $pager->set_class("first","btn btn-white");
-        $pager->set_class("previous","btn btn-white");
-        $pager->set_class("next","btn btn-white");
-        $pager->set_class("last","btn btn-white");
-        $result['page'] = $pager->render();
+            $pager->set_class("first","btn btn-white");
+            $pager->set_class("previous","btn btn-white");
+            $pager->set_class("next","btn btn-white");
+            $pager->set_class("last","btn btn-white");
+            $result['page'] = $pager->render();
+        }
         return $result;
     }
 
@@ -122,7 +122,8 @@ class ModelBase extends Swoole\Model
         {
             if (intval($type) == 0) //更新单条
             {
-                return $this->set($params['id'], $data, $params['where']);
+                $where = isset($params['where']) ? $params['where'] : '';
+                return $this->set($params['id'], $data, $where);
             }
             return $this->sets($data, $params);
         }

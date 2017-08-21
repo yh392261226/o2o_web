@@ -14,6 +14,7 @@
         <link href="{{$manageurl}}css/plugins/iCheck/custom.css" rel="stylesheet"/>
         <link href="{{$manageurl}}css/animate.css" rel="stylesheet"/>
         <link href="{{$manageurl}}css/style.css?v=4.1.0" rel="stylesheet"/>
+        <link href="{{$manageurl}}css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet"/>
     </head>
     <body class="gray-bg">
         <div class="wrapper wrapper-content animated fadeInRight">
@@ -21,46 +22,27 @@
                 <div class="col-sm-12">
                     <div class="ibox float-e-margins">
                         <div class="ibox-title">
-                            <h5>管理员权限添加</h5>
+                            <h5>添加分组</h5>
                             <div class="ibox-tools" style="margin-right: 15px;">
                                 <a class="close-link" href="/index/welcome">
                                     <i class="fa fa-times"></i>
                                 </a>
                             </div>
                             <div class="ibox-tools" style="margin-right: 15px;">
-                                <a href="/manager/managerPrivilegesModulesList">
+                                <a href="/manager/managersPrivilegesGroupList">
                                     <i class="fa fa-bars"></i>
-                                    管理员模块列表
+                                    分组列表
                                 </a>
                             </div>
                         </div>  
                         <div class="ibox-content">
-                            <form class="form-horizontal" method="POST" action="/manager/managerPrivilegesModulesAdd">
-                                <div class="hr-line-dashed"></div>
+                            <form class="form-horizontal" method="POST" action="/manager/managersPrivilegesGroupAdd">
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label">
-                                        权限名
+                                        权限组名称
                                     </label>
                                     <div class="col-sm-10">
-                                        <input class="form-control" type="text" required="" aria-required="true" aria-invalid="true" name="mpm_name" />
-                                    </div>
-                                </div>
-                                <div class="hr-line-dashed"></div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label">
-                                        权限值(控制器@方法)
-                                    </label>
-                                    <div class="col-sm-10">
-                                        <input class="form-control" type="text"  required="" aria-required="true" aria-invalid="true" name="mpm_value" />
-                                    </div>
-                                </div>
-                                <div class="hr-line-dashed"></div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label">
-                                        描述(程序开发完整后删除)
-                                    </label>
-                                    <div class="col-sm-10">
-                                        <input class="form-control" type="text"  required="" aria-required="true" aria-invalid="true" name="mpm_desc" />
+                                        <input class="form-control" type="text" required="" aria-required="true" aria-invalid="true" name="mpg_name" />
                                     </div>
                                 </div>
                                 <div class="hr-line-dashed"></div>
@@ -68,16 +50,30 @@
                                     <label class="col-sm-2 control-label">
                                         状态
                                     </label>
+                                    <div class="col-sm-2 m-b-xs">
+                                        <select class="input-sm form-control input-s-sm inline" name="mpg_status" style="height: 32px;">
+                                            <option value="">请选择</option>
+                                            <option value="2">开启</option>
+                                            <option value="1">未开启</option>
+                                            <option value="0">不可用</option>
+                                            <option value="-1">已经废弃</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="hr-line-dashed"></div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">
+                                        选择分组权限
+                                    </label>
                                     <div class="col-sm-10">
-                                        <div class="switch">
-                                            <div class="onoffswitch">
-                                                <input type="checkbox" checked class="onoffswitch-checkbox" id="mpm_status" name="mpm_status">
-                                                <label class="onoffswitch-label" for="mpm_status">
-                                                    <span class="onoffswitch-inner"></span>
-                                                    <span class="onoffswitch-switch"></span>
-                                                </label>
+                                        <fieldset>
+                                        {{foreach from=$mpm_list item=mpm}}
+                                            <div class="checkbox checkbox-success checkbox-inline">
+                                                <input type="checkbox" value="{{$mpm.mpm_id}}" name="mpm_ids[]" id="inlineCheckbox2">
+                                                <label class="inlineCheckbox2">{{$mpm.mpm_name}}</label>
                                             </div>
-                                        </div>
+                                        {{/foreach}}
+                                        </fieldset>
                                     </div>
                                 </div>
                                 <div class="hr-line-dashed"></div>
