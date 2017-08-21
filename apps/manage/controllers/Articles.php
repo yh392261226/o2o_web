@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-21 11:07:15
+ * @Last Modified time: 2017-08-21 17:28:07
  */
 
 namespace App\Controller;
@@ -340,7 +340,111 @@ class Articles extends \CLASSES\AdminBase
     /*文章添加数据操作*/
     public function doArticleAdd()
     {
-        var_dump($_POST);
+        $jump = "/Articles/articleAdd";
+        $dao_article = new \DAO\Articles();
+        if(!isset($_POST['a_title']) || !isset($_POST['ac_id']) || empty($_POST['ac_id']) || empty($_POST['a_title'])){
+            msg("请填写分类名并选择父分类名", $status = 0, $jump);
+        }
+
+        $data = array();
+        $data['ac_id'] = intval($_POST['ac_id']);
+        $data['a_title'] = trim($_POST['ac_name']);
+        $data['a_desc'] = isset($_POST['a_desc'])&&!empty($_POST['ac_desc'])?htmlspecialchars($_POST['ac_desc']):"";
+        $data['a_info'] = isset($_POST['a_info'])&&!empty($_POST['a_info'])?deepAddslashes(htmlspecialchars($_POST['a_info'])):"";
+        $data['a_in_time'] = time();
+        $data['a_author'] = $_SESSION['m_id'];
+        $data['r_id'] = isset($_POST['r_id'])&&!empty($_POST['r_id'])?intval($_POST['r_id']):1;
+        $data['a_status'] = isset($_POST['ac_status'])?intval($_POST['a_status']):0;
+        $data['a_top'] = isset($_POST['a_top'])?intval($_POST['a_top']):0;
+        $data['a_recommend'] = isset($_POST['a_recommend'])?intval($_POST['a_recommend']):0;
+        $data['a_link'] = isset($_POST['a_link'])?trim($_POST['a_status']):"";
+        $data['a_start_time'] = isset($_POST['a_start_time'])?time($_POST['a_start_time']):0;
+        $data['a_end_time'] = isset($_POST['a_end_time'])?time($_POST['a_end_time']):0;
+
+
+        if(isset($_FILES['a_img']['name'])&&!empty($_FILES['a_img']['name'])){
+
+            $up_pic = $this->uploadAll('a_img','a_');
+
+            if (empty($up_pic))
+            {
+                msg("文件上传失败!", $status = 0, $jump);
+            }else{
+                if(sizeof($up_pic)>1)
+                {
+                    $up_pic = explode($up_pic,",");
+                }else{
+                    $data['ac_img'] = $up_pic[0];
+                }
+            }
+        }
+
+        var_dump($data);die;
+        /*模板还没整完呢*/
+
+        $res = $dao_article->saveArticeCat($data);
+        if($res){
+            msg("分类添加成功", $status = 1, $jump);
+        }else{
+            msg("分类添加失败!", $status = 0, $jump);
+        }
+
     }
+
+    /*多文件上传函数*/
+    /*
+    $form_name:表单中的name名;
+    $prefix:生成的文件名的前缀;
+    $size:约定图片的最大尺寸;
+     */
+    public function uploadAll($form_name,$prefix,$size=array('max_width'=>60,'max_height'=>60,'max_qulitity'=>90))
+    {
+        /*子目录生成参数*/
+        $this->upload->shard_argv = 'Y/m/d';
+        /*子目录生成方法，可以使用randomkey，或者date,user*/
+        $this->upload->shard_type = 'date';
+         //自动压缩图片
+        $this->upload->max_width = $size['max_width']; /*约定图片的最大宽度*/
+        $this->upload->max_height = $size['max_height']; /*约定图片的最大高度*/
+        $this->upload->max_qulitity = $size['max_qulitity']; /*图片压缩的质量*/
+        $data = $_FILES;
+        $_FILES = array();
+        $up_pic = array();
+        if(!empty($data[$form_name]['name']))
+        {
+            foreach($data[$form_name]['name'] as $k=>$f)
+            {
+                $file_name = $prefix.time().rand(1000,9999);
+                if(!empty($data[$form_name]['name'][$k]))
+                {
+                    $_FILES[$form_name]['name'] = $data[$form_name]['name'][$k];
+                    $_FILES[$form_name]['type'] = $data[$form_name]['type'][$k];
+                    $_FILES[$form_name]['tmp_name'] = $data[$form_name]['tmp_name'][$k];
+                    $_FILES[$form_name]['error'] = $data[$form_name]['error'][$k];
+                    $_FILES[$form_name]['size'] = $data[$form_name]['size'][$k];
+                    $arr = $this->upload->save($form_name,$file_name);
+                    $up_pic[] = $arr['url'];
+                }
+            }
+        }
+        return $up_pic;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
