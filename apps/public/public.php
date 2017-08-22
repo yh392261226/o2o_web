@@ -184,25 +184,17 @@ function deepArrayFilter($data = array(), $filter = '')
 {
     if (!empty($data))
     {
-        $deep = getArrayDeep($data, 0);
-        if (!$deep)
+        //多维数组
+        foreach ($data as $key => $val)
         {
-            //多维数组
-            foreach ($data as $key => $val)
+            if (!is_array($val) && $val === $filter)
             {
-                if (getArrayDeep($val, 0))
-                {
-                   $data[$key] = array_filter($val, $filter);
-                }
-                if (is_array($val))
-                {
-                    $data[$key] = deepArrayFilter($val, $filter);
-                }
+                unset($data[$key]);
             }
-        }
-        else 
-        {
-            return array_filter($data);
+            elseif (is_array($val))
+            {
+                $data[$key] = deepArrayFilter($val, $filter);
+            }
         }
     }
     return $data;

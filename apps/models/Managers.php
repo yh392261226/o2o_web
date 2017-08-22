@@ -15,7 +15,20 @@ class Managers extends \MMODEL\ModelBase
     {
         if (!empty($data)) 
         {
-            return $this->updateData(array('m_status' => -2), $data);
+            if (is_array($data))
+            {
+                return $this->updateData(array('m_status' => -2), $data);
+            }
+            else
+            {
+                return $this->updateData(array('m_status' => -2), array('m_id' => $data));
+            }
         }
+        return false;
+    }
+
+    public function delData2($data = array())
+    {
+        return parent::delData($data);
     }
 }

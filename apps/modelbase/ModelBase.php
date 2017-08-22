@@ -30,7 +30,9 @@ class ModelBase extends \Swoole\Model
                 $type = getArrayDeep($data);
                 if ($type < 1) 
                 {
-                    return $this->get($data['val'], $data['key']);
+                    $val = isset($data['val']) ? $data['val'] : '';
+                    $key = isset($data['key']) ? $data['key'] : '';
+                    return $this->get($val, $key)->get();
                 } 
                 else 
                 {
@@ -44,7 +46,7 @@ class ModelBase extends \Swoole\Model
                     return $this->gets($data);
                 }
             }
-            return $this->get($data);//直接传主键值
+            return $this->get($data)->get();//直接传主键值
         }
         return $this->gets();
     }
@@ -66,9 +68,11 @@ class ModelBase extends \Swoole\Model
             else 
             {
                 $type = getArrayDeep($data);
-                if ($type < 1) 
+                if ($type)
                 {
-                    return $this->del($data['val'], $data['key']);
+                    $val = isset($data['val']) ? $data['val'] : '';
+                    $key = isset($data['key']) ? $data['key'] : '';
+                    return $this->del($val, $key);
                 } 
                 else 
                 {
@@ -90,7 +94,7 @@ class ModelBase extends \Swoole\Model
         if (!empty($data)) 
         {
             $type = getArrayDeep($data);
-            if ($type < 1) 
+            if ($type)
             {
                 return $this->put($data);
             } 
@@ -114,12 +118,12 @@ class ModelBase extends \Swoole\Model
      */
     public function updateData($data = array(), $params = array()) 
     {
-        if (!empty($data)) 
+        if (!empty($data) && !empty($params))
         {
-            $type = getArrayDeep($data);
-            if ($type < 1) 
+            $type = getArrayDeep($params);
+            if ($type)
             {
-                $where = isset($params['where'])?trim($params['where']):'';
+                $where = isset($params['where']) ? trim($params['where']) : '';
                 return $this->set($params[$this->primary], $data, $where);
             }
             return $this->sets($data, $params);
@@ -134,5 +138,14 @@ class ModelBase extends \Swoole\Model
     public function countData($data = array()) 
     {
         return $this->count($data);
+    }
+
+    /**
+     * @return int
+     * @获取最后插入ID
+     */
+    public function lastInsertId()
+    {
+        return $this->db->lastInsertId();
     }
 }
