@@ -3,11 +3,15 @@ namespace MDAO;
 
 class Managers
 {
-    public $manager = null;
+    public $managers = null;
+    public $manager_privileges_group = null;
+    public $manager_privileges_modules = null;
     
     public function __construct()
     {
-        $this->manager = model("Managers");
+        $this->managers = model("Managers");
+        $this->managers_privileges_group = model("Managers_privileges_group");
+        $this->manager_privileges_modules = model('Manager_privileges_modules');
     }
     
     /**
@@ -40,7 +44,7 @@ class Managers
         }
         //print_r($para);exit;
         $para = @array_filter($para, 'strlen'); //remove the false value of the array
-        return $this->manager->getDatas($para);
+        return $this->managers->getDatas($para);
     }
 
     /**
@@ -52,7 +56,7 @@ class Managers
     {
         if (!empty($data))
         {
-            return $this->manager->getDatas($data);
+            return $this->managers->getDatas($data);
         }
         return array();
     }
@@ -81,7 +85,7 @@ class Managers
             $para['m_start_time'] = isset($data['m_start_time']) ? $data['m_start_time'] : '0';
             $para['m_end_time']   = isset($data['m_end_time']) ? $data['m_end_time'] : '0';
             $para = deepArrayFilter($para, '');
-            return $this->manager->addData($para);
+            return $this->managers->addData($para);
         }
         return false;
     }
@@ -107,7 +111,7 @@ class Managers
             $para['m_start_time'] = isset($data['m_start_time']) ? $data['m_start_time'] : '0';
             $para['m_end_time']   = isset($data['m_end_time']) ? $data['m_end_time'] : '0';
             $para = deepArrayFilter($para, '');
-            return $this->manager->updateData($para, array('m_id' => $m_id));
+            return $this->managers->updateData($para, array('m_id' => $m_id));
         }
         return false;
     }
@@ -123,7 +127,7 @@ class Managers
         {
             if (!is_array($data))
             {
-                return $this->manager->delData($data); //更新单条
+                return $this->managers->delData($data); //更新单条
             }
             foreach ($data as $key => $val)
             {
@@ -136,7 +140,7 @@ class Managers
             {
                 return false;
             }//多个id同时更新
-            return $this->manager->delData(array(
+            return $this->managers->delData(array(
                 'walk' => array(
                     'where' => array(
                         'in' => array(
@@ -156,7 +160,7 @@ class Managers
         {
             if (!is_array($data))
             {
-                return $this->manager->delData2($data); //更新单条
+                return $this->managers->delData2($data); //更新单条
             }
             foreach ($data as $key => $val)
             {
@@ -169,7 +173,7 @@ class Managers
             {
                 return false;
             }//多个id同时更新
-            return $this->manager->delData2(array(
+            return $this->managers->delData2(array(
                     'walk' => array(
                         'where' => array(
                             'in' => array(
@@ -213,7 +217,116 @@ class Managers
 
             $para = deepArrayFilter($para, '');
         }
-        return $this->manager->countData($para);
+        return $this->managers->countData($para);
     }
-    
+
+    /**
+     * @param $data
+     * @return bool|mixed
+     * @ 登陆
+     */
+    public function login($data)
+    {
+        if (!empty($data))
+        {
+            if (!isset($data['m_name']) || '' == trim($data['m_name']) || !isset($data['m_pass']) || '' == trim($data['m_pass']))
+            {
+                return false;
+            }
+            $info = array();
+            $info = $this->infoManager(array('m_name' => $data['m_name'], 'm_pass' => $data['m_pass']));
+            if (isset($info[0]) && !empty($info[0]))
+            {
+                return $info[0];
+            }
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
+     * @权限组列表
+     */
+    public function listManagersPrivatesGroup($data = array())
+    {
+        $para = array();
+        $para['pager']          = isset($data['pager']) ? $data['pager'] : true;
+        $para['page']          = isset($data['page']) ? $data['page'] : 1;
+        $para['pagesize']       = isset($data['pagesize']) ? $data['pagesize'] : PAGESIZE;
+        if (!empty($data))
+        {
+            $para['mpg_id']     = isset($data['mpg_id']) ? intval($data['mpg_id']) : '';
+            $para['mpg_name']   = isset($data['mpg_name']) ? intval($data['mpg_name']) : '';
+            $para['mpg_status'] = isset($data['mpg_status']) ? trim($data['mpg_status']) : '';
+            $para['mpg_author'] = isset($data['mpg_author']) ? trim($data['mpg_author']) : '';
+            $para['mpg_editor'] = isset($data['mpg_editor']) ? trim($data['mpg_editor']) : '';
+            $start_time         = isset($data['start_time']) ? $data['start_time'] : '';
+            $end_time           = isset($data['end_time']) ? $data['end_time'] : '';
+            $para['where']      = '';
+            if (isset($data['where'])) $para['where']  .= $data['where'];
+            if ('' != $start_time) $para['where']  .= 'mpg_in_time >=' . $start_time;
+            if ('' != $end_time) $para['where']  .=' AND mpg_in_time <= ' . $end_time;
+            $para['page']          = isset($data['page']) ? $data['page'] : 1;
+            $para['pager']      = isset($data['pager']) ? $data['pager'] : true;
+            $para['pagesize']   = isset($data['pagesize']) ? $data['pagesize'] : PAGESIZE;
+
+        }
+        //print_r($para);exit;
+        $para = @array_filter($para, 'strlen'); //remove the false value of the array
+        return $this->managers_privileges_group->getDatas($para);
+    }
+
+    /**
+     * info managers_private_group by params
+     * @param unknown $data
+     * @return unknown|array
+     */
+    public function infoManagersPrivatesGroup($data = array())
+    {
+        if (!empty($data))
+        {
+            $info = $this->managers_privileges_group->getDatas($data);
+            if (!empty($info['mpm_ids']))
+            {
+                $info['modules'] = $this->listManager_privileges_modules->getDatas(
+                    array('where' => 'mpm_id IN ("' . $info['mpm_ids'] . '")',
+                    'pager' => false
+                    ));
+            }
+            return $info;
+        }
+        return array();
+    }
+
+
+    /**
+     * list managers privileges modules
+     * @param array $data
+     * @return mixed
+     */
+    public function listManager_privileges_modules($data =array())
+    {
+        $para = array();
+        $para['pager']          = isset($data['pager']) ? $data['pager'] : true;
+        $para['page']           = isset($data['page']) ? $data['page'] : 1;
+        $para['pagesize']       = isset($data['pagesize']) ? $data['pagesize'] : PAGESIZE;
+        if (!empty($data))
+        {
+            $para['mpm_id']     = isset($data['mpm_id']) ? intval($data['mpm_id']) : '';
+            $para['mpm_name']   = isset($data['mpm_name']) ? intval($data['mpm_name']) : '';
+            $para['mpm_status'] = isset($data['mpm_status']) ? trim($data['mpm_status']) : '';
+            $para['mpm_value']  = isset($data['mpm_value']) ? trim($data['mpm_value']) : '';
+            $para['where']      = '';
+            if (isset($data['where'])) $para['where']  .= $data['where'];
+            $para['page']          = isset($data['page']) ? $data['page'] : 1;
+            $para['pager']      = isset($data['pager']) ? $data['pager'] : true;
+            $para['pagesize']   = isset($data['pagesize']) ? $data['pagesize'] : PAGESIZE;
+
+        }
+        //print_r($para);exit;
+        $para = @array_filter($para, 'strlen'); //remove the false value of the array
+        return $this->manager_privileges_modules->getDatas($para);
+    }
 }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              

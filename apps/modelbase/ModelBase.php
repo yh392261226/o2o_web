@@ -8,6 +8,7 @@ namespace MMODEL;
 class ModelBase extends \Swoole\Model 
 {
     public $primary;
+    private $allow_delete = true;
     
     public function __construct(\Swoole $swoole, $db_key = 'master') 
     {
@@ -59,6 +60,11 @@ class ModelBase extends \Swoole\Model
      */
     public function delData($data = array()) 
     {
+        if ($this->allow_delete == false)
+        {
+            return false;
+        }
+
         if (!empty($data)) 
         {
             if (!is_array($data)) 

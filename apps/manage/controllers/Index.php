@@ -48,5 +48,13 @@ class Index extends \CLASSES\ManageBase
         //$add  = $this->managers_dao->addManager($data);
         //var_dump($add);
 
+        $data = array(
+            'm_name' => 'test',
+            'm_pass' => encyptPassword('test'),
+        );
+        $login  = $this->managers_dao->login($data);
+        $_SESSION['manager'] = $login;
+        print_r($_SESSION);
+
 	}
 }

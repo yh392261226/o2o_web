@@ -31,7 +31,7 @@ class ManageBase extends Swoole\Controller
                 if (!isset($_SESSION['m_id']) || empty($_SESSION['m_id'])) 
                 {
                     self::$manager_status = 0;
-                    header('Location:' . HOSTURL . '/Login/index');
+                    header('Location:' . HOSTURL . '/index/login');
                     exit;
                 }
                 self::$manager_status = 1;
@@ -39,6 +39,7 @@ class ManageBase extends Swoole\Controller
             }
             return false; //不需要验证
         }
+        return false;
     }
     
     /**
