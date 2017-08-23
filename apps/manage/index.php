@@ -1,6 +1,6 @@
 <?php
 define('WEBPATH', dirname(__FILE__));
-
+define('DEBUG', 1);
 require WEBPATH . '/configs/config.php';
 require CONFIGPATH . '/menu.php';
 require FRAMEWORKPATH . '/libs/lib_config.php';

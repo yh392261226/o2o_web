@@ -12,9 +12,13 @@ class Index extends \CLASSES\ManageBase
 	public function test()
     {
 
-        $this->db->debug = 1;
-        $this->showTrace(1);
-        $this->showTime();
+
+        if (DEBUG)
+        {
+            $this->db->debug = 1;
+            //$this->showTrace(1);
+            //$this->showTime();
+        }
 		//$data   = array('pager' => true, 'page' => 1);
         //$list = $this->managers_dao->listManagers($data);
 		//print_r($list);
