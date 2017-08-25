@@ -1,7 +1,7 @@
 <?php
 namespace MDAO;
 
-class Articles
+class Articles extends \MDAO\DaoBase
 {
     public $articles = null;
     public $articles_ext = null;

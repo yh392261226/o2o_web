@@ -48,13 +48,26 @@ class Index extends \CLASSES\ManageBase
         //$add  = $this->managers_dao->addManager($data);
         //var_dump($add);
 
-        $data = array(
-            'm_name' => 'test',
-            'm_pass' => encyptPassword('test'),
-        );
-        $login  = $this->managers_dao->login($data);
-        $_SESSION['manager'] = $login;
-        print_r($_SESSION);
+        //$data = array(
+        //    'm_name' => 'test',
+        //    'm_pass' => encyptPassword('test'),
+        //);
+        //$login  = $this->managers_dao->login($data);
+        //$_SESSION['manager'] = $login;
+        //print_r($_SESSION);
 
+        select * from table where m_name = 'abc' and m_name like '%name%';
+
+        $params = array(
+            'm_name' => array('require' => true, 'length' => array('max'=> 29, 'min' => 2)),
+            'm_pass' => array('require' => true, 'length' => array('max'=> 29, 'min' => 2), 'type' => 'password'),
+            'm_status' => array('type' => 'int', 'size' => 1, 'default' => 0),
+        );
+        $data = array(
+            'act' => 'add',
+            'data' => array( "..." ),
+            'params' => $params,
+        );
+        $result = $this->managers_dao->action($data);
 	}
 }
