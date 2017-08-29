@@ -117,7 +117,7 @@ class DaoBase
                                     if (isset($val['type']) && in_array($val['type'], array('gt', 'lt', 'ge', 'le')))
                                     {
                                         $explain = array('gt' => '>', 'lt' => '<', 'ge' => '>=', 'le' => '<=');
-                                        $param['where'] .= ' AND ' . $key . $explain[$val['type']] . $val[$val['type'].'_value'];
+                                        $param['where'] .= ' and ' . $key . $explain[$val['type']] . $val[$val['type'].'_value'];
                                         unset($param[$key]);
                                     }
                                 }
@@ -127,12 +127,12 @@ class DaoBase
 //print_r($val);exit;
                                     if (isset($val[0]['type']) && in_array($val[0]['type'], array('gt', 'lt', 'ge', 'le')))
                                     {
-                                        $param['where'] .= ' AND ' . $key . $explain[$val[0]['type']] . $val[0][$val[0]['type'].'_value'];
+                                        $param['where'] .= ' and ' . $key . $explain[$val[0]['type']] . $val[0][$val[0]['type'].'_value'];
                                         unset($param[$key]);
                                     }
                                     if (isset($val[1]['type']) && in_array($val[1]['type'], array('gt', 'lt', 'ge', 'le')))
                                     {
-                                        $param['where'] .= ' AND ' . $key . $explain[$val[1]['type']] . $val[1][$val[1]['type'].'_value'];
+                                        $param['where'] .= ' and ' . $key . $explain[$val[1]['type']] . $val[1][$val[1]['type'].'_value'];
                                         unset($param[$key]);
                                     }
                                 }
