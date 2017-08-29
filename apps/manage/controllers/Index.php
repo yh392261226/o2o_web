@@ -36,12 +36,15 @@ class Index extends \CLASSES\ManageBase
         //List:
         //$data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_id' => array('type' => 'in', 'value' => '1,2,3'));
         //$data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_id' => array('type' => 'in', 'value' => array(1,2,3,4)));
+        //$data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_in_time' => array(array('type' => 'ge', 'ge_value' => 1), array('type' => 'le', 'le_value' => 9999999999)));//多个区间值
+        //$data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_in_time' => array('type' => 'ge', 'ge_value' => 1)); //单个区间值
         //$list = $this->managers_dao->listData($data);
         //print_r($list);
         //------------------------------------------------------------------------------------------------
 
         //Info:
         //$info = $this->managers_dao->infoData('1');
+        //$info = $this->managers_dao->infoData(array('key' => 'm_name', 'val' =>  $data['m_name']));
         //print_r($info);
         //------------------------------------------------------------------------------------------------
 
@@ -73,7 +76,7 @@ class Index extends \CLASSES\ManageBase
         //Delete:
         //$delete = $this->managers_dao->delData(array('m_id' => array('type' => 'in', 'value' => array(1,2,3)))); //伪删除
         //$delete = $this->managers_dao->delData('7'); //伪删除
-        //$delete = $this->managers_dao->delData2(array('m_id' => array('type' => 'in', 'value' => array(8,9,20)))); //真删除
+        //$delete = $this->managers_dao->delData(array('m_id' => array('type' => 'in', 'value' => array(8,9,20)))); //真删除
         //var_dump($delete);
         //------------------------------------------------------------------------------------------------
 
@@ -88,9 +91,14 @@ class Index extends \CLASSES\ManageBase
         //    'm_last_editor' => 2,
         //    'm_last_ip' => getIp(),
         //    );
-        //$update  = $this->managers_dao->updateData($data, array('m_id' => 7));
+        //$param = array('m_id' => 7);
+        //$update  = $this->managers_dao->updateData($data, $param);
         //var_dump($update);
         //------------------------------------------------------------------------------------------------
 
+        //Sql:
+        //$sql = 'show tables';
+        //$query = $this->managers_dao->queryData($sql);
+        //print_r($query->fetchall());
 	}
 }

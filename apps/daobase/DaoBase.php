@@ -60,7 +60,8 @@ class DaoBase
             //进入规则调整 在规则中的 需要unset掉在上面正常的where条件
             foreach ($data as $key => $val)
             {
-                if (isset($val['value']))
+                //print_r($val);echo "<br>\n";
+                if (isset($val))
                 {
                     $tmpkey = array();
                     $tmpkey = explode('_',$key);
@@ -101,7 +102,6 @@ class DaoBase
 
                                 $param['walk']['where']['like'] = array($key, $val['value']);
                                 unset($param[$key]);
-                                //print_r($param);exit;
                             }
                             break;
                         case 'interval':
@@ -109,11 +109,33 @@ class DaoBase
                             /**
                              * $data['m_in_time'] = array('type' => 'gt', 'value' => 1234567890, 'gt_value' => 2345678910);
                              */
-                            if (isset($val['type']) && in_array($val['type'], array('gt', 'lt', 'ge', 'le')))
+                            if (is_array($val))
                             {
-                                $explain = array('gt' => '>', 'lt' => '<', 'ge' => '>=', 'le' => '<=');
-                                $param['where'] .= ' AND ' . $key . $explain[$val['type']] . $val[$val['type'].'_value'];
-                                unset($param[$key]);
+                                $deep = getArrayDeep($val, true);
+                                if ($deep == 1) //一维数组 直接赋值
+                                {
+                                    if (isset($val['type']) && in_array($val['type'], array('gt', 'lt', 'ge', 'le')))
+                                    {
+                                        $explain = array('gt' => '>', 'lt' => '<', 'ge' => '>=', 'le' => '<=');
+                                        $param['where'] .= ' AND ' . $key . $explain[$val['type']] . $val[$val['type'].'_value'];
+                                        unset($param[$key]);
+                                    }
+                                }
+                                else //多维数组
+                                {
+                                    $explain = array('gt' => '>', 'lt' => '<', 'ge' => '>=', 'le' => '<=');
+//print_r($val);exit;
+                                    if (isset($val[0]['type']) && in_array($val[0]['type'], array('gt', 'lt', 'ge', 'le')))
+                                    {
+                                        $param['where'] .= ' AND ' . $key . $explain[$val[0]['type']] . $val[0][$val[0]['type'].'_value'];
+                                        unset($param[$key]);
+                                    }
+                                    if (isset($val[1]['type']) && in_array($val[1]['type'], array('gt', 'lt', 'ge', 'le')))
+                                    {
+                                        $param['where'] .= ' AND ' . $key . $explain[$val[1]['type']] . $val[1][$val[1]['type'].'_value'];
+                                        unset($param[$key]);
+                                    }
+                                }
                             }
                             break;
                     }
@@ -164,6 +186,7 @@ class DaoBase
         {
             $this->handler->select = implode(',', $this->fields);
         }
+        //print_r($data);
         $param = $this->createWhere($data);
         return $this->handler->getDatas($param);
     }
