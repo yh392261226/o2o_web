@@ -1,4 +1,0 @@
-Options +FollowSymLinks
-RewriteEngine On
-RewriteBase /
-RewriteRule ^(.*)$ index.php?s=$1 [QSA,PT,L]
