@@ -14,6 +14,7 @@ class Orders extends \MMODEL\ModelBase
     {
         if (!empty($data))
         {
+            $param['o_id'] = isset($data['o_id']) ? $data['o_id'] : '';
             $status = isset($data['o_status']) intval($data['o_status']) : ''; //-9工人删除 -8雇主删除
             if ('' == $status)
             {
@@ -21,20 +22,19 @@ class Orders extends \MMODEL\ModelBase
             }
             unset($data['o_status']);
 
-            if (is_array($data))
+            if (!is_array($data))
             {
-                return $this->updateData(array('o_status' => $status), $data);
+                $param['o_id'] = $data;
             }
-            else
+
+            if (isset($data['walk']))
             {
-                return $this->updateData(array('o_status' => $status), array('o_id' => $data));
+                $param['walk'] = $data['walk'];
+                unset($data['walk'], $param['o_id']);
             }
+            if (empty($param)) return false;
+            return $this->updateData(array('o_status' => $status), $param);
         }
         return false;
-    }
-
-    public function delData2($data = array())
-    {
-        return parent::delData($data);
     }
 }

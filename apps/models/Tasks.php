@@ -14,21 +14,27 @@ class Task_comment_ext extends \MMODEL\ModelBase
     {
         if (!empty($data))
         {
-            $status = -9;
-            if (is_array($data))
+            $param['t_id'] = isset($data['t_id']) ? $data['t_id'] : '';
+            $status = isset($data['t_status']) intval($data['t_status']) : '-9';
+            if ('' == $status)
             {
-                return $this->updateData(array('t_status' => $status), $data);
+                return false;
             }
-            else
+            unset($data['t_status']);
+
+            if (!is_array($data))
             {
-                return $this->updateData(array('t_status' => $status), array('t_id' => $data));
+                $param['t_id'] = $data;
             }
+
+            if (isset($data['walk']))
+            {
+                $param['walk'] = $data['walk'];
+                unset($data['walk'], $param['t_id']);
+            }
+            if (empty($param)) return false;
+            return $this->updateData(array('t_status' => $status), $param);
         }
         return false;
-    }
-
-    public function delData2($data = array())
-    {
-        return parent::delData($data);
     }
 }

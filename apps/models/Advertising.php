@@ -1,9 +1,9 @@
 <?php 
 namespace App\Model;
-class Bouns extends \MMODEL\ModelBase
+class Advertising extends \MMODEL\ModelBase
 {
-    public $table = 'bouns';
-    public $primary = "b_id";
+    public $table = 'advertising';
+    public $primary = "a_id";
     
     
 }

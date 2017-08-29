@@ -274,3 +274,21 @@ function createOrderNumber($prefix = '')
     $time = microtime();
     return encyptPassword($prefix . $time);
 }
+
+
+//搜索数组中该值的键  只针对二维数组
+function searchKey($value = '', $data = array())
+{
+    if ('' == trim($value) || empty($data))
+    {
+        return;
+    }
+    foreach ($data as $key => $val)
+    {
+        if (array_search($value, $val) !== false)
+        {
+            return $key;
+        }
+    }
+    return;
+}

@@ -9,6 +9,7 @@ class ModelBase extends \Swoole\Model
 {
     public $primary;
     private $allow_delete = true;
+    public $select = '*';
     
     public function __construct(\Swoole $swoole, $db_key = 'master') 
     {
@@ -22,19 +23,23 @@ class ModelBase extends \Swoole\Model
      * @desc 多条详情
      *https://worthy.gitbooks.io/swoole-framework-db-api/content/%E6%9F%A5%E8%AF%A2.html
      */
-    public function getDatas($data = array()) 
+    public function getDatas($data = array())
     {
         if (!empty($data)) 
         {
             if (is_array($data)) 
             {
-                $type = getArrayDeep($data);
-                if ($type < 1) 
+                $val = isset($data['val']) ? $data['val'] : '';
+                $key = isset($data['key']) ? $data['key'] : '';
+                if ($val && $key)
                 {
-                    $val = isset($data['val']) ? $data['val'] : '';
-                    $key = isset($data['key']) ? $data['key'] : '';
                     return $this->get($val, $key)->get();
-                } 
+                    //永远走不到
+                    //if (count($data) > 2 || isset($data['key']) || isset($data['val']))
+                    //{
+                    //    return $this->select($paras['fields'])->where($paras['where'])->fetch();
+                    //}
+                }
                 else 
                 {
                     if (isset($data['pager']) && $data['pager']) 
@@ -153,5 +158,22 @@ class ModelBase extends \Swoole\Model
     public function lastInsertId()
     {
         return $this->db->lastInsertId();
+    }
+
+    /**
+     * @return int
+     * @设置查询字段
+     */
+    public function setFields($data)
+    {
+        if (!empty($data))
+        {
+            if (is_array($data))
+            {
+                $this->select = implode(',', $data);
+            }
+            $this->select = $data;
+        }
+        $this->select = '*';
     }
 }

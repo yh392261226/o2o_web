@@ -14,21 +14,20 @@ class Users extends \MMODEL\ModelBase
     {
         if (!empty($data))
         {
-            $status = -9;
-            if (is_array($data))
+            $param['u_id'] = isset($data['u_id']) ? $data['u_id'] : '';
+            if (!is_array($data))
             {
-                return $this->updateData(array('u_status' => $status), $data);
+                $param['u_id'] = $data;
             }
-            else
+
+            if (isset($data['walk']))
             {
-                return $this->updateData(array('u_status' => $status), array('u_id' => $data));
+                $param['walk'] = $data['walk'];
+                unset($data['walk'], $param['u_id']);
             }
+            if (empty($param)) return false;
+            return $this->updateData(array('u_status' => -9), $param);
         }
         return false;
-    }
-
-    public function delData2($data = array())
-    {
-        return parent::delData($data);
     }
 }

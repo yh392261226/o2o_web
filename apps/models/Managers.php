@@ -13,22 +13,28 @@ class Managers extends \MMODEL\ModelBase
      */
     public function delData($data = array())
     {
-        if (!empty($data)) 
+        if (!empty($data))
         {
-            if (is_array($data))
+            $param['m_id'] = isset($data['m_id']) ? $data['m_id'] : '';
+            if (!is_array($data))
             {
-                return $this->updateData(array('m_status' => -2), $data);
+                $param['m_id'] = $data;
             }
-            else
+
+            if (isset($data['walk']))
             {
-                return $this->updateData(array('m_status' => -2), array('m_id' => $data));
+                $param['walk'] = $data['walk'];
+                unset($data['walk'], $param['m_id']);
             }
+            if (empty($param)) return false;
+            return $this->updateData(array('m_status' => -2), $param);
         }
         return false;
     }
 
-    public function delData2($data = array())
-    {
-        return parent::delData($data);
-    }
+    //真删除
+    //public function delData($data = array())
+    //{
+    //    return parent::delData($data);
+    //}
 }

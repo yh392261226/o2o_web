@@ -19,55 +19,78 @@ class Index extends \CLASSES\ManageBase
             //$this->showTrace(1);
             //$this->showTime();
         }
-		//$data   = array('pager' => true, 'page' => 1);
-        //$list = $this->managers_dao->listManagers($data);
-		//print_r($list);
 
-        //$info = $this->managers_dao->infoManager('1');
-        //print_r($info);
-
-        //$data   = array(); //array('m_status' => -2);
-        //$counts = $this->managers_dao->countManagers($data);
-        //print_r($counts);
-
-        //$delete = $this->managers_dao->delManagers(array(4,5,6,7));
-        //$delete = $this->managers_dao->delManagers('4');
-        //var_dump($delete);
-
-        //$data = array(
-        //    'm_name' => 'test',
-        //    'm_pass' => 'test',
-        //    'm_status' => 0,
-        //    'm_in_time' => time(),
-        //    'm_inip' => '123456789',
-        //    'm_author' => 1,
-        //    'mpg_id' => 0,
-        //    'm_start_time' => time(),
-        //    'm_end_time' => time()
-        //    );
-        //$add  = $this->managers_dao->addManager($data);
-        //var_dump($add);
-
+        //Login:
         //$data = array(
         //    'm_name' => 'test',
         //    'm_pass' => encyptPassword('test'),
         //);
-        //$login  = $this->managers_dao->login($data);
-        //$_SESSION['manager'] = $login;
+        //$login  = $this->managers_dao->infoData(array('key' => 'm_name', 'val' =>  $data['m_name']));
+        //if (!empty($login) && $login['m_pass'] == $data['m_pass'])
+        //{
+        //    $_SESSION['manager'] = $login;
+        //}
         //print_r($_SESSION);
+        //------------------------------------------------------------------------------------------------
 
-        select * from table where m_name = 'abc' and m_name like '%name%';
+        //List:
+        //$data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_id' => array('type' => 'in', 'value' => '1,2,3'));
+        //$data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_id' => array('type' => 'in', 'value' => array(1,2,3,4)));
+        //$list = $this->managers_dao->listData($data);
+        //print_r($list);
+        //------------------------------------------------------------------------------------------------
 
-        $params = array(
-            'm_name' => array('require' => true, 'length' => array('max'=> 29, 'min' => 2)),
-            'm_pass' => array('require' => true, 'length' => array('max'=> 29, 'min' => 2), 'type' => 'password'),
-            'm_status' => array('type' => 'int', 'size' => 1, 'default' => 0),
-        );
-        $data = array(
-            'act' => 'add',
-            'data' => array( "..." ),
-            'params' => $params,
-        );
-        $result = $this->managers_dao->action($data);
+        //Info:
+        //$info = $this->managers_dao->infoData('1');
+        //print_r($info);
+        //------------------------------------------------------------------------------------------------
+
+        //Count:
+        //$data   = array('m_status' => -2);
+        //$counts = $this->managers_dao->countData($data);
+        //print_r($counts);
+        //------------------------------------------------------------------------------------------------
+
+        //Add:
+        //$data = array(
+        //    'm_name' => 'test2',
+        //    'm_pass' => encyptPassword('test2'),
+        //    'm_status' => 0,
+        //    'm_in_time' => time(),
+        //    'm_inip' => getIp(),
+        //    'm_author' => 0,
+        //    'mpg_id' => 0,
+        //    'm_start_time' => time(),
+        //    'm_end_time' => time(),
+        //    'm_last_edit_time' => time(),
+        //    'm_last_editor' => 0,
+        //    'm_last_ip' => getIp(),
+        //    );
+        //$add  = $this->managers_dao->addData($data);
+        //var_dump($add);
+        //------------------------------------------------------------------------------------------------
+
+        //Delete:
+        //$delete = $this->managers_dao->delData(array('m_id' => array('type' => 'in', 'value' => array(1,2,3)))); //伪删除
+        //$delete = $this->managers_dao->delData('7'); //伪删除
+        //$delete = $this->managers_dao->delData2(array('m_id' => array('type' => 'in', 'value' => array(8,9,20)))); //真删除
+        //var_dump($delete);
+        //------------------------------------------------------------------------------------------------
+
+        //Update:
+        //$data = array(
+        //    'm_name' => 'test2',
+        //    'm_pass' => encyptPassword('test2'),
+        //    'm_status' => 0,
+        //    'm_author' => 1,
+        //    'mpg_id' => 2,
+        //    'm_last_edit_time' => time(),
+        //    'm_last_editor' => 2,
+        //    'm_last_ip' => getIp(),
+        //    );
+        //$update  = $this->managers_dao->updateData($data, array('m_id' => 7));
+        //var_dump($update);
+        //------------------------------------------------------------------------------------------------
+
 	}
 }
