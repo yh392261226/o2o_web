@@ -13,7 +13,7 @@
  */
 function encyptController($controllerName)
 {
-    return md5(md5($controllerName) . get_rand_str(6));
+    return md5(md5($controllerName));
 }
 
 /*
@@ -63,15 +63,17 @@ function msg($message, $status = 1, $jumpUrl = '', $time = 3)
         if (empty($jumpUrl)) {
             Swoole::$php->tpl->assign("jumpUrl", $_SERVER["HTTP_REFERER"]);
         }
-        Swoole::$php->tpl->display("manager/show_msg.php");
+        Swoole::$php->tpl->display("show_msg.php");
         exit;
     } else {
         Swoole::$php->tpl->assign('error', $message); // 提示信息
         //发生错误时候默认停留3秒
         Swoole::$php->tpl->assign('waitSecond', $time);
         // 默认发生错误的话自动返回上页
-        Swoole::$php->tpl->assign('jumpUrl', "javascript:history.back(-1);");
-        Swoole::$php->tpl->display("manager/show_msg.php");
+        if (empty($jumpUrl)) {
+            Swoole::$php->tpl->assign('jumpUrl', "javascript:history.back(-1);");
+        }
+        Swoole::$php->tpl->display("show_msg.php");
         // 中止执行  避免出错后继续执行
         exit;
     }
@@ -281,7 +283,6 @@ function createOrderNumber($prefix = '')
     return encyptPassword($prefix . $time);
 }
 
-
 //搜索数组中该值的键  只针对二维数组
 function searchKey($value = '', $data = array())
 {
@@ -306,4 +307,114 @@ function searchKeyDeep($value = '', $data =array())
 
     }
     return array();
+}
+
+/**
+ * [logs description] 记录日志
+ * @author 户连超
+ * @e-mail zrkjhlc@gmail.com
+ * @date   2017-08-16
+ * @param  [string]            $path 路径
+ * @param  [array || string]            $msg  要记录的信息
+ */
+function logs($path, $msg)
+{
+    if (!is_dir($path)) {
+        mkdir($path);
+    }
+    $filename = $path . '/' . date('YmdHis') . '.txt';
+    if (is_array($msg)) {
+        $info = json_encode($msg);
+    } else {
+        $info = $msg;
+    }
+    $content = "------------------" . date("Y-m-d H:i:s") . "------------------" . "\r\n" . $info . "\r\n \r\n";
+    file_put_contents($filename, $content, FILE_APPEND);
+}
+
+/**
+ * 地区三级联动公共函数
+ * 如果传$area_id返回当前id的地区名,如果不传返回p_id下的地区id和名称;
+ * @author zhaoyu
+ * @e-mail zhaoyu8292@qq.com
+ * @date   2017-08-15
+ * $parent 父id
+ * $type 编号:  1是国家,2省份,3城市,
+ * $target 列表框的id名称
+ * @return [type]            [description]
+ */
+function area($parent=1,$type="1",$target="selProvinces",$area_id = "")
+{
+    if(!is_file("../../area.php")){
+        return false;
+    }
+    $data = unserialize(file_get_contents("../../area.php"));
+    if(!empty($area_id)){
+        $area_name = "";
+        foreach ($data as $key => $value) {
+            if($value['r_id'] == $area_id){
+                $area_name = $value['r_name'];
+                return $area_name;
+            }
+
+        }
+    }else{
+        $res = array();
+        $area_arr = array();
+        foreach ($data as $key => $value) {
+            if($value['r_pid'] == $parent){
+                $area_arr[] = array('region_id'=>$value['r_id'],'region_name'=>$value['r_name']);
+            }
+        }
+        $res['regions'] = $area_arr;
+        $res['type'] = $type;
+        $res['target'] = $target;
+        return $res;
+    }
+
+}
+
+/**
+ * [checkUserPermissions description]检查用户权限
+ * @author 户连超
+ * @e-mail zrkjhlc@gmail.com
+ * @date   2017-08-18
+ * @return [type]            [description]
+ * 未完待续......
+ */
+function checkUserPermissions()
+{
+    if (isset($_GET['s'])) {
+        $permissions = explode("/", trim($_GET['s'],"/"));
+        $str = implode("@", $permissions);
+        encyptController($str);
+
+    }
+}
+/**
+ * 递归处理 输出所有子分类id
+ * @author zhaoyu
+ * @e-mail zhaoyu8292@qq.com
+ * @date   2017-08-19
+ * @param  [type]            $data    查找的数据
+ * @param  [type]            $catid   id
+ * @param  [type]            $key_id  子id字段名
+ * @param  [type]            $key_pid 父id字段名
+ * @param  boolean           $isClear 是否初始化静态变量
+ * @return [type]            所有子分类id   例如:Array ( [0] => 22 [1] => 17 [2] => 23 [3] => 25 [4] => 24 )
+ */
+function getChildren($data,$catid,$key_id,$key_pid,$isClear=false)
+{
+    static $child = array();
+    if($isClear){
+        $child = array();
+    }
+    foreach ($data as $k => $v) {
+
+        if($v[$key_pid] == $catid){
+            $child[] = $v[$key_id];
+            getChildren($data,$v[$key_id],$key_id,$key_pid);
+        }
+    }
+    return $child;
 }
