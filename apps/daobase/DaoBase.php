@@ -36,6 +36,7 @@ class DaoBase
             $param['pager']    = isset($data['pager']) ? $data['pager'] : true;
             $param['page']     = isset($data['page']) ? $data['page'] : 1;
             $param['pagesize'] = isset($data['pagesize']) ? $data['pagesize'] : PAGESIZE;
+            if (!$param['pager']) unset($param['page'], $param['pagesize']);
             $param['key']      = isset($data['key']) ? $data['key'] : '';
             $param['val']      = isset($data['val']) ? $data['val'] : '';
             $param['where']    = ' 1 ';
