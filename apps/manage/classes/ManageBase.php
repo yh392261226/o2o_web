@@ -7,15 +7,16 @@ class ManageBase extends Swoole\Controller
 {
     static $manager_status = false;
     public $not_validata   = array('login');
-    
+
     public function __construct($swoole)
     {
         parent::__construct($swoole);
         $this->session->start();
 //         $this->validataLoginStatus(); //验证登陆状态
         $this->publicAssign();
+        $this->db->debug = true;
     }
-    
+
     /**
      * @验证是否需要验证登陆状态
      * @return boolean
@@ -28,7 +29,7 @@ class ManageBase extends Swoole\Controller
             if (!in_array($controller_name, $this->not_validata))
             {
                 //需要验证状态
-                if (!isset($_SESSION['m_id']) || empty($_SESSION['m_id'])) 
+                if (!isset($_SESSION['m_id']) || empty($_SESSION['m_id']))
                 {
                     self::$manager_status = 0;
                     header('Location:' . HOSTURL . '/index/login');
@@ -41,7 +42,7 @@ class ManageBase extends Swoole\Controller
         }
         return false;
     }
-    
+
     /**
      * @模板公共赋值
      */
@@ -54,5 +55,5 @@ class ManageBase extends Swoole\Controller
             $this->tpl->assign("host_url", HOSTURL);
         }
     }
-    
+
 }

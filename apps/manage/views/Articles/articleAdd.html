@@ -13,13 +13,33 @@
 
     <link rel="shortcut icon" href="favicon.ico"> <link href="{{$manageurl}}css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
     <link href="{{$manageurl}}css/font-awesome.css?v=4.4.0" rel="stylesheet">
-
-    <link href="{{$manageurl}}css/plugins/summernote/summernote.css" rel="stylesheet">
-    <link href="{{$manageurl}}css/plugins/summernote/summernote-bs3.css" rel="stylesheet">
     <link href="{{$manageurl}}css/animate.css" rel="stylesheet">
     <link href="{{$manageurl}}css/style.css?v=4.1.0" rel="stylesheet">
     <link href="{{$manageurl}}css/plugins/iCheck/custom.css" rel="stylesheet">
     <!-- <script type="text/javascript" src="{{$manageurl}}js/area.js"></script> -->
+
+    <!-- 富文本编辑器 -->
+    <link rel="stylesheet" href="{{$htmleditor}}/themes/default/default.css" />
+    <link rel="stylesheet" href="{{$htmleditor}}/plugins/code/prettify.css" />
+    <script charset="utf-8" src="{{$htmleditor}}/kindeditor-all-min.js"></script>
+    <script charset="utf-8" src="{{$htmleditor}}/lang/zh-CN.js"></script>
+    <script charset="utf-8" src="{{$htmleditor}}/plugins/code/prettify.js"></script>
+    <script>
+      KindEditor.ready(function(K) {
+        var editor1 = K.create('#content1', {
+          cssPath : '{{$htmleditor}}/plugins/code/prettify.css',
+          uploadJson : '{{$htmleditor}}/php/upload_json.php',
+          fileManagerJson : '{{$htmleditor}}/php/file_manager_json.php',
+          allowFileManager : true,
+          afterCreate : function() {
+
+
+
+          }
+        });
+        prettyPrint();
+      });
+    </script>
 
 </head>
 
@@ -27,31 +47,23 @@
 
   <form method="post" class="form-horizontal" enctype="multipart/form-data" action="/Articles/doArticleAdd" onSubmit="return checkForm();">
     <div class="wrapper wrapper-content animated fadeInUp">
-        <div class="row">
-            <div class="col-sm-12">
 
-                <div class="ibox">
-                    <div class="ibox-title">
-                        <h5>文章管理</h5>
-                        <div class="ibox-tools">
-                            <a href="index" class="btn btn-primary btn-xs">文章列表</a>
-                        </div>
-                    </div>
-                    <div class="ibox-content">
-                        <div class="row m-b-sm m-t-sm">
-                            <div class="col-md-1">
-                                <button type="button" id="loading-example-btn" class="btn btn-white btn-sm"><i class="fa fa-refresh"></i> 刷新</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div class="row">
             <div class="col-sm-12">
                 <div class="ibox float-e-margins">
                     <div class="ibox-title">
-                        <h5>文章添加 <small></small></h5>
+                        <h5>文章添加</h5>
+                        <div class="ibox-tools" style="margin-right: 15px;">
+                            <a class="close-link" href="/index/welcome">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </div>
+                        <div class="ibox-tools" style="margin-right: 15px;">
+                            <a href="index">
+                                <i class="fa fa-plus"></i>
+                                文章列表
+                            </a>
+                        </div>
                     </div>
                     <div class="ibox-content">
 
@@ -60,6 +72,16 @@
 
                                 <div class="col-sm-4">
                                     <input type="text" name="a_title" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">外部链接:</label>
+
+                                <div class="col-sm-4">
+                                    <input type="text" name="a_link" class="form-control">
                                 </div>
                             </div>
 
@@ -187,49 +209,42 @@
                             <div class="hr-line-dashed"></div>
 
                             <div class="form-group">
-                                <label class="col-sm-2 control-label">图标触发日期：</label>
+                                <label class="col-sm-2 control-label">定时发布时间：</label>
                                 <div class="col-sm-10">
-                                    <input placeholder="开始日期" class="form-control layer-date" id="start">
-                                    <input placeholder="结束日期" class="form-control layer-date" id="end">
+                                    <input placeholder="开始日期" class="form-control layer-date" id="start" name="a_start_time">
+                                    <input placeholder="结束日期" class="form-control layer-date" id="end" name="a_end_time">
                                 </div>
                             </div>
 
                             <div class="hr-line-dashed"></div>
 
+                            <div class="row">
+                                <div class="col-sm-1"></div>
+                                <div class="col-sm-10">
+                                    <div class="ibox float-e-margins">
+                                        <div class="ibox-title">
+                                            <h5>文章内容</h5>
+                                        </div>
+                                        <div class="ibox-content no-padding">
+                                          <textarea name="a_desc" style="width:100%;height:200px;visibility:hidden;" id="content1"></textarea>
 
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
 
 
 
                             <div class="form-group">
                                 <div class="col-sm-4 col-sm-offset-2">
-                                    <input type="hidden" name="a_desc" id="a_desc">
+                                    <!-- <input type="hidden" name="a_desc" id="a_desc"> -->
                                     <input type="hidden" name="r_id" id="area_id" value="1">
                                     <button class="btn btn-primary" type="submit">保存内容</button>
                                 </div>
                             </div>
 
 
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="wrapper wrapper-content">
-
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="ibox float-e-margins">
-                    <div class="ibox-title">
-                        <h5>文章内容</h5>
-                    </div>
-                    <div class="ibox-content no-padding">
-
-                        <div class="summernote" id="summernote">
-
-                        </div>
 
                     </div>
                 </div>
@@ -250,44 +265,13 @@
     <!-- layerDate plugin javascript -->
     <script src="{{$manageurl}}js/plugins/layer/laydate/laydate.js"></script>
 
-    <!-- SUMMERNOTE -->
-    <script src="{{$manageurl}}js/plugins/summernote/summernote.min.js"></script>
-    <script src="{{$manageurl}}js/plugins/summernote/summernote-zh-CN.js"></script>
 
 
     <script>
-      function checkForm(){
-        var html =  $('#summernote ').code();
-        $("#a_desc").val(html);
+      function checkForm()
+      {
         return true;
       }
-
-    </script>
-
-    <!-- 富文本编辑器js -->
-    <script>
-        $(document).ready(function () {
-
-            $('#summernote').summernote({
-                lang: 'zh-CN'
-            });
-
-
-        });
-        var edit = function () {
-            $("#eg").addClass("no-padding");
-            $('.click2edit').summernote({
-                lang: 'zh-CN',
-                focus: true
-            });
-        };
-        var save = function () {
-            $("#eg").removeClass("no-padding");
-            var aHTML = $('.click2edit').code(); //save HTML If you need(aHTML: array).
-            $('.click2edit').destroy();
-        };
-
-
 
     </script>
 

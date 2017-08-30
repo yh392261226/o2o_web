@@ -11,9 +11,9 @@
  * @date   2017-08-15
  */
 $menu = array(
-	/**
-	 * 系统设置
-	 */
+    /**
+     * 系统设置
+     */
     0 => array(
         'name' => '系统设置', 'icon' => '', 'link' => '', 'sub_menu' => array(
             0 => array(
@@ -87,7 +87,7 @@ $menu = array(
                         'name' => '文章列表', 'icon' => '', 'link' => '/Articles/index',
                     ),
                     1 => array(
-                        'name' => '文章添加', 'icon' => '', 'link' => '/Articles/articlesAdd',
+                        'name' => '文章添加', 'icon' => '', 'link' => '/Articles/articleAdd',
                     ),
                 ),
             ),
