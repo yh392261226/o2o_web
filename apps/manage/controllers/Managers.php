@@ -7,6 +7,7 @@ class Managers extends \CLASSES\ManageBase
     {
         parent::__construct($swoole);
         $this->managers_dao = new \MDAO\Managers();
+        $this->managers_privileges_group_dao = new \MDAO\Managers_privileges_group();
     }
 
     public function login()
@@ -133,8 +134,63 @@ class Managers extends \CLASSES\ManageBase
 
     public function list()
     {
+        $list = $data = array();
+        if (isset($_REQUEST['m_id'])) $data['m_id'] = array('type' => 'in', value => $_REQUEST['m_id']);
+        if (isset($_REQUEST['m_name'])) $data['m_name'] = array('type'=>'like', 'value' => trim($_REQUEST['m_name']));
+        if (isset($_REQUEST['m_status'])) $data['m_status'] = intval($_REQUEST['m_status']);
+        if (isset($_REQUEST['m_inip'])) $data['m_inip'] = array('type' => 'in', 'value' => $_REQUEST['m_inip']);
+        if (isset($_REQUEST['m_author'])) $data['m_author'] = intval($_REQUEST['m_author']);
+        if (isset($_REQUEST['mpg_id'])) $data['mpg_id'] = intval($_REQUEST['mpg_id']);
+        if (isset($_REQUEST['m_start_time'])) $data['m_start_time'] = array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['m_start_time']));
+        if (isset($_REQUEST['m_end_time'])) $data['m_end_time'] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['m_end_time']));
+
+        if (isset($_REQUEST['m_start_time']) && isset($_REQUEST['m_end_time']) && strtotime($_REQUEST['m_end_time']) < strtotime($_REQUEST['m_start_time']))
+        {
+            //结束时间不能小于开始时间
+            //failed
+        }
+
+        $list = $this->managers_dao->listData($data);
+        $this->tpl->assign('list', $list);
+        $this->tpl->display('manager_list');
+    }
+
+
+    public function addGroup()
+    {
 
     }
+
+    public function editGroup()
+    {
+
+    }
+
+    public function delGroup()
+    {
+        $result = 0;
+        if (isset($_REQUEST['mpg_id']))
+        {
+            if (is_array($_REQUEST['mpg_id']))
+            {
+                $result = $this->managers_privileges_group_dao->delData(array('mpg_id' => array('type' => 'in', 'value' => $_REQUEST['mpg_id']))); //伪删除
+            }
+            else
+            {
+                $result = $this->managers_privileges_group_dao->delData(intval($_REQUEST['mpg_id'])); //伪删除
+            }
+        }
+        if (!$result) {
+            //FAILED
+        }
+        //SUCCESSFUL
+    }
+
+    public function listGroup()
+    {
+
+    }
+
 
 
 }
