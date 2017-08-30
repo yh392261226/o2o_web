@@ -116,6 +116,7 @@ function deepStripslashes($data = array())
  */
 function getIp($type = 0)
 {
+    $ip = '';
     if (getenv('HTTP_CLIENT_IP')) {
         $ip = getenv('HTTP_CLIENT_IP');
     } elseif (getenv('HTTP_X_FORWARDED_FOR')) {
@@ -129,20 +130,80 @@ function getIp($type = 0)
     } else {
         $ip = $_SERVER['REMOTE_ADDR'];
     }
+    if ('' == $ip) $ip = \Swoole::$php->request->getClientIP();
     if ($ip != '') {
         if ($type == 0) {
             return ip2long($ip);
         }
-        return $ip;
+    }
+    else
+    {
+        $ip = '0.0.0.0';
+    }
+    return $ip;
+}
+
+/**
+ * 获取数组维度 或 验证数组是否是一维数组
+ * $type 非0或false时 返回数组深度 为false时返回是否是一维数组
+ */
+function getArrayDeep($data = array(), $type = 0) {
+    if (!is_array($data)) {
+        return 0;
+    } else {
+        if ($type == 0) {
+            if (count($data)==count($data, 1)) {
+                return true; //一维数组
+            } else {
+                return false; //非一维数组
+            }
+        } else { //获取数组深度
+            $max1 = 0;
+            foreach ($data as $item1) {
+                $t1 = getArrayDeep($item1);
+                if ($t1 > $max1) {
+                    $max1 = $t1;
+                }
+                
+            }
+            return $max1+1;
+        }
     }
 }
 
-/*
- * 验证
- */
-function validatas($data = array())
-{
 
+// function deepArrayFilter($data = array(), $index, $value){
+//     if(is_array($array) && count($array)>0)
+//     {
+//         foreach(array_keys($array) as $key){
+//             $temp[$key] = $array[$key][$index];
+            
+//             if ($temp[$key] == $value){
+//                 $newarray[$key] = $array[$key];
+//             }
+//         }
+//     }
+//     return $newarray;
+// } 
+
+function deepArrayFilter($data = array(), $filter = '')
+{
+    if (!empty($data))
+    {
+        //多维数组
+        foreach ($data as $key => $val)
+        {
+            if (!is_array($val) && $val === $filter)
+            {
+                unset($data[$key]);
+            }
+            elseif (is_array($val))
+            {
+                $data[$key] = deepArrayFilter($val, $filter);
+            }
+        }
+    }
+    return $data;
 }
 
 /*
@@ -218,4 +279,31 @@ function createOrderNumber($prefix = '')
 {
     $time = microtime();
     return encyptPassword($prefix . $time);
+}
+
+
+//搜索数组中该值的键  只针对二维数组
+function searchKey($value = '', $data = array())
+{
+    if ('' == trim($value) || empty($data))
+    {
+        return;
+    }
+    foreach ($data as $key => $val)
+    {
+        if (array_search($value, $val) !== false)
+        {
+            return $key;
+        }
+    }
+    return;
+}
+
+function searchKeyDeep($value = '', $data =array())
+{
+    if ('' != trim($value) && !empty($data))
+    {
+
+    }
+    return array();
 }
