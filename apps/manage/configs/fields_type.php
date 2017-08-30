@@ -8,5 +8,9 @@ $fields_type = array(
     'blurred' => array('reason', 'remark', 'truename', 'shortname', 'info', 'title', 'link', 'name', 'value', 'address'),
     //区间值 <= >= < >
     'interval' => array('dissensions', 'duration', 'price', 'workernum', 'total', 'positx', 'posity', 'editamount', 'amountedittimes', 'edittimes', 'ticket', 'envelope', 'overage', 'highopinions', 'lowopinions', 'middleopinions', 'jobsnum', 'workednum', 'credit', 'amount', 'firststart', 'start', 'soluttime', 'lastedittime', 'starttime', 'endtime', 'intime', 'usetime'),
+    //特殊类型 后缀为_special
+    'special' => array(),
+    //混合类型 后缀为_mixed
+    'mixed' => array(),
 );
 return $fields_type;

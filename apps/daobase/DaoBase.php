@@ -70,6 +70,16 @@ class DaoBase
                     //echo $rule_key;
                     switch($rule_key)
                     {
+                        case 'mixed':
+
+                            unset($param[$key]);
+                            $key = substr($key, 0, -6); //还原key的名称 即去掉末尾的 _mixed
+                            break;
+                        case 'special':
+
+                            unset($param[$key]);
+                            $key = substr($key, 0, -8); //还原key的名称 即去掉末尾的 _special
+                            break;
                         case 'primary':
                             //equal, =, in, notin
                             if (isset($val['type']) && in_array($val['type'], array('in', 'notin', 'equal', '=')))
@@ -142,6 +152,11 @@ class DaoBase
                 }
             }
 
+        }
+
+        if (empty($param))
+        {
+            $param['where'] = 1;
         }
 
         return $param;

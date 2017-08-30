@@ -116,6 +116,7 @@ function deepStripslashes($data = array())
  */
 function getIp($type = 0)
 {
+    $ip = '';
     if (getenv('HTTP_CLIENT_IP')) {
         $ip = getenv('HTTP_CLIENT_IP');
     } elseif (getenv('HTTP_X_FORWARDED_FOR')) {
@@ -134,12 +135,17 @@ function getIp($type = 0)
         if ($type == 0) {
             return ip2long($ip);
         }
-        return $ip;
     }
+    else
+    {
+        $ip = '0.0.0.0';
+    }
+    return $ip;
 }
 
 /**
  * 获取数组维度 或 验证数组是否是一维数组
+ * $type 非0或false时 返回数组深度 为false时返回是否是一维数组
  */
 function getArrayDeep($data = array(), $type = 0) {
     if (!is_array($data)) {
@@ -291,4 +297,13 @@ function searchKey($value = '', $data = array())
         }
     }
     return;
+}
+
+function searchKeyDeep($value = '', $data =array())
+{
+    if ('' != trim($value) && !empty($data))
+    {
+
+    }
+    return array();
 }

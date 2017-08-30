@@ -46,10 +46,12 @@ class ModelBase extends \Swoole\Model
                     {
                         $pager = null;
                         unset($data['pager']);
-                        $data = $this->gets($data, $pager);
-                        return array('data' => $data, 'pager' => $pager);
+                        return array('data' => $this->gets($data, $pager), 'pager' => $pager);
                     }
-                    return $this->gets($data);
+                    else
+                    {
+                        return array('data' => $this->gets($data));
+                    }
                 }
             }
             return $this->get($data)->get();//直接传主键值
