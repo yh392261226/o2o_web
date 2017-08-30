@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-<?php 
+<?php
 namespace App\Model;
 class Articles extends \MMODEL\ModelBase
 {
