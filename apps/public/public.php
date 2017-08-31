@@ -166,7 +166,7 @@ function getArrayDeep($data = array(), $type = 0) {
                 if ($t1 > $max1) {
                     $max1 = $t1;
                 }
-                
+
             }
             return $max1+1;
         }
@@ -179,14 +179,14 @@ function getArrayDeep($data = array(), $type = 0) {
 //     {
 //         foreach(array_keys($array) as $key){
 //             $temp[$key] = $array[$key][$index];
-            
+
 //             if ($temp[$key] == $value){
 //                 $newarray[$key] = $array[$key];
 //             }
 //         }
 //     }
 //     return $newarray;
-// } 
+// }
 
 function deepArrayFilter($data = array(), $filter = '')
 {

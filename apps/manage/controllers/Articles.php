@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-30 14:27:12
+ * @Last Modified time: 2017-08-31 10:51:28
  */
 
 namespace App\Controller;
@@ -46,8 +46,8 @@ class Articles extends \CLASSES\ManageBase
             msg("请填写分类名并选择父分类名", $status = 0, $jump);
         }else{
             /*判断分类名是否存在*/
-            $res = $dao_article->infoData(array('key'=>'ac_name','value'=>$_POST['ac_name']));
-            var_dump($res);die;
+            $res = $dao_article->infoData(array('key'=>'ac_name','val'=>$_POST['ac_name'],'fields'=>'ac_id'));
+
 
             if(intval($res) > 0){
                 msg("分类名已经存在!", $status = 0, $jump);
@@ -57,7 +57,7 @@ class Articles extends \CLASSES\ManageBase
         $data = array();
         $data['ac_pid'] = intval($_POST['ac_pid']);
         $data['ac_name'] = trim($_POST['ac_name']);
-        $data['ac_desc'] = isset($_POST['ac_desc'])&&!empty($_POST['ac_desc'])?deepAddslashes(htmlspecialchars($_POST['ac_desc'])):"";
+        $data['ac_info'] = isset($_POST['ac_info'])&&!empty($_POST['ac_info'])?deepAddslashes(htmlspecialchars($_POST['ac_info'])):"";
         $data['ac_status'] = isset($_POST['ac_status'])?intval($_POST['ac_status']):0;
         if(isset($_FILES['ac_img']['name'])&&!empty($_FILES['ac_img']['name'])){
 
@@ -87,8 +87,9 @@ class Articles extends \CLASSES\ManageBase
         }
         $data['ac_in_time'] = time();
         $data['ac_author'] = $_SESSION['m_id'];
+        $data['ac_last_edit_time'] = time();
+        $data['ac_last_author'] = $_SESSION['m_id'];
         $data['r_id'] = isset($_POST['r_id'])&&!empty($_POST['r_id'])?intval($_POST['r_id']):1;
-
         $res = $dao_article->addData($data);
         if($res){
             msg("分类添加成功", $status = 1, $jump);
@@ -107,8 +108,7 @@ class Articles extends \CLASSES\ManageBase
         if(empty($parent)||empty($type)||empty($target)){
             $this->http->finish($this->json("传入信息不完整",0));
         }
-        // $data = table('regions')->select('*')->fetchall();
-        // file_put_contents("../../area.php",serialize($data));
+
         $res = area($parent,$type,$target);
         if($res){
             $this->http->finish($this->json($res,1));
@@ -197,11 +197,11 @@ class Articles extends \CLASSES\ManageBase
         $area = area(1);
 
         /*获取除了自己子集的分类树*/
-        $dao_article = new \MDAO\Articles();
+        $dao_article = new \MDAO\Articles(array('table'=>'Articles_category'));
         $ac_tree = $dao_article->getTreeExceptChild($ac_id);
 
-        $self_data = $dao_article->getCategory($ac_id);
-        $self_data = $self_data[0];
+        $self_data = $dao_article->infoData(array('key'=>'ac_id','val'=>$ac_id));
+
         $r_name = "";
         if($self_data['r_id'])
         {
