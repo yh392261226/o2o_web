@@ -5,17 +5,17 @@ namespace MMODEL;
  * @action   model层基础类
  */
 
-class ModelBase extends \Swoole\Model 
+class ModelBase extends \Swoole\Model
 {
     public $primary;
     private $allow_delete = true;
     public $select = '*';
-    
-    public function __construct(\Swoole $swoole, $db_key = 'master') 
+
+    public function __construct(\Swoole $swoole, $db_key = 'master')
     {
         parent::__construct($swoole, $db_key);
     }
-    
+
     /**
      * @param array $data
      * @return array
@@ -25,9 +25,9 @@ class ModelBase extends \Swoole\Model
      */
     public function getDatas($data = array())
     {
-        if (!empty($data)) 
+        if (!empty($data))
         {
-            if (is_array($data)) 
+            if (is_array($data))
             {
                 $val = isset($data['val']) ? $data['val'] : '';
                 $key = isset($data['key']) ? $data['key'] : '';
@@ -40,9 +40,9 @@ class ModelBase extends \Swoole\Model
                     //    return $this->select($paras['fields'])->where($paras['where'])->fetch();
                     //}
                 }
-                else 
+                else
                 {
-                    if (isset($data['pager']) && $data['pager']) 
+                    if (isset($data['pager']) && $data['pager'])
                     {
                         $pager = null;
                         unset($data['pager']);
@@ -58,27 +58,27 @@ class ModelBase extends \Swoole\Model
         }
         return $this->gets();
     }
-    
+
     /**
      * @param array $data 一维数组 键值对  name=123
      * @return bool
      * @author Ross
      * @desc 删除管理员
      */
-    public function delData($data = array()) 
+    public function delData($data = array())
     {
         if ($this->allow_delete == false)
         {
             return false;
         }
 
-        if (!empty($data)) 
+        if (!empty($data))
         {
-            if (!is_array($data)) 
+            if (!is_array($data))
             {
                 return $this->del($data);
-            } 
-            else 
+            }
+            else
             {
                 $type = getArrayDeep($data);
                 if ($type)
@@ -86,8 +86,8 @@ class ModelBase extends \Swoole\Model
                     $val = isset($data['val']) ? $data['val'] : '';
                     $key = isset($data['key']) ? $data['key'] : '';
                     return $this->del($val, $key);
-                } 
-                else 
+                }
+                else
                 {
                     return $this->dels($data);
                 }
@@ -95,25 +95,25 @@ class ModelBase extends \Swoole\Model
         }
         return false;
     }
-    
+
     /**
      * @param array $data
      * @param array $fields
      * @return boolean|number
      * @添加数据
      */
-    public function addData($data = array(), $fields = array()) 
+    public function addData($data = array(), $fields = array())
     {
-        if (!empty($data)) 
+        if (!empty($data))
         {
             $type = getArrayDeep($data);
             if ($type)
             {
                 return $this->put($data);
-            } 
-            else 
+            }
+            else
             {
-                if (count($data) > 0 && count($fields) > 0) 
+                if (count($data) > 0 && count($fields) > 0)
                 {
                     return $this->puts($fields, $data);
                 }
@@ -121,7 +121,7 @@ class ModelBase extends \Swoole\Model
         }
         return false;
     }
-    
+
     /**
      * @param array $data
      * @param array $params
@@ -129,7 +129,7 @@ class ModelBase extends \Swoole\Model
      * @return boolean
      * @更新数据
      */
-    public function updateData($data = array(), $params = array()) 
+    public function updateData($data = array(), $params = array())
     {
         if (!empty($data) && !empty($params))
         {
@@ -142,13 +142,13 @@ class ModelBase extends \Swoole\Model
             return $this->sets($data, $params);
         }
     }
-    
+
     /**
      * @param array $data
      * @return boolean|number
      * @查询条数
      */
-    public function countData($data = array()) 
+    public function countData($data = array())
     {
         return $this->count($data);
     }
