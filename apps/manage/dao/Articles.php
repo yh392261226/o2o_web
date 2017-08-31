@@ -22,17 +22,16 @@ class Articles extends \MDAOBASE\DaoBase
     /*获取所有除了自己子集的分类树*/
     public function getTreeExceptChild($catid)
     {
-        $data = $this->listData();
-        $child_arr = _getChildren($data,$catid,true);
-
+        $data = $this->listData(array('pager'=>false));
+        $child_arr = $this->_getChildren($data['data'],$catid,true);
+        // print_r($child_arr);die;
         if($child_arr){
             $ins = implode(',', $child_arr);
-            $no_child_arr = $this->listData(array('fields'=>'ac_id,ac_name,ac_pid',"where"=>"`ac_id` NOT IN ({$ins})"));
+            $no_child_arr = $this->listData(array('fields'=>'ac_id,ac_name,ac_pid','ac_id' => array('type' => 'notin', 'value' => $child_arr),'pager'=>false));
         }else{
             $no_child_arr = $data;
         }
-
-        return $this->_getTree($no_child_arr,0,0,true);
+        return $this->_getTree($no_child_arr['data'],0,0,true);
 
     }
      /*递归引用*/
@@ -46,7 +45,7 @@ class Articles extends \MDAOBASE\DaoBase
 
     /*递归引用输出前台树状模型(带level)*/
     public function getTree($catid=0){
-        $data = $this->listData(array('fields'=>'ac_id,ac_name,ac_pid','where'=>1));
+        $data = $this->listData(array('fields'=>'ac_id,ac_name,ac_pid','where'=>1,'pager'=>false));
         $data = $data['data'];
         return $this->_getTree($data,$catid,0,true);
     }
@@ -70,7 +69,7 @@ class Articles extends \MDAOBASE\DaoBase
     /*递归引用输出树状模型*/
     public function getChildTree($catid=0){
 
-        $data = $this->listData(array('fields'=>'ac_id as tags ,ac_pid,ac_name as text','where'=>1));
+        $data = $this->listData(array('fields'=>'ac_id as tags ,ac_pid,ac_name as text','where'=>1,'pager'=>false));
 
         return $this->_getChildTree($data['data'],$catid);
     }
@@ -101,6 +100,7 @@ class Articles extends \MDAOBASE\DaoBase
             $child = array();
         }
         foreach ($data as $k => $v) {
+
             if($v['ac_pid'] == $catid){
                 $child[] = $v['ac_id'];
                 $this->_getChildren($data,$v['ac_id']);
@@ -108,5 +108,16 @@ class Articles extends \MDAOBASE\DaoBase
         }
         return $child;
     }
+
+    /**
+ * 判断分类下是否存在子分类
+ */
+   public function catChild($ac_id)
+   {
+        $data['fields'] = 'ac_id';
+        $data['where'] = array('ac_pid'=>$ac_id);
+
+        return model('ArticlesCategory')->infoData($data);
+   }
 
 }
