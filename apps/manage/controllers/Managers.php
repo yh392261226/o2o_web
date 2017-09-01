@@ -11,6 +11,9 @@ class Managers extends \CLASSES\ManageBase
         $this->manager_privileges_modules = new \MDAO\Manager_privileges_modules();
     }
 
+    /**
+     * ****[ managers ]***********************************************************************************************
+     */
     public function login()
     {
         if (isset($_POST['m_name']))
@@ -169,7 +172,7 @@ class Managers extends \CLASSES\ManageBase
     }
 
     /**
-     * ***************************************************************************************************
+     * ****[ managers privileges group ]***********************************************************************************************
      */
 
     public function addGroup()
@@ -312,7 +315,7 @@ class Managers extends \CLASSES\ManageBase
     }
 
     /**
-     * ***************************************************************************************************
+     * ****[ managers privileges modules ]***********************************************************************************************
      */
 
     public function addModules()
@@ -423,7 +426,5 @@ class Managers extends \CLASSES\ManageBase
         $this->tpl->display('list');
     }
 
-    /**
-     * ***************************************************************************************************
-     */
+
 }
