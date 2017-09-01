@@ -15,6 +15,7 @@ class ManageBase extends Swoole\Controller
     {
         parent::__construct($swoole);
         $this->session->start();
+        $_SESSION['m_id'] = 1;
 //         $this->validataLoginStatus(); //验证登陆状态
         $this->publicAssign();
         $this->db->debug = true;

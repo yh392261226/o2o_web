@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-31 10:51:28
+ * @Last Modified time: 2017-08-31 19:07:19
  */
 
 namespace App\Controller;
@@ -88,7 +88,7 @@ class Articles extends \CLASSES\ManageBase
         $data['ac_in_time'] = time();
         $data['ac_author'] = $_SESSION['m_id'];
         $data['ac_last_edit_time'] = time();
-        $data['ac_last_author'] = $_SESSION['m_id'];
+        $data['ac_last_editor'] = $_SESSION['m_id'];
         $data['r_id'] = isset($_POST['r_id'])&&!empty($_POST['r_id'])?intval($_POST['r_id']):1;
         $res = $dao_article->addData($data);
         if($res){
@@ -154,16 +154,17 @@ class Articles extends \CLASSES\ManageBase
             msg("参数错误,删除失败!", $status = 0, $jump);
         }else{
             /*判断有没有子集和该分类内有没有文件如果有删除失败*/
-            $dao_article = new \MDAO\Articles();
-            $child_cat_id = $dao_article->catChild($ac_id);
-            if(!$child_cat_id)
+            $dao_articles_category = new \MDAO\Articles(array('table'=>'Articles_category'));
+            $child_cat_id = $dao_articles_category ->infoData(array('key'=>'ac_pid','val'=>$ac_id,'fields'=>'ac_id'));
+            if(!$child_cat_id['ac_id'])
             {
 
-                $child_art_id = $dao_article->artChild($ac_id);
-                if(!$child_art_id)
+                $dao_article = new \MDAO\Articles(array('table'=>'Articles'));
+                $child_art_id = $dao_article->infoData(array('key'=>'ac_id','val'=>$ac_id,'fields'=>'a_id'));
+                if(!$child_art_id['a_id'])
                 {
 
-                    $res = $dao_article->delCategory($ac_id);
+                    $res = $dao_articles_category->delData($ac_id);
                     if($res)
                     {
                         msg("分类删除成功!", $status = 1, $jump);
@@ -227,13 +228,13 @@ class Articles extends \CLASSES\ManageBase
             msg("参数错误修改失败!", $status = 0, $jump);
         }
 
-        $dao_article = new \MDAO\Articles();
-        if(!isset($_POST['ac_name']) || !isset($_POST['ac_pid']) || empty($_POST['ac_pid']) || empty($_POST['ac_name'])){
+        $dao_article = new \MDAO\Articles(array('table'=>'Articles_category'));
+        if(!isset($_POST['ac_name']) || !isset($_POST['ac_pid']) || (empty($_POST['ac_pid'])&&$_POST['ac_pid']!=="0") || empty($_POST['ac_name'])){
             msg("请填写分类名并选择父分类名", $status = 0, $jump);
         }else{
             /*判断分类名是否存在*/
 
-            $res = $dao_article->getIdByName($_POST['ac_name']);
+            $res = $dao_article->infoData(array('key'=>'ac_id','val'=>$ac_id,'fields'=>'ac_id'));
 
             if(intval($res['ac_id']) > 0 && $res['ac_id'] != $ac_id){
                 msg("分类名已经存在!", $status = 0, $jump);
@@ -243,7 +244,7 @@ class Articles extends \CLASSES\ManageBase
         $data = array();
         $data['ac_pid'] = intval($_POST['ac_pid']);
         $data['ac_name'] = trim($_POST['ac_name']);
-        $data['ac_desc'] = isset($_POST['ac_desc'])&&!empty($_POST['ac_desc'])?deepAddslashes(htmlspecialchars($_POST['ac_desc'])):"";
+        $data['ac_info'] = isset($_POST['ac_info'])&&!empty($_POST['ac_info'])?deepAddslashes(htmlspecialchars($_POST['ac_info'])):"";
         $data['ac_status'] = isset($_POST['ac_status'])?intval($_POST['ac_status']):0;
         if(isset($_FILES['ac_img']['name'])&&!empty($_FILES['ac_img']['name'])){
 
@@ -278,10 +279,8 @@ class Articles extends \CLASSES\ManageBase
         $data['ac_last_editor'] = $_SESSION['m_id'];
         $data['r_id'] = isset($_POST['r_id'])&&!empty($_POST['r_id'])?intval($_POST['r_id']):1;
 
-        $where = array();
-        $where['id'] = $ac_id;
-        $where['where'] = 'ac_id';
-        $res = $dao_article->updateArticeCat($data,$where);
+        $where = array('ac_id'=>$ac_id);
+        $res = $dao_article->updateData($data,$where);
         if($res){
             msg("分类修改成功", $status = 1, $jump);
         }else{
@@ -300,23 +299,6 @@ class Articles extends \CLASSES\ManageBase
 
 
 
-
-    /**
-     * 通过分类id查看文章id
-     * @author zhaoyu
-     * @e-mail zhaoyu8292@qq.com
-     * @date   2017-08-18
-     * @param  [type]            $ac_id [description]
-     * @return array                  [description]
-     */
-    public function getArticlesByCateId($ac_id)
-    {
-        $dao_article = new \MDAO\Articles();
-        return $dao_article->getArticlesByCateId($ac_id);
-    }
-
-
-
     /*文章列表默认为首页*/
     public function index()
     {
@@ -325,28 +307,25 @@ class Articles extends \CLASSES\ManageBase
         $condition['search_condition'] = isset($_POST['search_condition'])&&!empty($_POST['search_condition']) ? intval($_POST['search_condition']) : "";
         $condition['page'] = (isset($_REQUEST['page']) && !empty($_REQUEST['page'])) ? $data['page'] = $_REQUEST['page'] : $data['page'] = 1;
         /*获取文章列表*/
-        $dao_article = new \MDAO\Articles();
+        $dao_article = new \MDAO\Articles(array('table'=>'Articles'));
         $artivle_list_arr = $dao_article->getArticleList($condition);
 
 
         /*通过id获取用户名*/
-        $dao_manager =  new \MDAO\Manager();
+        $dao_manager =  new \MDAO\Managers(array('table'=>'Managers'));
         foreach ($artivle_list_arr['data'] as $key => $value) {
-            echo $artivle_list_arr['data'][$key]['a_author'];
-            $m_name_arr = $dao_manager->getNameById($artivle_list_arr['data'][$key]['a_author']);
+            // echo $artivle_list_arr['data'][$key]['a_author'];
+            $m_name_arr = $dao_manager->infoData(array('key'=>'m_id','val'=>$artivle_list_arr['data'][$key]['a_author'],'fields'=>'m_name'));
             $artivle_list_arr['data'][$key]['a_author'] = $m_name_arr['m_name'];
         }
 
 
 
 
-        var_dump($artivle_list_arr);die;
-
-
-
+        // var_dump($artivle_list_arr);die;
 
         /*获取分类树*/
-        $dao_article = new \MDAO\Articles();
+        $dao_article = new \MDAO\Articles(array('table'=>'Articles_category'));
         $ac_tree = $dao_article->getTree();
         // var_dump($ac_tree);
         $this->tpl->assign("ac_tree",$ac_tree);
