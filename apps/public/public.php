@@ -345,10 +345,13 @@ function logs($path, $msg)
  */
 function area($parent=1,$type="1",$target="selProvinces",$area_id = "")
 {
-    if(!is_file("../../area.php")){
+    if(!is_file("./area.php")){
         return false;
     }
-    $data = unserialize(file_get_contents("../../area.php"));
+
+    require './area.php';
+
+
     if(!empty($area_id)){
         $area_name = "";
         foreach ($data as $key => $value) {
