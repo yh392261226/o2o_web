@@ -8,29 +8,24 @@ class ManageBase extends Swoole\Controller
     static $manager_status = false;
     public $not_validata   = array('login');
     public $controller_name = '';
-    public $action_name = '';
+    public $view_name = '';
     public $template_ext = '.html';
 
     public function __construct($swoole)
     {
         parent::__construct($swoole);
+
         $this->session->start();
-        $_SESSION['m_id'] = 1;
 //         $this->validataLoginStatus(); //验证登陆状态
-        $this->publicAssign();
-        $this->db->debug = true;
-        $control_action = isset($_GET['s']) ? trim($_GET['s']) : '';
-        if ($control_action != '')
+        $this->managerAssign();
+        //$this->db->debug = true;
+
+        if (!empty($this->swoole->env['mvc']))
         {
-            $tmparray = array();
-            $tmparray = explode('/', $control_action);
-            //print_r($tmparray);
-            if (!empty($tmparray))
-            {
-                $this->controller_name = isset($tmparray[1]) ? $tmparray[1] : 'index';
-                $this->action_name = isset($tmparray[2]) ? $tmparray[2] : 'index';
-            }
+            $this->controller_name = $this->swoole->env['mvc']['controller'];
+            $this->view_name = $this->swoole->env['mvc']['view'];
         }
+
 
     }
 
@@ -46,10 +41,10 @@ class ManageBase extends Swoole\Controller
             if (!in_array($controller_name, $this->not_validata))
             {
                 //需要验证状态
-                if (!isset($_SESSION['m_id']) || empty($_SESSION['m_id']))
+                if (!isset($_SESSION['manager_info']['m_id']) || empty($_SESSION['manager_info']['m_id']))
                 {
                     self::$manager_status = 0;
-                    header('Location:' . HOSTURL . '/index/login');
+                    header('Location:' . HOSTURL . '/Managers/login');
                     exit;
                 }
                 self::$manager_status = 1;
@@ -63,7 +58,8 @@ class ManageBase extends Swoole\Controller
     /**
      * @模板公共赋值
      */
-    protected function publicAssign()
+
+    public function managerAssign()
     {
         if (defined("MANAGEURL")) {
             $this->tpl->assign("manageurl", MANAGEURL);
@@ -71,6 +67,9 @@ class ManageBase extends Swoole\Controller
         if (defined('HOSTURL')) {
             $this->tpl->assign("host_url", HOSTURL);
         }
+        $manager_info = !empty($_SESSION['manager']) ? $_SESSION['manager'] : array();
+        $this->tpl->assign('manager_info', $manager_info);
+        $this->tpl->assign('menu_list', $this->config['menu']);
     }
 
     /**
@@ -102,7 +101,7 @@ class ManageBase extends Swoole\Controller
         }
         else
         {
-            $template = ucfirst($this->controller_name) . '/' . $this->action_name . $this->template_ext;
+            $template = ucfirst($this->controller_name) . '/' . $this->view_name . $this->template_ext;
         }
         $this->tpl->display($template);
     }
