@@ -9,6 +9,7 @@ class ManageBase extends Swoole\Controller
     public $not_validata   = array('login');
     public $controller_name = '';
     public $action_name = '';
+    public $template_ext = '.html';
 
     public function __construct($swoole)
     {
@@ -20,8 +21,14 @@ class ManageBase extends Swoole\Controller
         $control_action = isset($_GET['s']) ? trim($_GET['s']) : '';
         if ($control_action != '')
         {
-            $this->controller_name = explode('/', $control_action)[1];
-            $this->action_name = explode('/', $control_action)[2];
+            $tmparray = array();
+            $tmparray = explode('/', $control_action);
+            //print_r($tmparray);
+            if (!empty($tmparray))
+            {
+                $this->controller_name = isset($tmparray[1]) ? $tmparray[1] : 'index';
+                $this->action_name = isset($tmparray[2]) ? $tmparray[2] : 'index';
+            }
         }
 
     }
@@ -84,6 +91,19 @@ class ManageBase extends Swoole\Controller
             $param = $data;
         }
         return $param;
+    }
+
+    public function mydisplay($name = '')
+    {
+        if ('' != trim($name))
+        {
+            $template = $name . $this->template_ext;
+        }
+        else
+        {
+            $template = ucfirst($this->controller_name) . '/' . $this->action_name . $this->template_ext;
+        }
+        $this->tpl->display($template);
     }
 
 }
