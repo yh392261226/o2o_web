@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-31 19:07:19
+ * @Last Modified time: 2017-09-01 19:33:32
  */
 
 namespace App\Controller;
@@ -304,8 +304,9 @@ class Articles extends \CLASSES\ManageBase
     {
         $condition = array();
         $condition['ac_id'] = isset($_GET['ac_id'])&&!empty($_GET['ac_id']) ? intval($_GET['ac_id']) : 0;
-        $condition['search_condition'] = isset($_POST['search_condition'])&&!empty($_POST['search_condition']) ? intval($_POST['search_condition']) : "";
-        $condition['page'] = (isset($_REQUEST['page']) && !empty($_REQUEST['page'])) ? $data['page'] = $_REQUEST['page'] : $data['page'] = 1;
+        $condition['search_condition'] = isset($_POST['search_condition'])&&!empty($_POST['search_condition']) ? $_POST['search_condition'] : "";
+        $condition['page'] = (isset($_REQUEST['page']) && !empty($_REQUEST['page'])) ? $_REQUEST['page'] : 1;
+
         /*获取文章列表*/
         $dao_article = new \MDAO\Articles(array('table'=>'Articles'));
         $artivle_list_arr = $dao_article->getArticleList($condition);
@@ -314,20 +315,21 @@ class Articles extends \CLASSES\ManageBase
         /*通过id获取用户名*/
         $dao_manager =  new \MDAO\Managers(array('table'=>'Managers'));
         foreach ($artivle_list_arr['data'] as $key => $value) {
-            // echo $artivle_list_arr['data'][$key]['a_author'];
-            $m_name_arr = $dao_manager->infoData(array('key'=>'m_id','val'=>$artivle_list_arr['data'][$key]['a_author'],'fields'=>'m_name'));
-            $artivle_list_arr['data'][$key]['a_author'] = $m_name_arr['m_name'];
+
+            $artivle_list_arr['data'][$key]['a_last_edit_time'] = date('Y-m-d H:i:s',$artivle_list_arr['data'][$key]['a_last_edit_time']);
         }
 
 
 
 
-        // var_dump($artivle_list_arr);die;
+        // var_dump($artivle_list_arr['pager']);die;
 
         /*获取分类树*/
         $dao_article = new \MDAO\Articles(array('table'=>'Articles_category'));
         $ac_tree = $dao_article->getTree();
-        // var_dump($ac_tree);
+        if(!empty($condition['search_condition'])){
+            $this->tpl->assign("search_condition",$condition['search_condition']);
+        }
         $this->tpl->assign("ac_tree",$ac_tree);
         $this->tpl->assign("page", $artivle_list_arr['page']);
         $this->tpl->assign("artivle_list_arr",$artivle_list_arr);
