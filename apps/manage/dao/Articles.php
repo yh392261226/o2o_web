@@ -47,11 +47,11 @@ class Articles extends \MDAOBASE\DaoBase
     public function getTree($catid=0){
         $data = $this->listData(array('fields'=>'ac_id,ac_name,ac_pid','where'=>1,'pager'=>false));
         $data = $data['data'];
-        return $this->_getTree($data,$catid,0,true);
+        return $this->_getTree($data,$catid,1,true);
     }
 
     /*递归引用输出前台树状模型(带level)*/
-    public function _getTree($data,$pid,$level=0,$isClear=false){
+    public function _getTree($data,$pid,$level=1,$isClear=false){
         static $tree = array();
         if($isClear){
             $tree = array();
@@ -109,15 +109,62 @@ class Articles extends \MDAOBASE\DaoBase
         return $child;
     }
 
-    /**
- * 判断分类下是否存在子分类
- */
-   public function catChild($ac_id)
-   {
-        $data['fields'] = 'ac_id';
-        $data['where'] = array('ac_pid'=>$ac_id);
 
-        return model('ArticlesCategory')->infoData($data);
-   }
+   /*获取文章列表*/
+    public function getArticleList($condition=array())
+    {
+        $a_id_arr = array();
+       if($condition['ac_id'] > 0)
+       {
+            /*获取文章信息*/
+            $a_id_arr = $this->getArticlesByCateId($condition);
+
+       }elseif(!empty($condition['search_condition'])){
+
+            $a_id_arr = $this->getArticlesBySearch($condition);
+
+       }else{
+            /*获取所有文章信息*/
+            $a_id_arr = $this->listData(array('fields'=>'a_id,a_title,a_info,a_author,a_in_time' ,'pager'=>true,'page' => 1,));
+
+            // $m_art = model('Articles');
+            // $info['page'] = $condition['page'];
+            // $m_art->select = 'a_id,a_title,a_info,a_author,a_in_time';
+            // $a_id_arr = $m_art -> listDatas($info);
+       }
+       return $a_id_arr;
+    }
+
+    /*通过分类id查看文章id*/
+    public function getArticlesByCateId($condition)
+    {
+        $m_ac = model('ArticlesCategory');
+        $ac_id = $condition['ac_id'];
+
+        $data = $m_ac->infoDatas();
+        $child_arr[] = "{$ac_id}";
+        $child_arr = getChildren($data,$ac_id,"ac_id","ac_pid",true);
+
+
+        $ins = implode(',', $child_arr);
+        $m_art = model('Articles');
+        $info = array('fields'=>'a_id,a_title,a_info,a_author,a_in_time',"where"=>"`ac_id` IN ({$ins})",'page'=>$condition['page']);
+
+        return $m_art -> infoDatas($info);
+
+    }
+
+    /*通过搜索条件搜索文章id*/
+
+    public function getArticlesBySearch($condition)
+    {
+        $info = array();
+        $info['walk']['where']["like"] = array("m_name", "%" . $condition['search_condition'] . "%");
+        $info['page'] = $condition['page'];
+        $info['fields'] = 'a_id,a_title,a_info,a_author,a_in_time';
+
+        $m_art = model('Articles');
+        return $m_art -> infoDatas($info);
+    }
 
 }
