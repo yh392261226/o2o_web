@@ -7,6 +7,8 @@ class ManageBase extends Swoole\Controller
 {
     static $manager_status = false;
     public $not_validata   = array('login');
+    public $controller_name = '';
+    public $action_name = '';
 
     public function __construct($swoole)
     {
@@ -15,6 +17,13 @@ class ManageBase extends Swoole\Controller
 //         $this->validataLoginStatus(); //验证登陆状态
         $this->publicAssign();
         $this->db->debug = true;
+        $control_action = isset($_GET['s']) ? trim($_GET['s']) : '';
+        if ($control_action != '')
+        {
+            $this->controller_name = explode('/', $control_action)[1];
+            $this->action_name = explode('/', $control_action)[2];
+        }
+
     }
 
     /**
@@ -54,6 +63,27 @@ class ManageBase extends Swoole\Controller
         if (defined('HOSTURL')) {
             $this->tpl->assign("host_url", HOSTURL);
         }
+    }
+
+    /**
+     * 合并基本条件
+     * @param array $data
+     */
+    protected function params($data)
+    {
+        $param = array();
+        if (!empty($data))
+        {
+            if (is_array($data))
+            {
+
+            }
+        }
+        else
+        {
+            $param = $data;
+        }
+        return $param;
     }
 
 }
