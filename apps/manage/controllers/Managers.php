@@ -36,7 +36,7 @@ class Managers extends \CLASSES\ManageBase
             header('location:/Managers/index');
         }
 
-        $this->tpl->display('login');
+        $this->mydisplay();
     }
 
     public function add()
