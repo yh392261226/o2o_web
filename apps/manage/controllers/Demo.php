@@ -6,7 +6,7 @@
  * @Last Modified time: 2017-08-29 16:21:17
  */
 namespace App\Controller;
-class Index extends \CLASSES\ManageBase
+class Demo extends \CLASSES\ManageBase
 {
     public function __construct($swoole)
     {
