@@ -23,7 +23,7 @@ class Managers extends \CLASSES\ManageBase
                 'm_pass' => encyptPassword($_POST['m_pass']),
             );
             $result  = $this->managers_dao->infoData(array('key' => 'm_name', 'val' =>  $data['m_name']));
-            $_SESSION['manager']
+            $_SESSION['manager'] = array();
             if (!empty($result) && $result['m_pass'] == $data['m_pass'])
             {
                 $_SESSION['manager'] = $result;
@@ -36,7 +36,7 @@ class Managers extends \CLASSES\ManageBase
             header('location:/Managers/index');
         }
 
-        $this->tpl->display('login');
+        $this->mydisplay();
     }
 
     public function add()
@@ -104,7 +104,7 @@ class Managers extends \CLASSES\ManageBase
         }
 
         $info = $this->managers_dao->infoData($_REQUEST['m_id']);
-        $this->tpl->assign('info' => $info);
+        $this->tpl->assign('info', $info);
         $this->tpl->display('edit');
     }
 
@@ -188,7 +188,7 @@ class Managers extends \CLASSES\ManageBase
 
             $data   = array(
                 'mpg_name'          => isset($_POST['mpg_name']) ? trim($_POST['mpg_name']) : '',
-                'mpg_status'        => isset($_POST['mpg_status']) ? trim($_POST['mpg_status']) : 0,,
+                'mpg_status'        => isset($_POST['mpg_status']) ? trim($_POST['mpg_status']) : 0,
                 'mpg_in_time'       => $curtime,
                 'mpg_author'        => $_SESSION['manager']['m_id'],
                 'mpg_last_edit_time'=> $curtime,
@@ -245,7 +245,7 @@ class Managers extends \CLASSES\ManageBase
             msg('操作成功', 1);
         }
         $info = $this->managers_privileges_group_dao->infoData($_REQUEST['mpg_id']);
-        $this->tpl->assign('info' => $info);
+        $this->tpl->assign('info', $info);
         $this->tpl->display('group_edit');
     }
 
@@ -298,8 +298,8 @@ class Managers extends \CLASSES\ManageBase
         if (isset($_REQUEST['mpg_status'])) $data['mpg_status'] = intval($_REQUEST['mpg_status']);
         if (isset($_REQUEST['mpg_author'])) $data['mpg_author'] = intval($_REQUEST['mpg_author']);
         if (isset($_REQUEST['mpg_in_time'])) $data['mpg_in_time'] = array(
-            array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['start_mpg_in_time']),
-            array('type' => 'le', 'le_value' => strtotime($_REQUEST['end_mpg_in_time'])
+            array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['start_mpg_in_time'])),
+            array('type' => 'le', 'le_value' => strtotime($_REQUEST['end_mpg_in_time'])),
         );
 
         if (isset($_REQUEST['m_start_time']) && isset($_REQUEST['m_end_time']) && strtotime($_REQUEST['m_end_time']) < strtotime($_REQUEST['m_start_time']))
@@ -369,7 +369,7 @@ class Managers extends \CLASSES\ManageBase
             msg('操作成功', 1);
         }
         $info = $this->manager_privileges_modules->infoData($_REQUEST['mpm_id']);
-        $this->tpl->assign('info' => $info);
+        $this->tpl->assign('info', $info);
         $this->tpl->display('modules_edit');
     }
 

@@ -7,6 +7,9 @@ class ManageBase extends Swoole\Controller
 {
     static $manager_status = false;
     public $not_validata   = array('login');
+    public $controller_name = '';
+    public $action_name = '';
+    public $template_ext = '.html';
 
     public function __construct($swoole)
     {
@@ -16,6 +19,19 @@ class ManageBase extends Swoole\Controller
 //         $this->validataLoginStatus(); //验证登陆状态
         $this->publicAssign();
         $this->db->debug = true;
+        $control_action = isset($_GET['s']) ? trim($_GET['s']) : '';
+        if ($control_action != '')
+        {
+            $tmparray = array();
+            $tmparray = explode('/', $control_action);
+            //print_r($tmparray);
+            if (!empty($tmparray))
+            {
+                $this->controller_name = isset($tmparray[1]) ? $tmparray[1] : 'index';
+                $this->action_name = isset($tmparray[2]) ? $tmparray[2] : 'index';
+            }
+        }
+
     }
 
     /**
@@ -55,6 +71,40 @@ class ManageBase extends Swoole\Controller
         if (defined('HOSTURL')) {
             $this->tpl->assign("host_url", HOSTURL);
         }
+    }
+
+    /**
+     * 合并基本条件
+     * @param array $data
+     */
+    protected function params($data)
+    {
+        $param = array();
+        if (!empty($data))
+        {
+            if (is_array($data))
+            {
+
+            }
+        }
+        else
+        {
+            $param = $data;
+        }
+        return $param;
+    }
+
+    public function mydisplay($name = '')
+    {
+        if ('' != trim($name))
+        {
+            $template = $name . $this->template_ext;
+        }
+        else
+        {
+            $template = ucfirst($this->controller_name) . '/' . $this->action_name . $this->template_ext;
+        }
+        $this->tpl->display($template);
     }
 
 }
