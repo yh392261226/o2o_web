@@ -12,7 +12,7 @@ class DaoBase
         if (isset($data['table']))
         {
             $this->table = $data['table'];
-            $this->handler = model($this->table);
+            $this->handler = model(ucfirst($this->table));
         }
         else
         {
