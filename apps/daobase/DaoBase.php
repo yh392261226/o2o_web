@@ -149,6 +149,9 @@ class DaoBase
                                 }
                             }
                             break;
+                        default:
+                            $param[$key] = $val;
+                            break;
                     }
                 }
             }
