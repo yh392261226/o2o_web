@@ -158,6 +158,11 @@ class DaoBase
 
         }
 
+        if (is_string($data) && '' != trim($data))
+        {
+            $param = $data;
+        }
+
         if (empty($param))
         {
             $param['where'] = 1;
@@ -232,9 +237,12 @@ class DaoBase
     public function delData($data = array())
     {
         $param = $this->createWhere($data);
-        unset($param['page']);
-        unset($param['pager']);
-        unset($param['pagesize']);
+        if (is_array($param) && !empty($param))
+        {
+            unset($param['page']);
+            unset($param['pager']);
+            unset($param['pagesize']);
+        }
         if (empty($param))
         {
             $param = $data;
@@ -255,7 +263,10 @@ class DaoBase
     public function countData($data = array())
     {
         $param = $this->createWhere($data);
-        unset($param['pager']);
+        if (is_array($param) && !empty($param))
+        {
+            unset($param['pager']);
+        }
         return $this->handler->countData($param);
     }
 
