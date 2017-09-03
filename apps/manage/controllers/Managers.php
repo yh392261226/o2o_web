@@ -50,6 +50,14 @@ class Managers extends \CLASSES\ManageBase
         $this->mydisplay();
     }
 
+    public function logOut()
+    {
+        session_destroy();
+        session_unset();
+        $this->http->status(302);
+        $this->http->header('Location', HOSTURL);
+    }
+
     public function add()
     {
         if (isset($_POST['m_name']))
@@ -72,7 +80,7 @@ class Managers extends \CLASSES\ManageBase
 
             if ('' == $data['m_name']) msg('管理员名称不能为空', 0);
             if ('' == $data['m_pass']) msg('密码不能为空', 0);
-            if ($this->_checkName($data['m_name']))) msg('管理员名称已被占用', 0);
+            if ($this->_checkName($data['m_name'])) msg('管理员名称已被占用', 0);
 
             $result = $this->managers_dao->addData($data);
             if (!$result)

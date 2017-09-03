@@ -13,12 +13,14 @@ class Index extends \CLASSES\ManageBase
     {
         parent::__construct($swoole);
     }
+
     public function index()
     {
-        $menu = $this->config['menu'];
-        $this->tpl->assign('menu_list', $menu);
-        $this->tpl->display("Index/index.html");
+        //$menu = $this->config['menu'];
+        //$this->tpl->assign('menu_list', $menu);
+        $this->mydisplay("Index/index");
     }
+    //
     public function welcome()
     {
         /* $smarty->display('file:index.tpl');
@@ -28,6 +30,6 @@ class Index extends \CLASSES\ManageBase
          * {include file="db:index.tpl"}
          * {include file="index.tpl"} {* will use default resource type *}
          */
-        $this->tpl->display("Index/welcome.html");
+        $this->mydisplay("Index/welcome");
     }
 }
