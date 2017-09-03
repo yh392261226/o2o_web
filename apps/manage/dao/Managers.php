@@ -7,4 +7,18 @@ class Managers extends \MDAOBASE\DaoBase
     {
         parent::__construct(array('table' => 'Managers'));
     }
+
+    public function checkManagerName($name)
+    {
+        if ('' != trim($name))
+        {
+            $counts = $this->countData(array('m_name' => $name));
+            if ($counts > 0)
+            {
+                return true; //exusts manager
+            }
+        }
+        return false; //does not exists manager
+    }
+
 }

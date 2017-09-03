@@ -42,6 +42,7 @@
                                 <th data-field="state" data-checkbox="true"></th>
                                 <th data-field="id" data-sortable="true">ID</th>
                                 <th data-field="name" data-sortable="true">名称</th>
+                                <th data-field="status" data-sortable="true">状态</th>
                                 <th data-field="time" data-sortable="true">添加时间</th>
                                 <th data-field="action" data-sortable="">操作</th>
 
@@ -54,6 +55,13 @@
                                 <td></td>
                                 <td>{{$value.m_id}}</td>
                                 <td>{{$value.m_name}}</td>
+                                <td>
+                                    {{if $value.m_status == -2}}已删除/离职{{/if}}
+                                    {{if $value.m_status == -1}}禁止登陆{{/if}}
+                                    {{if $value.m_status == 0}}正常{{/if}}
+                                    {{if $value.m_status == 1}}限制管理{{/if}}
+                                    {{if $value.m_status == 9}}总管理员{{/if}}
+                                </td>
                                 <td>{{$value.m_in_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
                                 <td><a href="/Managers/edit?m_id={{$value.m_id}}">修改</a> |  <a href="/Managers/del?m_id={{$value.m_id}}">删除</a></td>
                             </tr>

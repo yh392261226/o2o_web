@@ -49,10 +49,12 @@
 
                                 <div class="col-sm-10">
                                     <select class="form-control m-b" name="mpg_id">
-
                                         <option value="0">请选择</option>
-                                        <option value=""></option>
-
+                                        {{if $group}}
+                                        {{foreach from=$group.data item=value}}
+                                        <option value="{{$value.mpg_id}}" {{if $value.mpg_id == $info.mpg_id}}selected="selected"{{/if}}>{{$value.mpg_name}}</option>
+                                        {{/foreach}}
+                                        {{/if}}
                                     </select>
                                 </div>
                             </div>
