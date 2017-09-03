@@ -114,43 +114,60 @@ class Articles extends \MDAOBASE\DaoBase
     public function getArticleList($condition=array())
     {
         $a_id_arr = array();
+        $page = $condition['page'];
+        $info = array();
+        $info = array(
+            'pager'=>true,'page'=>$page,
+            'fields'=>'a_id,a_title,a_info,managers.m_name as a_author,a_last_edit_time' ,
+            'leftjoin'=>array('managers',"managers.m_id = articles.a_author"),
+            );
+
        if($condition['ac_id'] > 0)
        {
             /*获取文章信息*/
-            $a_id_arr = $this->getArticlesByCateId($condition);
+            $d_ac = new \MDAO\Articles(array('table'=>'Articles_category'));
+            $ac_id = $condition['ac_id'];
+            $page = $condition['page'];
+            $data_ac = $d_ac->listData();
+            $child_arr = array();
 
-       }elseif(!empty($condition['search_condition'])){
+            $child_arr = getChildren($data_ac['data'],$ac_id,"ac_id","ac_pid",true);
+            array_unshift($child_arr,"{$ac_id}");
+            $info['ac_id'] = array('type' => 'in', 'value' =>$child_arr);
 
-            $a_id_arr = $this->getArticlesBySearch($condition);
-
-       }else{
-            /*获取所有文章信息*/
-            $a_id_arr = $this->listData(array('fields'=>'a_id,a_title,a_info,a_author,a_in_time' ,'pager'=>true,'page' => 1,));
-
-            // $m_art = model('Articles');
-            // $info['page'] = $condition['page'];
-            // $m_art->select = 'a_id,a_title,a_info,a_author,a_in_time';
-            // $a_id_arr = $m_art -> listDatas($info);
        }
+       if(!empty($condition['search_condition'])){
+
+            $info['a_title'] =  array('type' => 'like', 'value' => $condition['search_condition']);
+
+       }
+       // var_dump($info);die;
+            /*获取所有文章信息*/
+            $a_id_arr = $this->listData($info);
+
        return $a_id_arr;
     }
 
     /*通过分类id查看文章id*/
     public function getArticlesByCateId($condition)
     {
-        $m_ac = model('ArticlesCategory');
+        $d_ac = new \MDAO\Articles(array('table'=>'Articles_category'));
         $ac_id = $condition['ac_id'];
+        $page = $condition['page'];
+        $data_ac = $d_ac->listData();
+        $child_arr = array();
 
-        $data = $m_ac->infoDatas();
-        $child_arr[] = "{$ac_id}";
-        $child_arr = getChildren($data,$ac_id,"ac_id","ac_pid",true);
+        $child_arr = getChildren($data_ac['data'],$ac_id,"ac_id","ac_pid",true);
+        array_unshift($child_arr,"{$ac_id}");
 
 
-        $ins = implode(',', $child_arr);
-        $m_art = model('Articles');
-        $info = array('fields'=>'a_id,a_title,a_info,a_author,a_in_time',"where"=>"`ac_id` IN ({$ins})",'page'=>$condition['page']);
-
-        return $m_art -> infoDatas($info);
+        $info = array(
+                        'pager'=>true,'page'=>$page,
+                        'fields'=>'a_id,a_title,a_info,managers.m_name as a_author,a_last_edit_time',
+                        "ac_id"=>array('type' => 'in', 'value' =>$child_arr),
+                        'leftjoin'=>array('managers', "managers.m_id = articles.a_author")
+                    );
+        return $this -> listData($info);
 
     }
 
@@ -159,12 +176,14 @@ class Articles extends \MDAOBASE\DaoBase
     public function getArticlesBySearch($condition)
     {
         $info = array();
-        $info['walk']['where']["like"] = array("m_name", "%" . $condition['search_condition'] . "%");
-        $info['page'] = $condition['page'];
-        $info['fields'] = 'a_id,a_title,a_info,a_author,a_in_time';
+        $info = array(
+                        'pager'=>true,'page'=>$page,
+                        'fields'=>'a_id,a_title,a_info,managers.m_name as a_author,a_last_edit_time',
+                        'a_title' => array('type' => 'like', 'value' => $condition['search_condition']),
+                        'leftjoin'=>array('managers', "managers.m_id = articles.a_author")
+                    );
 
-        $m_art = model('Articles');
-        return $m_art -> infoDatas($info);
+        return $this -> listData($info);
     }
 
 }
