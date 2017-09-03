@@ -14,6 +14,7 @@ class ManageBase extends Swoole\Controller
     public function __construct($swoole)
     {
         parent::__construct($swoole);
+        $this->db->debug = 1;
 
         $this->session->start();
 //         $this->validataLoginStatus(); //验证登陆状态
@@ -62,7 +63,7 @@ class ManageBase extends Swoole\Controller
     public function managerAssign()
     {
         if (defined("MANAGEURL")) {
-            $this->tpl->assign("manageurl", MANAGEURL);
+            $this->tpl->assign("manageurl", STATICPATH);
         }
         if (defined('HOSTURL')) {
             $this->tpl->assign("host_url", HOSTURL);
