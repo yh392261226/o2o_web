@@ -1686,7 +1686,7 @@ a.list-group-item.active:focus {
 .list-group-item {
     background-color: inherit;
     border: 1px solid #e7eaec;
-    display: inline-block;
+    display: block;
     margin-bottom: -1px;
     padding: 10px 15px;
     position: relative;
