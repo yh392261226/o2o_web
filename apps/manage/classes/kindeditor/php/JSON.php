@@ -92,7 +92,7 @@ define('SERVICES_JSON_LOOSE_TYPE', 16);
 define('SERVICES_JSON_SUPPRESS_ERRORS', 32);
 
 /*文件上传路径*/
-define('UPLOADURL',  '../../../uploads');//定义上传url路径与config文件中相同
+define('UPLOADURL',  '../../../../uploads');//定义上传url路径与config文件中相同
 define('UPLOADPATH', '../../uploads');//定义上传路径地址
 /**
  * Converts to and from JSON format.

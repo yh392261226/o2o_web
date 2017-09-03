@@ -111,7 +111,7 @@ class DaoBase
                                     $val['value'] = '%' . $val['value'];
                                 }
 
-                                $param['walk']['_where']['like'] = array($key, $val['value']);
+                                $param['walk']['where']['like'] = array($key, $val['value']);
                                 unset($param[$key]);
                             }
                             break;

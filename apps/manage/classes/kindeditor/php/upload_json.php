@@ -31,7 +31,7 @@ $max_size = 1000000;
 // 打开目录，然后读取其内容
 
 
-
+// var_dump(realpath(UPLOADURL.'/kindeditor'));die;
 $save_path = realpath($save_path) . '/';
 // var_dump($save_path);die;
 
