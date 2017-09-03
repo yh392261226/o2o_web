@@ -36,10 +36,53 @@ class Demo extends \CLASSES\ManageBase
         //List:
         //$data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_id' => array('type' => 'in', 'value' => '1,2,3'));
         //$data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_id' => array('type' => 'in', 'value' => array(1,2,3,4)));
-        $data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_name' => array('type' => 'like', 'value' => 'admin'), 'm_id' => array('type' => 'in', 'value' => array(1,2,3,4)), 'm_in_time' => array(array('type' => 'ge', 'ge_value' => 1), array('type' => 'le', 'le_value' => 9999999999)));//多个条件并存
-        //$data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_in_time' => array(array('type' => 'ge', 'ge_value' => 1), array('type' => 'le', 'le_value' => 9999999999)));//2个区间值
+        //$data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_name' => array('type' => 'like', 'value' => 'admin'), 'm_id' => array('type' => 'in', 'value' => array(1,2,3,4)), 'm_in_time' => array(array('type' => 'ge', 'ge_value' => 1), array('type' => 'le', 'le_value' => 9999999999)));//多个条件并存
+        $data   = array(
+            'pager' => true,
+            'page' => 1,
+            'm_status' => -2,
+            'm_in_time' => array(
+                array(
+                    'type' => 'ge',
+                    'ge_value' => 1
+                ),
+                array(
+                    'type' => 'le',
+                    'le_value' => 9999999999
+                )
+            ),
+            'in' => array(
+                'm_id',
+                '1,2,3',
+                array(1,2,3,4),
+            ),
+            'm_id' => array(
+                'type' => 'in',
+                'value' => '1,2,3'
+            ),
+            'm_name' => array(
+                'type' => 'like',
+                'value' => 'abc',
+            ),
+        );//2个区间值
         //$data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_in_time' => array('type' => 'ge', 'ge_value' => 2)); //单个区间值
         $list = $this->managers_dao->listData($data);
+        //$list = model('Managers')->gets(array(
+        //    'walk'=>array(
+        //        'where' => array(
+        //            'in' => array(
+        //                'm_id', '1,2,3'
+        //            )
+        //        ),
+        //        '_where' => array(
+        //            'like' => array(
+        //                'm_name', '%abc%'
+        //            ),
+        //            ''
+        //        ),
+        //
+        //    )
+        //));
         print_r($list);
         //------------------------------------------------------------------------------------------------
         //Info:

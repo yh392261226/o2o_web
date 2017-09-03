@@ -18,6 +18,7 @@ class Login extends \CLASSES\ManageBase
     {
         $this->tpl->display("Login/index.html");
     }
+
     public function doLogin()
     {
         if ($_POST['manager_name'] == '' && $_POST['manager_passwd'] == '') {
@@ -41,6 +42,7 @@ class Login extends \CLASSES\ManageBase
             }
         }
     }
+
     public function logOut()
     {
         session_destroy();

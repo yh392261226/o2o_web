@@ -14,6 +14,12 @@ class Managers extends \CLASSES\ManageBase
     /**
      * ****[ managers ]***********************************************************************************************
      */
+
+    public function index()
+    {
+        $this->mydisplay();
+    }
+
     public function login()
     {
         if (isset($_POST['m_name']))
@@ -27,16 +33,29 @@ class Managers extends \CLASSES\ManageBase
             if (!empty($result) && $result['m_pass'] == $data['m_pass'])
             {
                 $_SESSION['manager'] = $result;
+                if (isset($_SESSION['manager']) && !empty($_SESSION['manager']) && isset($_SESSION['manager']['m_id']) && intval($_SESSION['manager']['m_id']) > 0)
+                {
+                    echo json_encode(array('status' => 200, 'data' => 'success', 'url' => HOSTURL . '/Managers/index'));exit;
+                }
+                echo json_encode(array('status' => 200, 'data' => '数据信息错误，请联系管理员处理'));exit;
             }
-            return $_SESSION['manager'];
+            echo json_encode(array('status' => 200, 'data' => '错误的账号或密码'));exit;
         }
 
         if (isset($_SESSION['manager']) && !empty($_SESSION['manager']) && isset($_SESSION['manager']['m_id']) && intval($_SESSION['manager']['m_id']) > 0)
         {
-            header('location:/Managers/index');
+            header('location:' . HOSTURL . '/Managers/index');
         }
 
         $this->mydisplay();
+    }
+
+    public function logOut()
+    {
+        session_destroy();
+        session_unset();
+        $this->http->status(302);
+        $this->http->header('Location', HOSTURL);
     }
 
     public function add()
@@ -58,6 +77,11 @@ class Managers extends \CLASSES\ManageBase
                 'm_last_editor'     => $_SESSION['manager']['m_id'],
                 'm_last_ip'         => getIp(),
             );
+
+            if ('' == $data['m_name']) msg('管理员名称不能为空', 0);
+            if ('' == $data['m_pass']) msg('密码不能为空', 0);
+            if ($this->_checkName($data['m_name'])) msg('管理员名称已被占用', 0);
+
             $result = $this->managers_dao->addData($data);
             if (!$result)
             {
@@ -67,7 +91,7 @@ class Managers extends \CLASSES\ManageBase
             //SUCCESSFUL
             msg('操作成功', 1);
         }
-        $this->tpl->display('add');
+        $this->tpl->display();
     }
 
     public function edit()
@@ -85,6 +109,9 @@ class Managers extends \CLASSES\ManageBase
                 'm_last_editor'    => $_SESSION['manager']['m_id'],
                 'm_last_ip'         => getIp(),
             );
+
+            if ('' == $data['m_pass']) msg('密码不能为空', 0);
+
             $param = array(
                 'm_id' => isset($_POST['m_id']) ? trim($_POST['m_id']) : 0,
             );
@@ -105,7 +132,7 @@ class Managers extends \CLASSES\ManageBase
 
         $info = $this->managers_dao->infoData($_REQUEST['m_id']);
         $this->tpl->assign('info', $info);
-        $this->tpl->display('edit');
+        $this->tpl->display();
     }
 
     public function del()
@@ -205,7 +232,7 @@ class Managers extends \CLASSES\ManageBase
             msg('操作成功', 1);
         }
 
-        $this->tpl->display('group_add');
+        $this->tpl->display();
     }
 
     public function editGroup()
@@ -246,7 +273,7 @@ class Managers extends \CLASSES\ManageBase
         }
         $info = $this->managers_privileges_group_dao->infoData($_REQUEST['mpg_id']);
         $this->tpl->assign('info', $info);
-        $this->tpl->display('group_edit');
+        $this->tpl->display();
     }
 
     public function delGroup()
@@ -287,7 +314,7 @@ class Managers extends \CLASSES\ManageBase
             }
         }
         $this->tpl->assign('info', $info);
-        $this->tpl->display('group_info');
+        $this->tpl->display();
     }
 
     public function listGroup()
@@ -311,7 +338,7 @@ class Managers extends \CLASSES\ManageBase
 
         $list = $this->managers_privileges_group_dao->listData($data);
         $this->tpl->assign('list', $list);
-        $this->tpl->display('group_list');
+        $this->tpl->display();
     }
 
     /**
@@ -337,7 +364,7 @@ class Managers extends \CLASSES\ManageBase
             //SUCCESSFUL
             msg('操作成功', 1);
         }
-        $this->tpl->display('modules_add');
+        $this->tpl->display();
     }
 
     public function editMoudles()
@@ -370,7 +397,7 @@ class Managers extends \CLASSES\ManageBase
         }
         $info = $this->manager_privileges_modules->infoData($_REQUEST['mpm_id']);
         $this->tpl->assign('info', $info);
-        $this->tpl->display('modules_edit');
+        $this->tpl->display();
     }
 
     public function delModules()
@@ -411,7 +438,7 @@ class Managers extends \CLASSES\ManageBase
             }
         }
         $this->tpl->assign('info', $info);
-        $this->tpl->display('info');
+        $this->tpl->display();
     }
 
     public function listModules()
@@ -423,8 +450,21 @@ class Managers extends \CLASSES\ManageBase
         if (isset($_REQUEST['mpm_value'])) $data['mpm_value'] = array('type' => 'like', 'value' => $_REQUEST['mpm_value']);
         $list = $this->manager_privileges_modules->listData($data);
         $this->tpl->assign('list', $list);
-        $this->tpl->display('list');
+        $this->tpl->display();
     }
 
 
+
+    private function _checkName($name)
+    {
+        if ('' != trim($name))
+        {
+            $counts = $this->managers_dao->countData(array('m_name' => $name));
+            if ($counts > 0)
+            {
+                return true; //exusts manager
+            }
+        }
+        return false; //does not exists manager
+    }
 }
