@@ -41,7 +41,6 @@
                     </div>
                     <div class="ibox-content">
                         <div class="row">
-                            <form action="" method="post">
                                 <div class="col-sm-2 m-b-xs">
                                     <select class="input-sm form-control input-s-sm inline" name="mpm_status" id="cat_search" onchange="getListByCat();">
                                         <option value="">请选择</option>
@@ -52,13 +51,12 @@
                                 </div>
                                 <div class="col-sm-2">
                                     <div class="input-group">
-                                        <form action="index" method="post" accept-charset="utf-8">
+                                        <form action="Articles/index" method="get" accept-charset="utf-8">
                                             <input type="text" placeholder="请输入关键词" class="input-sm form-control" name="search_condition" value="{{$search_condition}}"> <span class="input-group-btn">
                                         </form>
                                             <button type="submit" class="btn btn-sm btn-primary"> 搜索</button> </span>
                                     </div>
                                 </div>
-                            </form>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-striped">

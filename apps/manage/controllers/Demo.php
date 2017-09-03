@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-29 16:21:05
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-08-29 16:21:17
+ * @Last Modified time: 2017-09-03 09:50:54
  */
 namespace App\Controller;
 class Demo extends \CLASSES\ManageBase
@@ -36,8 +36,9 @@ class Demo extends \CLASSES\ManageBase
         //List:
         //$data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_id' => array('type' => 'in', 'value' => '1,2,3'));
         //$data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_id' => array('type' => 'in', 'value' => array(1,2,3,4)));
-        $data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_name' => array('type' => 'like', 'value' => 'admin'), 'm_id' => array('type' => 'in', 'value' => array(1,2,3,4)), 'm_in_time' => array(array('type' => 'ge', 'ge_value' => 1), array('type' => 'le', 'le_value' => 9999999999)));//多个条件并存
-        //$data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_in_time' => array(array('type' => 'ge', 'ge_value' => 1), array('type' => 'le', 'le_value' => 9999999999)));//2个区间值
+        $data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_name' => array('type' => 'like', 'value' => 'admin'), 'm_id' => array('type' => 'in', 'value' => array(1,2,3,4)), 'm_in_time' => array(array('type' => 'ge', 'ge_value' => 1), array('type' => 'le', 'le_value' => 9999999999)));
+        //多个条件并存
+        // $data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_in_time' => array(array('type' => 'ge', 'ge_value' => 1), array('type' => 'le', 'le_value' => 9999999999)));//2个区间值
         //$data   = array('pager' => true, 'page' => 1, 'm_status' => -2, 'm_in_time' => array('type' => 'ge', 'ge_value' => 2)); //单个区间值
         $list = $this->managers_dao->listData($data);
         print_r($list);

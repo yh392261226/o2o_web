@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-01 19:33:32
+ * @Last Modified time: 2017-09-03 10:21:51
  */
 
 namespace App\Controller;
@@ -304,7 +304,7 @@ class Articles extends \CLASSES\ManageBase
     {
         $condition = array();
         $condition['ac_id'] = isset($_GET['ac_id'])&&!empty($_GET['ac_id']) ? intval($_GET['ac_id']) : 0;
-        $condition['search_condition'] = isset($_POST['search_condition'])&&!empty($_POST['search_condition']) ? $_POST['search_condition'] : "";
+        $condition['search_condition'] = isset($_GET['search_condition'])&&!empty($_GET['search_condition']) ? $_GET['search_condition'] : "";
         $condition['page'] = (isset($_REQUEST['page']) && !empty($_REQUEST['page'])) ? $_REQUEST['page'] : 1;
 
         /*获取文章列表*/
