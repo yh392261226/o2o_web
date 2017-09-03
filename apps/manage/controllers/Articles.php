@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-03 16:14:11
+ * @Last Modified time: 2017-09-03 16:29:24
  */
 
 namespace App\Controller;
@@ -443,7 +443,7 @@ class Articles extends \CLASSES\ManageBase
 
 
 
-        $res = $dao_article->saveArtice($data);
+        $res = $dao_article->addData($data);
         if($res){
             msg("文章添加成功", $status = 1, $jump);
         }else{

@@ -13,7 +13,7 @@ if (!defined('WEBPATH')) {
 define('CONFIGPATH', WEBPATH . '/configs');
 define('FRAMEWORKPATH', WEBPATH . '/../../framework');
 define('APPPATH', WEBPATH . '/..');
-define('STATICPATH','/views/static/manager/');
+define('STATICPATH','/views/static/');
 define('STATICURL', '');
 define('MANAGEURL', STATICURL . '/manager/');//定义后台静态文件路径
 // define('UPLOADURL', STATICURL . '/uploads/');//定义上传路径
