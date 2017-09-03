@@ -13,8 +13,8 @@ if (!defined('WEBPATH')) {
 define('CONFIGPATH', WEBPATH . '/configs');
 define('FRAMEWORKPATH', WEBPATH . '/../../framework');
 define('APPPATH', WEBPATH . '/..');
-define('STATICPATH', WEBPATH . '/../../static');
-define('STATICURL', 'http://devstatic.gangjianwang.com');
+define('STATICPATH', '/views/static/');
+define('STATICURL', '/views/static/');
 define('MANAGEURL', STATICURL . '/manager/');//定义后台静态文件路径
 // define('UPLOADURL', STATICURL . '/uploads/');//定义上传路径
 define('HOSTURL', 'http://' . $_SERVER['HTTP_HOST']); //定义网站家域名

@@ -62,7 +62,7 @@ class ManageBase extends Swoole\Controller
     public function managerAssign()
     {
         if (defined("MANAGEURL")) {
-            $this->tpl->assign("manageurl", MANAGEURL);
+            $this->tpl->assign("manageurl", STATICPATH);
         }
         if (defined('HOSTURL')) {
             $this->tpl->assign("host_url", HOSTURL);
