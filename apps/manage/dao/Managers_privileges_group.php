@@ -7,4 +7,9 @@ class Managers_privileges_group extends \MDAOBASE\DaoBase
     {
         parent::__construct(array('table' => 'managers_privileges_group'));
     }
+
+    public function listDataAll()
+    {
+        return $this->listData(array('pager' => 0));
+    }
 }

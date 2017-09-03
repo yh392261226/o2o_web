@@ -39,10 +39,10 @@ $menu = array(
             0 => array(
                 "name" => '管理员', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
                     0 => array(
-                        'name' => '管理员列表', 'icon' => '', 'link' => '/manager/managerList',
+                        'name' => '管理员列表', 'icon' => '', 'link' => '/Managers/list',
                     ),
                     1 => array(
-                        'name' => '管理员添加', 'icon' => '', 'link' => '/manager/managerAdd',
+                        'name' => '管理员添加', 'icon' => '', 'link' => '/Managers/add',
                     ),
                 ),
             ),
