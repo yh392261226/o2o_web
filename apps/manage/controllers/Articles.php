@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-03 10:21:51
+ * @Last Modified time: 2017-09-03 16:14:11
  */
 
 namespace App\Controller;
@@ -156,18 +156,19 @@ class Articles extends \CLASSES\ManageBase
             /*判断有没有子集和该分类内有没有文件如果有删除失败*/
             $dao_articles_category = new \MDAO\Articles(array('table'=>'Articles_category'));
             $child_cat_id = $dao_articles_category ->infoData(array('key'=>'ac_pid','val'=>$ac_id,'fields'=>'ac_id'));
-            if(!$child_cat_id['ac_id'])
+            if(!isset($child_cat_id['ac_id']))
             {
 
                 $dao_article = new \MDAO\Articles(array('table'=>'Articles'));
                 $child_art_id = $dao_article->infoData(array('key'=>'ac_id','val'=>$ac_id,'fields'=>'a_id'));
-                if(!$child_art_id['a_id'])
+
+                if(!isset($child_art_id['a_id']))
                 {
 
                     $res = $dao_articles_category->delData($ac_id);
                     if($res)
                     {
-                        msg("分类删除成功!", $status = 1, $jump);
+                        // msg("分类删除成功!", $status = 1, $jump);
                     }else{
                         msg("分类删除失败!", $status = 0, $jump);
                     }
@@ -314,21 +315,24 @@ class Articles extends \CLASSES\ManageBase
 
         /*通过id获取用户名*/
         $dao_manager =  new \MDAO\Managers(array('table'=>'Managers'));
-        foreach ($artivle_list_arr['data'] as $key => $value) {
+        // foreach ($artivle_list_arr['data'] as $key => $value) {
 
-            $artivle_list_arr['data'][$key]['a_last_edit_time'] = date('Y-m-d H:i:s',$artivle_list_arr['data'][$key]['a_last_edit_time']);
-        }
-
-
+            // $artivle_list_arr['data'][$key]['a_last_edit_time'] = date('Y-m-d H:i:s',$artivle_list_arr['data'][$key]['a_last_edit_time']);
+        // }
 
 
-        // var_dump($artivle_list_arr['pager']);die;
+
+
+        // var_dump($artivle_list_arr);die;
 
         /*获取分类树*/
         $dao_article = new \MDAO\Articles(array('table'=>'Articles_category'));
         $ac_tree = $dao_article->getTree();
         if(!empty($condition['search_condition'])){
             $this->tpl->assign("search_condition",$condition['search_condition']);
+        }
+        if($condition['ac_id'] > 0){
+            $this->tpl->assign("ac_id",$condition['ac_id']);
         }
         $this->tpl->assign("ac_tree",$ac_tree);
         $this->tpl->assign("page", $artivle_list_arr['page']);
@@ -350,7 +354,7 @@ class Articles extends \CLASSES\ManageBase
         $area = area(1);
 
         /*获取分类树*/
-        $dao_article = new \MDAO\Articles();
+        $dao_article = new \MDAO\Articles(array('table'=>'Articles_category'));
         $ac_tree = $dao_article->getTree();
 
 
@@ -381,11 +385,14 @@ class Articles extends \CLASSES\ManageBase
         $area = area(1);
 
         /*获取分类树*/
-        $dao_article = new \MDAO\Articles();
+        $dao_article = new \MDAO\Articles(array('table'=>'Articles_category'));
         $ac_tree = $dao_article->getTree();
 
         $this->tpl->assign("ac_tree",$ac_tree);
         $this->tpl->assign("area_provinces",$area['regions']);
+        if (defined('HTMLEDITOR')) {
+            $this->tpl->assign("htmleditor", HTMLEDITOR);
+        }
         $this->tpl->display("Articles/articleAdd.html");
     }
 
@@ -395,7 +402,7 @@ class Articles extends \CLASSES\ManageBase
     public function doArticleAdd()
     {
         $jump = "/Articles/articleAdd";
-        $dao_article = new \MDAO\Articles();
+        $dao_article = new \MDAO\Articles(array('table'=>'Articles'));
         if(!isset($_POST['a_title']) || !isset($_POST['ac_id']) || empty($_POST['ac_id']) || empty($_POST['a_title'])){
             msg("请填写分类名并选择父分类名", $status = 0, $jump);
         }
