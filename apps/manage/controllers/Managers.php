@@ -91,7 +91,7 @@ class Managers extends \CLASSES\ManageBase
             //SUCCESSFUL
             msg('操作成功', 1);
         }
-        $this->tpl->display();
+        $this->mydisplay();
     }
 
     public function edit()
@@ -110,7 +110,7 @@ class Managers extends \CLASSES\ManageBase
                 'm_last_ip'         => getIp(),
             );
 
-            if ('' == $data['m_pass']) msg('密码不能为空', 0);
+            if ('' == $data['m_pass']) unset($data['m_pass']);
 
             $param = array(
                 'm_id' => isset($_POST['m_id']) ? trim($_POST['m_id']) : 0,
@@ -131,8 +131,9 @@ class Managers extends \CLASSES\ManageBase
         }
 
         $info = $this->managers_dao->infoData($_REQUEST['m_id']);
+        //print_r($info);
         $this->tpl->assign('info', $info);
-        $this->tpl->display();
+        $this->mydisplay();
     }
 
     public function del()
@@ -140,13 +141,13 @@ class Managers extends \CLASSES\ManageBase
         $result = 0;
         if (isset($_REQUEST['m_id']))
         {
-            if (is_array($_REQUEST['m_id']))
+            if (is_array($_REQUEST['m_id']) || strpos($_REQUEST['m_id'], ','))
             {
                 $result = $this->managers_dao->delData(array('m_id' => array('type' => 'in', 'value' => $_REQUEST['m_id']))); //伪删除
             }
             else
             {
-                $result = $this->managers_dao->delData(intval($_REQUEST['m_id'])); //伪删除
+                $result = $this->managers_dao->delData(array('m_id' => intval($_REQUEST['m_id']))); //伪删除
             }
         }
         if (!$result) {
@@ -154,7 +155,7 @@ class Managers extends \CLASSES\ManageBase
             msg('操作失败', 0);
         }
         //SUCCESSFUL
-        msg('操作成功', 1);
+        msg('操作成功', 1, '/Managers/list');
     }
 
     public function info()
@@ -181,6 +182,7 @@ class Managers extends \CLASSES\ManageBase
         if (isset($_REQUEST['m_id'])) $data['m_id'] = array('type' => 'in', value => $_REQUEST['m_id']);
         if (isset($_REQUEST['m_name'])) $data['m_name'] = array('type'=>'like', 'value' => trim($_REQUEST['m_name']));
         if (isset($_REQUEST['m_status'])) $data['m_status'] = intval($_REQUEST['m_status']);
+        $data['m_status'] = isset($_REQUEST['m_status']) ? intval($_REQUEST['m_status']) : array('notin', '-2');
         if (isset($_REQUEST['m_inip'])) $data['m_inip'] = array('type' => 'in', 'value' => $_REQUEST['m_inip']);
         if (isset($_REQUEST['m_author'])) $data['m_author'] = intval($_REQUEST['m_author']);
         if (isset($_REQUEST['mpg_id'])) $data['mpg_id'] = intval($_REQUEST['mpg_id']);
@@ -195,7 +197,7 @@ class Managers extends \CLASSES\ManageBase
 
         $list = $this->managers_dao->listData($data);
         $this->tpl->assign('list', $list);
-        $this->tpl->display('list');
+        $this->mydisplay();
     }
 
     /**
@@ -453,7 +455,9 @@ class Managers extends \CLASSES\ManageBase
         $this->tpl->display();
     }
 
-
+    /**
+     * ****[ others ]***********************************************************************************************
+     */
 
     private function _checkName($name)
     {

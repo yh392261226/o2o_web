@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>管理员添加</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+
+    <link rel="shortcut icon" href="favicon.ico"> <link href="{{$manageurl}}css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="{{$manageurl}}css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="{{$manageurl}}css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/animate.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/plugins/summernote/summernote.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/plugins/summernote/summernote-bs3.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/style.css?v=4.1.0" rel="stylesheet">
+
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated ">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                   
+                    <div class="ibox-content">
+                        <form method="post" class="form-horizontal" action="">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">管理名称</label>
+
+                                <div class="col-sm-10">
+                                    <input id="m_name" name="m_name" minlength="6" type="text" class="form-control" required="true" aria-required="true">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">密码</label>
+
+                                <div class="col-sm-10">
+                                    <input id="m_pass" name="m_pass" minlength="6" type="text" class="form-control" required="true" aria-required="true">
+                                </div>
+                            </div>
+
+                             <div class="form-group">
+                                <label class="col-sm-2 control-label">管理组</label>
+
+                                <div class="col-sm-10">
+                                    <select class="form-control m-b" name="mpg_id">
+
+                                        <option value="0">请选择</option>
+                                        <option value=""></option>
+
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"> </label>
+                                <div class="col-sm-10">
+                                    <div class="switch">
+			                            <div class="onoffswitch">
+			                                <input type="checkbox" checked class="onoffswitch-checkbox" id="example1">
+			                                <label class="onoffswitch-label" for="example1">
+			                                    <span class="onoffswitch-inner"></span>
+			                                    <span class="onoffswitch-switch"></span>
+		                               		</label>
+		                            	</div>
+                       		 		</div>
+                       		 		
+                                </div>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <div class="col-sm-4 col-sm-offset-2">
+                                    <button class="btn btn-primary" type="submit">保存内容</button>
+                                    <button class="btn btn-white" type="reset">取消</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-form" class="modal fade" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-6 b-r">
+                            <h3 class="m-t-none m-b">登录</h3>
+                            <form role="form">
+                                <div class="form-group">
+                                    <label>用户名：</label>
+                                    <input type="email" placeholder="请输入用户名" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>密码：</label>
+                                    <input type="password" placeholder="请输入密码" class="form-control">
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-primary pull-right m-t-n-xs" type="submit"><strong>登录</strong>
+                                    </button>
+                                    <label>
+                                        <input type="checkbox" class="i-checks">自动登录</label>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-sm-6">
+                            <h4>还不是会员？</h4>
+                            <p>您可以注册一个账户</p>
+                            <p class="text-center">
+                                <a href="form_basic.html"><i class="fa fa-sign-in big-icon"></i></a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+    <!-- 全局js -->
+    <script src="{{$manageurl}}js/jquery.min.js?v=2.1.4"></script>
+    <script src="{{$manageurl}}js/bootstrap.min.js?v=3.3.6"></script>
+
+    <!-- 自定义js -->
+    <script src="{{$manageurl}}js/content.js?v=1.0.0"></script>
+
+    <!-- iCheck -->
+    <script src="{{$manageurl}}js/plugins/iCheck/icheck.min.js"></script>
+     <!-- SUMMERNOTE -->
+    <script src="{{$manageurl}}js/plugins/summernote/summernote.min.js"></script>
+    <script src="{{$manageurl}}js/plugins/summernote/summernote-zh-CN.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            $('.summernote').summernote({
+                lang: 'zh-CN'
+            });
+
+        });
+        var edit = function () {
+            $("#eg").addClass("no-padding");
+            $('.click2edit').summernote({
+                lang: 'zh-CN',
+                focus: true
+            });
+        };
+        var save = function () {
+            $("#eg").removeClass("no-padding");
+            var aHTML = $('.click2edit').code(); //save HTML If you need(aHTML: array).
+            $('.click2edit').destroy();
+        };
+    </script>
+    
+    <script>
+        $(document).ready(function () {
+            $('.i-checks').iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green',
+            });
+        });
+    </script>
+
+    
+
+</body>
+
+</html>
