@@ -51,6 +51,7 @@ class Demo extends \CLASSES\ManageBase
                     'le_value' => 9999999999
                 )
             ),
+            'in' => array('m_id', '3,5,3'),
             'm_id' => array(
                 'type' => 'in',
                 'value' => '1,2,3'
