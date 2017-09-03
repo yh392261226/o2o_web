@@ -322,6 +322,7 @@
 							);
 					});
 				}
+
 				if(node.tags){
 					$.each(node.tags, function addTag(id, tag) {
 						btn
@@ -407,7 +408,7 @@
 			btn:'<button onclick="delAc(this)">删除</button>'
 		},
 
-		_css: '.list-group-item{cursor:pointer;display:inline-block;width:90%;}span.indent{margin-left:10px;margin-right:10px}span.icon{margin-right:5px}'
+		_css: '.list-group-item{cursor:pointer;display:inline-block;width:96%;}span.indent{margin-left:10px;margin-right:10px}span.icon{margin-right:5px}'
 		// _css: '.list-group-item{cursor:pointer;}.list-group-item:hover{background-color:#f5f5f5;}span.indent{margin-left:10px;margin-right:10px}span.icon{margin-right:5px}'
 
 	};
@@ -448,6 +449,4 @@
 		});
 	};
 
-
 })(jQuery, window, document);
-
