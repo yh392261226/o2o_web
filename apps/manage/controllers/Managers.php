@@ -9,6 +9,8 @@ class Managers extends \CLASSES\ManageBase
         $this->managers_dao = new \MDAO\Managers();
         $this->managers_privileges_group_dao = new \MDAO\Managers_privileges_group();
         $this->manager_privileges_modules = new \MDAO\Manager_privileges_modules();
+
+        //$this->db->debug = 1;
     }
 
     /**
@@ -80,7 +82,7 @@ class Managers extends \CLASSES\ManageBase
 
             if ('' == $data['m_name']) msg('管理员名称不能为空', 0);
             if ('' == $data['m_pass']) msg('密码不能为空', 0);
-            if ($this->_checkName($data['m_name'])) msg('管理员名称已被占用', 0);
+            if ($this->managers_dao->checkManagerName($data['m_name'])) msg('管理员名称已被占用', 0);
 
             $result = $this->managers_dao->addData($data);
             if (!$result)
@@ -89,9 +91,11 @@ class Managers extends \CLASSES\ManageBase
                 msg('操作失败', 0);
             }
             //SUCCESSFUL
-            msg('操作成功', 1);
+            msg('操作成功', 1, '/Managers/list');
         }
-        $this->tpl->display();
+        $privileges_group = $this->managers_privileges_group_dao->listDataAll();
+        $this->tpl->assign('group', $privileges_group);
+        $this->mydisplay();
     }
 
     public function edit()
@@ -100,9 +104,9 @@ class Managers extends \CLASSES\ManageBase
         {
             $curtime = time();
             $data = array(
-                'm_pass'           => isset($_POST['m_pass']) ? encyptPassword(trim($_POST['m_pass'])) : '',
+                'm_pass'           => (isset($_POST['m_pass']) && '' != trim($_POST['m_pass'])) ? encyptPassword(trim($_POST['m_pass'])) : '',
                 'm_status'         => isset($_POST['m_status']) ? trim($_POST['m_status']) : 0,
-                'mpg_id'           => isset($_POST['mpg_id']) ? trim($_POST['mpg_id']) : 0,
+                'mpg_id'           => isset($_POST['mpg_id']) ? intval($_POST['mpg_id']) : 0,
                 'm_start_time'     => isset($_POST['m_start_time']) ? trim($_POST['m_start_time']) : 0,
                 'm_end_time'       => isset($_POST['m_end_time']) ? trim($_POST['m_end_time']) : 0,
                 'm_last_edit_time' => $curtime,
@@ -110,13 +114,13 @@ class Managers extends \CLASSES\ManageBase
                 'm_last_ip'         => getIp(),
             );
 
-            if ('' == $data['m_pass']) msg('密码不能为空', 0);
+            if ('' == $data['m_pass']) unset($data['m_pass']);
 
             $param = array(
                 'm_id' => isset($_POST['m_id']) ? trim($_POST['m_id']) : 0,
             );
 
-            if (!$param['m_id'] || $data['m_pass'] == '') {
+            if (!$param['m_id']) {
                 //FAILED
                 msg('操作失败', 0);
             }
@@ -127,12 +131,14 @@ class Managers extends \CLASSES\ManageBase
                 msg('操作失败', 0);
             }
             //SUCCESSFUL
-            msg('操作成功', 1);
+            msg('操作成功', 1, '/Managers/list');
         }
 
         $info = $this->managers_dao->infoData($_REQUEST['m_id']);
+        $privileges_group = $this->managers_privileges_group_dao->listDataAll();
         $this->tpl->assign('info', $info);
-        $this->tpl->display();
+        $this->tpl->assign('group', $privileges_group);
+        $this->mydisplay();
     }
 
     public function del()
@@ -140,13 +146,13 @@ class Managers extends \CLASSES\ManageBase
         $result = 0;
         if (isset($_REQUEST['m_id']))
         {
-            if (is_array($_REQUEST['m_id']))
+            if (is_array($_REQUEST['m_id']) || strpos($_REQUEST['m_id'], ','))
             {
                 $result = $this->managers_dao->delData(array('m_id' => array('type' => 'in', 'value' => $_REQUEST['m_id']))); //伪删除
             }
             else
             {
-                $result = $this->managers_dao->delData(intval($_REQUEST['m_id'])); //伪删除
+                $result = $this->managers_dao->delData(array('m_id' => intval($_REQUEST['m_id']))); //伪删除
             }
         }
         if (!$result) {
@@ -154,7 +160,7 @@ class Managers extends \CLASSES\ManageBase
             msg('操作失败', 0);
         }
         //SUCCESSFUL
-        msg('操作成功', 1);
+        msg('操作成功', 1, '/Managers/list');
     }
 
     public function info()
@@ -186,6 +192,11 @@ class Managers extends \CLASSES\ManageBase
         if (isset($_REQUEST['mpg_id'])) $data['mpg_id'] = intval($_REQUEST['mpg_id']);
         if (isset($_REQUEST['m_start_time'])) $data['m_start_time'] = array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['m_start_time']));
         if (isset($_REQUEST['m_end_time'])) $data['m_end_time'] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['m_end_time']));
+        $data['notin'] = array('m_status', '-2');
+        if (isset($data['m_status']) && '' != $data['m_status'])
+        {
+            unset($data['notin']);
+        }
 
         if (isset($_REQUEST['m_start_time']) && isset($_REQUEST['m_end_time']) && strtotime($_REQUEST['m_end_time']) < strtotime($_REQUEST['m_start_time']))
         {
@@ -195,7 +206,7 @@ class Managers extends \CLASSES\ManageBase
 
         $list = $this->managers_dao->listData($data);
         $this->tpl->assign('list', $list);
-        $this->tpl->display('list');
+        $this->mydisplay();
     }
 
     /**
@@ -453,18 +464,8 @@ class Managers extends \CLASSES\ManageBase
         $this->tpl->display();
     }
 
+    /**
+     * ****[ others ]***********************************************************************************************
+     */
 
-
-    private function _checkName($name)
-    {
-        if ('' != trim($name))
-        {
-            $counts = $this->managers_dao->countData(array('m_name' => $name));
-            if ($counts > 0)
-            {
-                return true; //exusts manager
-            }
-        }
-        return false; //does not exists manager
-    }
 }
