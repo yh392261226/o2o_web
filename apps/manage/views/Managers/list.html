@@ -16,8 +16,6 @@
     <link href="{{$manageurl}}css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
     <link href="{{$manageurl}}css/animate.css" rel="stylesheet">
     <link href="{{$manageurl}}css/style.css?v=4.1.0" rel="stylesheet">
-    
-
 </head>
 
 <body class="gray-bg">
@@ -52,7 +50,7 @@
                             {{if $list.data}}
                             {{foreach from=$list.data item=value}}
                             <tr>
-                                <td></td>
+                                <td><input type="checkbox" name="m_id" value="{{$value.m_id}}"></td>
                                 <td>{{$value.m_id}}</td>
                                 <td>{{$value.m_name}}</td>
                                 <td>
@@ -69,6 +67,7 @@
                             {{/if}}
                         </tbody>
                     </table>
+                    {{include file='layout/pager.html'}}
                 </div>
             </div>
             <!-- End Example Events -->

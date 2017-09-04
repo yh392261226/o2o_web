@@ -192,6 +192,8 @@ class Managers extends \CLASSES\ManageBase
         if (isset($_REQUEST['mpg_id'])) $data['mpg_id'] = intval($_REQUEST['mpg_id']);
         if (isset($_REQUEST['m_start_time'])) $data['m_start_time'] = array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['m_start_time']));
         if (isset($_REQUEST['m_end_time'])) $data['m_end_time'] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['m_end_time']));
+        $data['page'] = isset($_REQUEST['page']) ? intval($_REQUEST['page']) : 1;
+
         $data['notin'] = array('m_status', '-2');
         if (isset($data['m_status']) && '' != $data['m_status'])
         {
@@ -206,6 +208,7 @@ class Managers extends \CLASSES\ManageBase
 
         $list = $this->managers_dao->listData($data);
         $this->tpl->assign('list', $list);
+        $this->myPager($list['pager']);
         $this->mydisplay();
     }
 
