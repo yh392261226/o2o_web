@@ -389,10 +389,10 @@ class Managers extends \CLASSES\ManageBase
             //SUCCESSFUL
             msg('操作成功', 1);
         }
-        $this->tpl->display();
+        $this->mydisplay();
     }
 
-    public function editMoudles()
+    public function editModules()
     {
         if (isset($_POST['mpm_id']))
         {
@@ -422,7 +422,7 @@ class Managers extends \CLASSES\ManageBase
         }
         $info = $this->manager_privileges_modules->infoData($_REQUEST['mpm_id']);
         $this->tpl->assign('info', $info);
-        $this->tpl->display();
+        $this->mydisplay();
     }
 
     public function delModules()
@@ -473,9 +473,10 @@ class Managers extends \CLASSES\ManageBase
         if (isset($_REQUEST['mpm_name'])) $data['mpm_name'] = array('type'=>'like', 'value' => trim($_REQUEST['mpm_name']));
         if (isset($_REQUEST['mpm_status'])) $data['mpm_status'] = intval($_REQUEST['mpm_status']);
         if (isset($_REQUEST['mpm_value'])) $data['mpm_value'] = array('type' => 'like', 'value' => $_REQUEST['mpm_value']);
+        $data['page'] = isset($_REQUEST['page']) ? intval($_REQUEST['page']) : 1;
         $list = $this->manager_privileges_modules->listData($data);
         $this->tpl->assign('list', $list);
-        $this->tpl->display();
+        $this->mydisplay();
     }
 
     /**
