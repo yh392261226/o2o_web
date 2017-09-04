@@ -16,6 +16,7 @@
     <link href="{{$manageurl}}css/animate.css" rel="stylesheet">
     <link href="{{$manageurl}}css/style.css?v=4.1.0" rel="stylesheet">
     <link href="{{$manageurl}}css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
     <!-- <script type="text/javascript" src="{{$manageurl}}js/area.js"></script> -->
 
     <!-- 富文本编辑器 -->
@@ -87,63 +88,69 @@
 
                             <div class="hr-line-dashed"></div>
 <!-- 是否启用 -->
-                            <div class="form-group">
+                            <div class="form-group control-label">
                                 <label class="col-sm-2 control-label">是否启用:
                                     <br/>
                                     <small class="text-navy"></small>
                                 </label>
+                                <div class="col-sm-2">
+                                    <div class="radio radio-info radio-inline">
+                                        <input id="inlineRadio1" {{if $self_data.a_status eq 1}}checked=""{{/if}}  type="radio" name="a_status" value="1">
+                                        <label for="inlineRadio1">是</label>
+                                    </div>
+                                    <div class="radio radio-info radio-inline">
+                                            <input id="inlineRadio2" {{if $self_data.a_status eq 0}}checked=""{{/if}}  type="radio" name="a_status" value="0">
+                                            <label for="inlineRadio2">否</label>
+                                    </div>
 
-                                <div class="col-sm-4">
-                                    <div class="radio">
-                                        <label>
-                                            <input {{if $self_data.a_status eq 1}}checked=""{{/if}} type="radio"  value="1" id="optionsRadios1" name="a_status">已启用</label>
-                                    </div>
-                                    <div class="radio">
-                                        <label>
-                                            <input {{if $self_data.a_status eq 0}}checked=""{{/if}} type="radio" value="0" id="optionsRadios2" name="a_status">未启用</label>
-                                    </div>
                                 </div>
+
                             </div>
 
 <!-- 是否置顶 -->
-
-                            <div class="form-group">
+                            <div class="form-group control-label">
                                 <label class="col-sm-2 control-label">是否置顶:
                                     <br/>
                                     <small class="text-navy"></small>
                                 </label>
+                                <div class="col-sm-2">
+                                    <div class="radio radio-info radio-inline">
+                                        <input id="inlineRadio3" {{if $self_data.a_top eq 1}}checked=""{{/if}} type="radio" name="a_top" value="1">
+                                        <label for="inlineRadio3">是</label>
+                                    </div>
+                                    <div class="radio radio-info radio-inline">
+                                            <input id="inlineRadio4"  {{if $self_data.a_top eq 0}}checked=""{{/if}} type="radio" name="a_top" value="0">
+                                            <label for="inlineRadio4">否</label>
+                                    </div>
 
-                                <div class="col-sm-4">
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" {{if $self_data.a_top eq 1}}checked=""{{/if}} value="1" id="optionsRadios1" name="a_top">是</label>
-                                    </div>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" {{if $self_data.a_top eq 0}}checked=""{{/if}} value="0" id="optionsRadios2" name="a_top">否</label>
-                                    </div>
                                 </div>
+
                             </div>
 
 
-                            <!-- 是否推荐 -->
-                            <div class="form-group">
+
+                           <!-- 是否推荐 -->
+                            <div class="form-group control-label">
                                 <label class="col-sm-2 control-label">是否推荐:
                                     <br/>
                                     <small class="text-navy"></small>
                                 </label>
+                                <div class="col-sm-2">
+                                    <div class="radio radio-info radio-inline">
+                                        <input id="inlineRadio5" {{if $self_data.a_recommend eq 1}}checked=""{{/if}} type="radio" name="a_recommend" value="1">
+                                        <label for="inlineRadio5">是</label>
+                                    </div>
+                                    <div class="radio radio-info radio-inline">
+                                            <input id="inlineRadio6" {{if $self_data.a_recommend eq 0}}checked=""{{/if}} type="radio" name="a_recommend" value="0">
+                                            <label for="inlineRadio6">否</label>
+                                    </div>
 
-                                <div class="col-sm-4">
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" {{if $self_data.a_recommend eq 1}}checked=""{{/if}} value="1" id="optionsRadios1" name="a_recommend">是</label>
-                                    </div>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" {{if $self_data.a_recommend eq 0}}checked=""{{/if}} value="0" id="optionsRadios2" name="a_recommend">否</label>
-                                    </div>
                                 </div>
+
                             </div>
+
+
+
 
 
                             <div class="hr-line-dashed"></div>
@@ -194,7 +201,7 @@
                             <div class="form-group">
                                 <div class="col-sm-2"></div>
                                 <div class="col-sm-4">
-                                    <span>当前选择地区为:{{$self_data.r_name}}不选择不修改该地区;</span>
+                                    <span>当前选择地区为:{{$self_data.r_name}}   &nbsp;&nbsp;不选择不修改地区;</span>
                                 </div>
                             </div>
                             <div class="form-group">

@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -11,38 +11,31 @@
     <meta name="keywords" content="">
     <meta name="description" content="">
 
-    <link rel="shortcut icon" href="favicon.ico">
-    <link href="{{$manageurl}}css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link rel="shortcut icon" href="favicon.ico"> <link href="{{$manageurl}}css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
     <link href="{{$manageurl}}css/font-awesome.css?v=4.4.0" rel="stylesheet">
-    <link href="{{$manageurl}}css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
     <link href="{{$manageurl}}css/animate.css" rel="stylesheet">
     <link href="{{$manageurl}}css/style.css?v=4.1.0" rel="stylesheet">
-
 </head>
 
 <body class="gray-bg">
     <div class="wrapper wrapper-content animated fadeInRight">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="ibox float-e-margins">
-                    <div class="ibox-title">
-                        <h5>文章列表</h5>
-                        <div class="ibox-tools" style="margin-right: 15px;">
-                            <a class="close-link" href="/index/welcome">
-                                <i class="fa fa-times"></i>
-                            </a>
-                        </div>
-                        <div class="ibox-tools" style="margin-right: 15px;">
-                            <a href="articleAdd">
-                                <i class="fa fa-plus"></i>
-                                文章添加
-                            </a>
-                        </div>
-                    </div>
-                    <div class="ibox-content">
-                        <div class="row">
-                            <form action="index" method="get" accept-charset="utf-8">
-                                <div class="col-sm-2 m-b-xs">
+
+
+        <div class="col-sm-12">
+            <!-- Example Events -->
+            <div class="example-wrap">
+                <div class="example">
+                    <div class="btn-group hidden-xs" id="exampleTableEventsToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='/Articles/articleAdd';">
+                            <i class="glyphicon glyphicon-plus" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default">
+                            <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
+                        </button>
+
+                        <form action="index" method="get" accept-charset="utf-8">
+                                <div class="col-sm-4 m-b-xs">
                                     <select class="input-sm form-control input-s-sm inline" name="ac_id" id="cat_search" onchange="getListByCat();">
                                         <option value="">请选择</option>
                                         {{foreach from=$ac_tree item=value}}
@@ -50,7 +43,7 @@
                                         {{/foreach}}
                                     </select>
                                 </div>
-                                <div class="col-sm-2">
+                                <div class="col-sm-5">
                                     <div class="input-group">
 
                                             <input type="text" placeholder="请输入关键词" class="input-sm form-control" name="search_condition" value="{{$search_condition}}"> <span class="input-group-btn">
@@ -58,90 +51,78 @@
                                             <button type="submit" class="btn btn-sm btn-primary"> 搜索</button> </span>
                                     </div>
                                 </div>
-                            </form>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
+                        </form>
 
-                                        <th>ID</th>
-                                        <th>文章标题</th>
-                                        <th>作者</th>
-                                        <th>修改时间</th>
-                                        <th>描述</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {{foreach from=$artivle_list_arr.data item=info}}
-                                        <tr>
-                                            <td>
-                                                {{$info.a_id}}
-                                            </td>
-                                            <td>
-                                                {{$info.a_title}}
-                                            </td>
-                                            <td>
-                                                {{$info.a_author}}
-                                            </td>
-                                            <td>
-                                                {{$info.a_last_edit_time|date_format:"%y-%m-%d %H:%M:%S"}}
-                                            </td>
-                                            <td>
-                                                {{$info.a_info}}
-                                            </td>
-                                            <td>
-                                                <a href="/Articles/articleEdit?a_id={{$info.a_id}}"><i class="fa fa-wrench text-navy"></i> </a>&nbsp;&nbsp;
-                                                <a href="/Articles/articleEdit?a_id={{$info.a_id}}"><i class="fa fa-close text-navy"></i> </a>
-                                            </td>
-                                        </tr>
-                                    {{/foreach}}
-                                </tbody>
-                            </table>
-                        </div>
-                        <!-- 分页 start -->
-                            {{$page}}
-                        <!-- 分页 end -->
                     </div>
+                    <table id="exampleTableEvents" data-height="400" data-mobile-responsive="true" data-striped="true">
+                        <thead>
+                            <tr>
+                                <th data-field="state" data-checkbox="true"></th>
+                                <th data-field="id" data-sortable="true">ID</th>
+                                <th data-field="name" data-sortable="true">文章标题</th>
+                                <th data-field="status" data-sortable="true">作者</th>
+                                <th data-field="time" data-sortable="true">修改时间</th>
+                                <th data-field="time" data-sortable="true">描述</th>
+                                <th data-field="action" data-sortable="">操作</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{if $artivle_list_arr.data}}
+                            {{foreach from=$artivle_list_arr.data item=info}}
+                            <tr>
+                                <td><input type="checkbox" name="a_id" value="{{$info.a_id}}"></td>
+                                <td>{{$info.a_id}}</td>
+                                <td>{{$info.a_title}}</td>
+                                <td>
+                                    {{$info.a_author}}
+                                </td>
+                                <td>{{$info.a_last_edit_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
+                                <td>{{$info.a_info}}</td>
+                                <td><a href="/Articles/articleEdit?a_id={{$info.a_id}}">修改</a> |  <a href="#" onclick="articleDel({{$info.a_id}})" >删除</a></td>
+                            </tr>
+                            {{/foreach}}
+                            {{/if}}
+                        </tbody>
+                    </table>
+                    {{include file='layout/pager.html'}}
                 </div>
             </div>
+            <!-- End Example Events -->
         </div>
     </div>
+
+        <!-- End Panel Other -->
 
     <!-- 全局js -->
     <script src="{{$manageurl}}js/jquery.min.js?v=2.1.4"></script>
     <script src="{{$manageurl}}js/bootstrap.min.js?v=3.3.6"></script>
 
-
-
-    <!-- Peity -->
-    <script src="{{$manageurl}}js/plugins/peity/jquery.peity.min.js"></script>
-
     <!-- 自定义js -->
     <script src="{{$manageurl}}js/content.js?v=1.0.0"></script>
 
 
-    <!-- iCheck -->
-    <script src="{{$manageurl}}js/plugins/iCheck/icheck.min.js"></script>
+    <!-- Bootstrap table -->
+    <script src="{{$manageurl}}js/plugins/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="{{$manageurl}}js/plugins/bootstrap-table/bootstrap-table-mobile.min.js"></script>
+    <script src="{{$manageurl}}js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js"></script>
 
     <!-- Peity -->
-    <script src="{{$manageurl}}js/demo/peity-demo.js"></script>
+    <script src="{{$manageurl}}js/demo/bootstrap-table-demo.js"></script>
+    <script >
+        function articleDel(a_id)
+        {
+            if(confirm("确认删除?")){
+                window.location.href="/Articles/articleDel?a_id="+a_id;
+            }
 
-    <script>
-        $(document).ready(function () {
-            $('.i-checks').iCheck({
-                checkboxClass: 'icheckbox_square-green',
-                radioClass: 'iradio_square-green',
-            });
-        });
+        }
 
-        function getListByCat()
+         function getListByCat()
         {
             var ac_id = $('#cat_search').val();
             window.location.href="index?ac_id="+ac_id;
         }
-
     </script>
 
 
