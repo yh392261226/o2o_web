@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-03 16:29:24
+ * @Last Modified time: 2017-09-04 14:45:28
  */
 
 namespace App\Controller;
@@ -164,7 +164,7 @@ class Articles extends \CLASSES\ManageBase
 
                 if(!isset($child_art_id['a_id']))
                 {
-
+                    var_dump($ac_id);
                     $res = $dao_articles_category->delData($ac_id);
                     if($res)
                     {
@@ -219,7 +219,7 @@ class Articles extends \CLASSES\ManageBase
     }
 
 
-     /*处理文章添加数据*/
+     /*处理文章分类修改数据*/
     public function doCategoryEdit()
     {
 
@@ -315,15 +315,6 @@ class Articles extends \CLASSES\ManageBase
 
         /*通过id获取用户名*/
         $dao_manager =  new \MDAO\Managers(array('table'=>'Managers'));
-        // foreach ($artivle_list_arr['data'] as $key => $value) {
-
-            // $artivle_list_arr['data'][$key]['a_last_edit_time'] = date('Y-m-d H:i:s',$artivle_list_arr['data'][$key]['a_last_edit_time']);
-        // }
-
-
-
-
-        // var_dump($artivle_list_arr);die;
 
         /*获取分类树*/
         $dao_article = new \MDAO\Articles(array('table'=>'Articles_category'));
@@ -344,7 +335,7 @@ class Articles extends \CLASSES\ManageBase
     public function articleEdit()
     {
         $jump = "/Articles/index";
-        $ac_id = isset($_GET['a_id']) ? intval($_GET['a_id']) : 0;
+        $a_id = isset($_GET['a_id']) ? intval($_GET['a_id']) : 0;
 
         if($a_id == 0){
             msg("参数错误!", $status = 0, $jump);
@@ -354,15 +345,30 @@ class Articles extends \CLASSES\ManageBase
         $area = area(1);
 
         /*获取分类树*/
-        $dao_article = new \MDAO\Articles(array('table'=>'Articles_category'));
-        $ac_tree = $dao_article->getTree();
+        $dao_article_cat = new \MDAO\Articles(array('table'=>'Articles_category'));
+        $ac_tree = $dao_article_cat ->getTree();
 
 
         /*获取当前id数据*/
-        $self_data = $dao_article->getArticle($a_id);
-        $self_data = $self_data;
+        $dao_article = new \MDAO\Articles(array('table'=>'Articles'));
+        $self_data = $dao_article->infoData(array(
+            'a_id' => $a_id,
+            'pager'=>false,
+            'fields'=>'a_id as a_id,ac_id,a_title,a_info,a_in_time,a_link,a_author,a_last_editor,a_last_edit_time,a_img,a_top,a_recommend,a_status,a_start_time,a_end_time,r_id',
+                ));
 
+        /*获取文章详情数据*/
+        $dao_ext_article = new \MDAO\Articles(array('table'=>'articles_ext'));
+        $ext_data = $dao_ext_article -> infoData(array('key'=>'a_id','val'=>$a_id));
 
+        /*合并数据*/
+        $self_data['data'][0]['a_desc'] = $ext_data['a_desc'];
+
+        /*简化数据格式*/
+        $self_data = $self_data['data'][0];
+        $self_data['a_desc'] = htmlspecialchars_decode($self_data['a_desc']);
+
+        /*获取地区名称*/
         $r_name = "";
         if($self_data['r_id'])
         {
@@ -370,12 +376,78 @@ class Articles extends \CLASSES\ManageBase
         }
         $self_data['r_name'] = !empty($r_name) ? $r_name : "地区未定义";
 
-
+        if (defined('HTMLEDITOR')) {
+            $this->tpl->assign("htmleditor", HTMLEDITOR);
+        }
         $this->tpl->assign("self_data",$self_data);
         $this->tpl->assign("ac_tree",$ac_tree);
         $this->tpl->assign("area_provinces",$area['regions']);
-        $this->tpl->display("Articles/categoryEdit.html");
+        $this->tpl->display("Articles/articleEdit.html");
     }
+
+
+     /*文章修改数据操作*/
+    public function doArticleEdit()
+    {
+        var_dump($_POST);
+        $jump = "/Articles/index";
+        $dao_article = new \MDAO\Articles(array('table'=>'Articles'));
+        if(!isset($_POST['a_id']) || empty($_POST['a_id'])){
+             msg("参数不足", $status = 0, $jump);
+        }
+        if(!isset($_POST['a_title']) || !isset($_POST['ac_id']) || empty($_POST['ac_id']) || empty($_POST['a_title'])){
+            msg("请填写分类名并选择父分类名", $status = 0, $jump);
+        }
+
+        $data = array();
+        $a_id = intval($_POST['a_id']);
+        $data['ac_id'] = intval($_POST['ac_id']);
+        $data['a_title'] = trim($_POST['a_title']);
+        $data['a_info'] = isset($_POST['a_info'])&&!empty($_POST['a_info'])?deepAddslashes(htmlspecialchars($_POST['a_info'])):"";
+        $data['a_last_edit_time'] = time();
+        $data['a_last_editor'] = $_SESSION['m_id'];
+        $data['r_id'] = isset($_POST['r_id'])&&!empty($_POST['r_id'])?intval($_POST['r_id']):1;
+        $data['a_status'] = isset($_POST['a_status'])?intval($_POST['a_status']):0;
+        $data['a_top'] = isset($_POST['a_top'])?intval($_POST['a_top']):0;
+        $data['a_recommend'] = isset($_POST['a_recommend'])?intval($_POST['a_recommend']):0;
+        $data['a_link'] = isset($_POST['a_link'])?trim($_POST['a_link']):"";
+        $data['a_start_time'] = isset($_POST['a_start_time'])?strtotime($_POST['a_start_time']):0;
+        $data['a_end_time'] = isset($_POST['a_end_time'])?strtotime($_POST['a_end_time']):0;
+
+        if(isset($_FILES['a_img']['name'][0])&&!empty($_FILES['a_img']['name'][0])){
+
+            $up_pic = $this->uploadAll('a_img','a_');
+
+
+            if (empty($up_pic))
+            {
+                msg("文件上传失败!", $status = 0, $jump);
+            }else{
+
+                    $up_pic = implode(",",$up_pic);
+
+                    $data['a_img'] = $up_pic;
+
+            }
+        }
+
+
+
+        $res = $dao_article->updateData($data,array('a_id'=>$a_id));
+        if($res){
+            $ext_data['a_desc'] = isset($_POST['a_desc'])&&!empty($_POST['a_desc'])?htmlspecialchars($_POST['a_desc']):"";
+            $dao_article_ext = new \MDAO\Articles(array('table'=>'Articles_ext'));
+            $res = $dao_article_ext -> updateData($ext_data,array('a_id'=>$a_id));
+            if($res){
+                msg("文章修改成功", $status = 1, $jump);
+            }
+        }
+            msg("文章修改失败!", $status = 0, $jump);
+
+
+    }
+
+
 
 
     /*文章添加*/
@@ -410,15 +482,16 @@ class Articles extends \CLASSES\ManageBase
         $data = array();
         $data['ac_id'] = intval($_POST['ac_id']);
         $data['a_title'] = trim($_POST['a_title']);
-        $data['a_desc'] = isset($_POST['a_desc'])&&!empty($_POST['a_desc'])?htmlspecialchars($_POST['a_desc']):"";
         $data['a_info'] = isset($_POST['a_info'])&&!empty($_POST['a_info'])?deepAddslashes(htmlspecialchars($_POST['a_info'])):"";
         $data['a_in_time'] = time();
         $data['a_author'] = $_SESSION['m_id'];
+        $data['a_last_edit_time'] = time();
+        $data['a_last_editor'] = $_SESSION['m_id'];
         $data['r_id'] = isset($_POST['r_id'])&&!empty($_POST['r_id'])?intval($_POST['r_id']):1;
-        $data['a_status'] = isset($_POST['ac_status'])?intval($_POST['a_status']):0;
+        $data['a_status'] = isset($_POST['a_status'])?intval($_POST['a_status']):0;
         $data['a_top'] = isset($_POST['a_top'])?intval($_POST['a_top']):0;
         $data['a_recommend'] = isset($_POST['a_recommend'])?intval($_POST['a_recommend']):0;
-        $data['a_link'] = isset($_POST['a_link'])?trim($_POST['a_status']):"";
+        $data['a_link'] = isset($_POST['a_link'])?trim($_POST['a_link']):"";
         $data['a_start_time'] = isset($_POST['a_start_time'])?time($_POST['a_start_time']):0;
         $data['a_end_time'] = isset($_POST['a_end_time'])?time($_POST['a_end_time']):0;
 
@@ -426,29 +499,35 @@ class Articles extends \CLASSES\ManageBase
         if(isset($_FILES['a_img']['name'][0])&&!empty($_FILES['a_img']['name'][0])){
 
             $up_pic = $this->uploadAll('a_img','a_');
-            // var_dump($up_pic);die;
 
             if (empty($up_pic))
             {
                 msg("文件上传失败!", $status = 0, $jump);
             }else{
-                if(sizeof($up_pic)>1)
-                {
+
+
                     $up_pic = implode(",",$up_pic);
-                }else{
+
+
                     $data['a_img'] = $up_pic[0];
-                }
             }
         }
 
 
 
-        $res = $dao_article->addData($data);
-        if($res){
-            msg("文章添加成功", $status = 1, $jump);
-        }else{
-            msg("文章添加失败!", $status = 0, $jump);
+        $a_id = $dao_article->addData($data);
+        if($a_id){
+            $ext_data['a_desc'] = array();
+            $ext_data['a_id'] = $a_id;
+            $ext_data['a_desc'] = isset($_POST['a_desc'])&&!empty($_POST['a_desc'])?htmlspecialchars($_POST['a_desc']):"";
+            $dao_article_ext = new \MDAO\Articles(array('table'=>'Articles_ext'));
+            $res = $dao_article_ext -> addData($ext_data);
+            if($res){
+                msg("文章添加成功", $status = 1, $jump);
+            }
         }
+            msg("文章添加失败!", $status = 0, $jump);
+
 
     }
 
