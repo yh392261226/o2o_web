@@ -14,7 +14,7 @@ class ManageBase extends Swoole\Controller
     public function __construct($swoole)
     {
         parent::__construct($swoole);
-        $this->db->debug = 1;
+        //$this->db->debug = 1;
 
         $this->session->start();
 //         $this->validataLoginStatus(); //验证登陆状态
@@ -26,8 +26,6 @@ class ManageBase extends Swoole\Controller
             $this->controller_name = $this->swoole->env['mvc']['controller'];
             $this->view_name = $this->swoole->env['mvc']['view'];
         }
-
-
     }
 
     /**
@@ -105,6 +103,15 @@ class ManageBase extends Swoole\Controller
             $template = ucfirst($this->controller_name) . '/' . $this->view_name . $this->template_ext;
         }
         $this->tpl->display($template);
+    }
+
+    public function myPager($pager)
+    {
+        $pager->set_class('next', 'btn btn-white');
+        $pager->set_class('previous', 'btn btn-white');
+        $pager->set_class('first', 'btn btn-white');
+        $pager->set_class('last', 'btn btn-white');
+        $this->tpl->assign('pager', $pager->render());
     }
 
 }

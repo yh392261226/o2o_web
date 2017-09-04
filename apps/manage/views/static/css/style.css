@@ -7936,3 +7936,27 @@ body.skin-3 {
     font-size: 0;
     background-color: #131e26;
 }
+/** customs */
+.pager span,.pager a{-moz-user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857;
+    margin-bottom: 0;
+    padding: 4px 12px;
+    text-align: center;
+    touch-action: manipulation;
+    vertical-align: middle;
+    white-space: nowrap;
+    background: white none repeat scroll 0 0;
+    border: 1px solid #e7eaec;
+    color: inherit;}
+.pager span,.pager a:hover{border: 1px solid #d2d2d2;
+    color: inherit;
+}
+.pager span,.pager a:active{box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15) inset;}
+.curent{}
