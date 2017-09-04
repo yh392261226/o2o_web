@@ -112,6 +112,8 @@ class ManageBase extends Swoole\Controller
         $pager->set_class('first', 'btn btn-white');
         $pager->set_class('last', 'btn btn-white');
         $this->tpl->assign('pager', $pager->render());
+        $this->tpl->assign('pagesize', '');
+        //$this->tpl->assign('pagesize', $pager->set_pagesize());
     }
 
 }

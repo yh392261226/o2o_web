@@ -50,7 +50,7 @@
                             {{if $list.data}}
                             {{foreach from=$list.data item=value}}
                             <tr>
-                                <td></td>
+                                <td><input type="checkbox" name="m_id" value="{{$value.m_id}}"></td>
                                 <td>{{$value.m_id}}</td>
                                 <td>{{$value.m_name}}</td>
                                 <td>

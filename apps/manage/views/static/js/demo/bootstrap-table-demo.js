@@ -109,11 +109,12 @@ function buildTable($el, cells, rows) {
   (function() {
     $('#exampleTableEvents').bootstrapTable({
       //url: "3",
-      search: true,
+      search: false,
       pagination: true,
       showRefresh: true,
       showToggle: true,
       showColumns: true,
+      //formatShowingRows: false,
       iconSize: 'outline',
       toolbar: '#exampleTableEventsToolbar',
       icons: {
