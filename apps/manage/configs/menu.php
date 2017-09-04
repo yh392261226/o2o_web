@@ -54,7 +54,7 @@ $menu = array(
                         'name' => '模块列表', 'icon' => '', 'link' => '/Managers/listModules',
                     ),
                     5 => array(
-                        'name' => '模块添加', 'icon' => '', 'link' => '/Managers/addMoudles',
+                        'name' => '模块添加', 'icon' => '', 'link' => '/Managers/addModules',
                     ),
                 ),
             ),
