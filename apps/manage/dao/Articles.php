@@ -133,7 +133,8 @@ class Articles extends \MDAOBASE\DaoBase
 
             $child_arr = getChildren($data_ac['data'],$ac_id,"ac_id","ac_pid",true);
             array_unshift($child_arr,"{$ac_id}");
-            $info['ac_id'] = array('type' => 'in', 'value' =>$child_arr);
+            $info['in'] = array('ac_id',$child_arr);
+
 
        }
        if(!empty($condition['search_condition'])){
@@ -146,44 +147,6 @@ class Articles extends \MDAOBASE\DaoBase
             $a_id_arr = $this->listData($info);
 
        return $a_id_arr;
-    }
-
-    /*通过分类id查看文章id*/
-    public function getArticlesByCateId($condition)
-    {
-        $d_ac = new \MDAO\Articles(array('table'=>'Articles_category'));
-        $ac_id = $condition['ac_id'];
-        $page = $condition['page'];
-        $data_ac = $d_ac->listData();
-        $child_arr = array();
-
-        $child_arr = getChildren($data_ac['data'],$ac_id,"ac_id","ac_pid",true);
-        array_unshift($child_arr,"{$ac_id}");
-
-
-        $info = array(
-                        'pager'=>true,'page'=>$page,
-                        'fields'=>'a_id,a_title,a_info,managers.m_name as a_author,a_last_edit_time',
-                        "ac_id"=>array('type' => 'in', 'value' =>$child_arr),
-                        'leftjoin'=>array('managers', "managers.m_id = articles.a_author")
-                    );
-        return $this -> listData($info);
-
-    }
-
-    /*通过搜索条件搜索文章id*/
-
-    public function getArticlesBySearch($condition)
-    {
-        $info = array();
-        $info = array(
-                        'pager'=>true,'page'=>$page,
-                        'fields'=>'a_id,a_title,a_info,managers.m_name as a_author,a_last_edit_time',
-                        'a_title' => array('type' => 'like', 'value' => $condition['search_condition']),
-                        'leftjoin'=>array('managers', "managers.m_id = articles.a_author")
-                    );
-
-        return $this -> listData($info);
     }
 
 }
