@@ -44,6 +44,12 @@ $menu = array(
                     1 => array(
                         'name' => '管理员添加', 'icon' => '', 'link' => '/Managers/add',
                     ),
+                    2 => array(
+                        'name' => '权限组列表', 'icon' => '', 'link' => '/Managers/listGroup',
+                    ),
+                    3 => array(
+                        'name' => '权限组添加', 'icon' => '', 'link' => '/Managers/addGroup',
+                    ),
                 ),
             ),
             1 => array(

@@ -158,7 +158,7 @@ class DaoBase
 
         }
 
-        if (is_string($data) && '' != trim($data))
+        if (!is_array($data) && '' != trim($data))
         {
             $param = $data;
         }
@@ -212,6 +212,7 @@ class DaoBase
         }
         //print_r($data);
         $param = $this->createWhere($data);
+        //print_r($param);exit;
         return $this->handler->getDatas($param);
     }
 
@@ -236,7 +237,9 @@ class DaoBase
 
     public function delData($data = array())
     {
+        //print_r($data);
         $param = $this->createWhere($data);
+        //print_r($param);exit;
         if (is_array($param) && !empty($param))
         {
             unset($param['page']);

@@ -218,7 +218,7 @@ class Managers extends \CLASSES\ManageBase
 
     public function addGroup()
     {
-        if (isset($_POST['mpg_id']))
+        if (isset($_POST['mpg_name']))
         {
             $curtime = time();
             $mpm_ids = isset($_POST['mpm_ids']) ? $_POST['mpm_ids'] : '';
@@ -246,7 +246,10 @@ class Managers extends \CLASSES\ManageBase
             msg('操作成功', 1);
         }
 
-        $this->tpl->display();
+        $modules = $this->manager_privileges_modules->listData(array('pager' => false));
+        //print_r($modules);
+        $this->tpl->assign('modules', $modules);
+        $this->mydisplay();
     }
 
     public function editGroup()
@@ -254,10 +257,10 @@ class Managers extends \CLASSES\ManageBase
         if (isset($_POST['mpg_id']))
         {
             $curtime = time();
-            $mpg_ids = isset($_POST['mpm_ids']) ? $_POST['mpm_ids'] : '';
-            if (is_array($mpg_ids))
+            $mpm_ids = isset($_POST['mpm_ids']) ? $_POST['mpm_ids'] : '';
+            if (is_array($mpm_ids))
             {
-                $mpg_ids = implode(',', $mpg_ids);
+                $mpm_ids = implode(',', $mpm_ids);
             }
 
             $data   = array(
@@ -286,8 +289,16 @@ class Managers extends \CLASSES\ManageBase
             msg('操作成功', 1);
         }
         $info = $this->managers_privileges_group_dao->infoData($_REQUEST['mpg_id']);
+        $modules = $this->manager_privileges_modules->listData(array('pager' => false));
+        $infomodules = array();
+        if (isset($info['mpm_ids']))
+        {
+            $infomodules = explode(',', $info['mpm_ids']);
+        }
+        $this->tpl->assign('infomodules', $infomodules);
         $this->tpl->assign('info', $info);
-        $this->tpl->display();
+        $this->tpl->assign('modules', $modules);
+        $this->mydisplay();
     }
 
     public function delGroup()
@@ -335,24 +346,24 @@ class Managers extends \CLASSES\ManageBase
     {
         $list = $data = array();
         if (isset($_REQUEST['mpg_id'])) $data['mpg_id'] = array('type' => 'in', value => $_REQUEST['mpg_id']);
-        if (isset($_REQUEST['mpg_name'])) $data['mpg_name'] = array('type'=>'like', 'value' => trim($_REQUEST['mpg_name']));
+        if (isset($_REQUEST['mpg_name'])) $data['like'] = array('mpg_name', trim($_REQUEST['mpg_name']));
         if (isset($_REQUEST['mpg_status'])) $data['mpg_status'] = intval($_REQUEST['mpg_status']);
         if (isset($_REQUEST['mpg_author'])) $data['mpg_author'] = intval($_REQUEST['mpg_author']);
         if (isset($_REQUEST['mpg_in_time'])) $data['mpg_in_time'] = array(
             array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['start_mpg_in_time'])),
             array('type' => 'le', 'le_value' => strtotime($_REQUEST['end_mpg_in_time'])),
         );
-
+        $data['page'] = isset($_REQUEST['page']) ? intval($_REQUEST['page']) : 1;
         if (isset($_REQUEST['m_start_time']) && isset($_REQUEST['m_end_time']) && strtotime($_REQUEST['m_end_time']) < strtotime($_REQUEST['m_start_time']))
         {
             //结束时间不能小于开始时间
             //failed
             msg('结束时间不能小于开始时间', 0);
         }
-
         $list = $this->managers_privileges_group_dao->listData($data);
         $this->tpl->assign('list', $list);
-        $this->tpl->display();
+        $this->myPager($list['pager']);
+        $this->mydisplay();
     }
 
     /**
