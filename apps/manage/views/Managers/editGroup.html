@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-    <title>管理员修改</title>
+    <title>权限组添加</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
 
@@ -30,71 +30,49 @@
                    
                     <div class="ibox-content">
                         <form method="post" class="form-horizontal" action="">
-                            <input type="hidden" name="m_id" value="{{$info.m_id}}">
+                            <input type="hidden" name="mpg_id" value="{{$info.mpg_id}}">
                             <div class="form-group">
-                                <label class="col-sm-2 control-label">管理名称</label>
+                                <label class="col-sm-2 control-label">组名称</label>
 
                                 <div class="col-sm-10">
-                                    <input id="m_name" minlength="6" type="text" class="form-control" required="true" aria-required="true" value="{{$info.m_name}}">
+                                    <input id="mpg_name" name="mpg_name" minlength="6" type="text" class="form-control" required="true" aria-required="true" value="{{$info.mpg_name}}">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-sm-2 control-label">密码</label>
+                                <label class="col-sm-2 control-label"> 状态 </label>
 
                                 <div class="col-sm-10">
-                                    <input id="m_pass" name="m_pass" minlength="6" type="text" class="form-control">
+                                    <div class="radio radio-info radio-inline">
+                                        <input id="inlineRadio2" {{if $info.mpg_status == -1}}checked="checked"{{/if}}  type="radio" name="mpg_status" value="-1">
+                                        <label for="inlineRadio2">已废弃</label>
+                                    </div>
+                                    <div class="radio radio-info radio-inline">
+                                        <input id="inlineRadio3" {{if $info.mpg_status == 0}}checked="checked"{{/if}}   type="radio" name="mpg_status" value="0">
+                                        <label for="inlineRadio3">不可用</label>
+                                    </div>
+                                    <div class="radio radio-info radio-inline">
+                                        <input id="inlineRadio4" {{if $info.mpg_status == 1}}checked="checked"{{/if}}   type="radio" name="mpg_status" value="1">
+                                        <label  for="inlineRadio4">未开启</label>
+                                    </div>
+                                    <div class="radio radio-info radio-inline">
+                                        <input id="inlineRadio5" {{if $info.mpg_status == 2}}checked="checked"{{/if}}   type="radio" name="mpg_status" value="2">
+                                        <label for="inlineRadio5">正常</label>
+                                    </div>&nbsp;&nbsp;
                                 </div>
                             </div>
 
                              <div class="form-group">
-                                <label class="col-sm-2 control-label">管理组</label>
+                                <label class="col-sm-2 control-label">模块</label>
 
                                 <div class="col-sm-10">
-                                    <select class="form-control m-b" name="mpg_id">
-                                        <option value="0">请选择</option>
-                                        {{if $group}}
-                                        {{foreach from=$group.data item=value}}
-                                        <option value="{{$value.mpg_id}}" {{if $value.mpg_id == $info.mpg_id}}selected="selected"{{/if}}>{{$value.mpg_name}}</option>
-                                        {{/foreach}}
-                                        {{/if}}
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="hr-line-dashed"></div>
-                            <div class="form-group">
-                                <label class="col-sm-2 control-label"> </label>
-                                <div class="col-sm-10">
-                                    添加时IP：{{$info.m_in_ip|long2ip}}
-                                    <br>
-                       		 		最近一次登录IP：{{$info.m_last_ip|long2ip}}
-                                </div>
-                            </div>
-
-                            <div class="hr-line-dashed"></div>
-                            <div class="form-group">
-                                <label class="col-sm-2 control-label"> 状态 </label>
-                                <div class="col-sm-10 ">
-                                    <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio1" {{if $info.m_status == -2}}checked="checked"{{/if}}  type="radio" name="m_status" value="-2">
-                                        <label for="inlineRadio1">删除</label>
+                                    {{if $modules.data}}
+                                    {{foreach from=$modules.data item=value}}
+                                    <div class="checkbox checkbox-success checkbox-inline">
+                                        <input type="checkbox" id="edit_{{$value.mpm_id}}" {{if $value.mpm_id|in_array:$infomodules}}checked="checked"{{/if}} name="mpm_ids[]" value="{{$value.mpm_id}}">
+                                        <label for="edit_{{$value.mpm_id}}"> {{$value.mpm_name}} </label>
                                     </div>
-                                    <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio2" {{if $info.m_status == -1}}checked="checked"{{/if}}  type="radio" name="m_status" value="-1">
-                                        <label for="inlineRadio2">禁止登陆</label>
-                                    </div>
-                                    <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio3" {{if $info.m_status == 0}}checked="checked"{{/if}}   type="radio" name="m_status" value="0">
-                                        <label for="inlineRadio3">正常</label>
-                                    </div>
-                                    <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio4" {{if $info.m_status == 1}}checked="checked"{{/if}}   type="radio" name="m_status" value="1">
-                                        <label  for="inlineRadio4">限制类管理</label>
-                                    </div>
-                                    <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio5" {{if $info.m_status == 9}}checked="checked"{{/if}}   type="radio" name="m_status" value="9">
-                                        <label for="inlineRadio5">总管理</label>
-                                    </div>
+                                    {{/foreach}}
+                                    {{/if}}
                                 </div>
                             </div>
 
