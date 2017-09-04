@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-04 14:45:28
+ * @Last Modified time: 2017-09-04 17:11:49
  */
 
 namespace App\Controller;
@@ -164,11 +164,10 @@ class Articles extends \CLASSES\ManageBase
 
                 if(!isset($child_art_id['a_id']))
                 {
-                    var_dump($ac_id);
                     $res = $dao_articles_category->delData($ac_id);
                     if($res)
                     {
-                        // msg("分类删除成功!", $status = 1, $jump);
+                        msg("分类删除成功!", $status = 1, $jump);
                     }else{
                         msg("分类删除失败!", $status = 0, $jump);
                     }
@@ -306,11 +305,13 @@ class Articles extends \CLASSES\ManageBase
         $condition = array();
         $condition['ac_id'] = isset($_GET['ac_id'])&&!empty($_GET['ac_id']) ? intval($_GET['ac_id']) : 0;
         $condition['search_condition'] = isset($_GET['search_condition'])&&!empty($_GET['search_condition']) ? $_GET['search_condition'] : "";
-        $condition['page'] = (isset($_REQUEST['page']) && !empty($_REQUEST['page'])) ? $_REQUEST['page'] : 1;
+        $condition['page'] = (isset($_REQUEST['page']) && !empty($_REQUEST['page'])) ? intval($_REQUEST['page']) : 1;
 
         /*获取文章列表*/
         $dao_article = new \MDAO\Articles(array('table'=>'Articles'));
         $artivle_list_arr = $dao_article->getArticleList($condition);
+
+        $this->myPager($artivle_list_arr['pager']);
 
 
         /*通过id获取用户名*/
@@ -326,7 +327,7 @@ class Articles extends \CLASSES\ManageBase
             $this->tpl->assign("ac_id",$condition['ac_id']);
         }
         $this->tpl->assign("ac_tree",$ac_tree);
-        $this->tpl->assign("page", $artivle_list_arr['page']);
+        // $this->tpl->assign("page", $artivle_list_arr['page']);
         $this->tpl->assign("artivle_list_arr",$artivle_list_arr);
         $this->tpl->display("Articles/index.html");
     }
@@ -389,7 +390,7 @@ class Articles extends \CLASSES\ManageBase
      /*文章修改数据操作*/
     public function doArticleEdit()
     {
-        var_dump($_POST);
+
         $jump = "/Articles/index";
         $dao_article = new \MDAO\Articles(array('table'=>'Articles'));
         if(!isset($_POST['a_id']) || empty($_POST['a_id'])){
@@ -531,6 +532,24 @@ class Articles extends \CLASSES\ManageBase
 
     }
 
+    /*删除文章*/
+    public function articleDel()
+    {
+        $jump = "/Articles/index";
+        if(isset($_GET['a_id']) && !empty($_GET['a_id'])){
+            $a_id = intval($_GET['a_id']);
+            $dao_article = new \MDAO\Articles(array('table'=>'Articles'));
+            $res = $dao_article -> delData($a_id);
+            if($res){
+                msg("文件删除成功!", $status = 1, $jump);
+            }
+        }
+        msg("文件删除失败!", $status = 0, $jump);
+    }
+
+
+
+
     /*多文件上传函数*/
     /*
     $form_name:表单中的name名;
@@ -591,6 +610,8 @@ class Articles extends \CLASSES\ManageBase
         file_put_contents('../public/fields_arr.php',var_export($fields_arr,true));
 
     }
+
+
 
 
 
