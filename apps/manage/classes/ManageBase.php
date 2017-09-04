@@ -21,6 +21,8 @@ class ManageBase extends Swoole\Controller
         $this->managerAssign();
         //$this->db->debug = true;
 
+        clearTemplateC();
+
         if (!empty($this->swoole->env['mvc']))
         {
             $this->controller_name = $this->swoole->env['mvc']['controller'];
