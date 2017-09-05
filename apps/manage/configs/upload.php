@@ -1,8 +1,8 @@
 <?php
 
 $upload = array(
-    'base_dir' => WEBPATH.'/../uploads/images',
-    'base_url' => "/",
+    'base_dir' => UPLOADPATH.'/images',
+    'base_url' => UPLOADURL,
 );
 // var_dump($upload);die;
 return $upload;

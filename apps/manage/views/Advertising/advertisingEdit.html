@@ -7,69 +7,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-    <title> 文章分类添加</title>
+    <title>广告修改</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
 
     <link rel="shortcut icon" href="favicon.ico"> <link href="{{$manageurl}}css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
     <link href="{{$manageurl}}css/font-awesome.css?v=4.4.0" rel="stylesheet">
-
     <link href="{{$manageurl}}css/animate.css" rel="stylesheet">
     <link href="{{$manageurl}}css/style.css?v=4.1.0" rel="stylesheet">
     <link href="{{$manageurl}}css/plugins/iCheck/custom.css" rel="stylesheet">
     <link href="{{$manageurl}}css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
-    <script type="text/javascript" src="{{$manageurl}}js/area.js"></script>
+    <!-- <script type="text/javascript" src="{{$manageurl}}js/area.js"></script> -->
+
+
+
 
 </head>
 
 <body class="gray-bg">
 
-
+  <form method="post" class="form-horizontal" enctype="multipart/form-data" action="/Advertising/doAdvertisingEdit" onSubmit="return checkForm();">
     <div class="wrapper wrapper-content animated fadeInUp">
-        <div class="row">
-            <div class="col-sm-12">
 
-                <div class="ibox">
-                    <div class="ibox-title">
-                        <h5>文章管理</h5>
-                        <div class="ibox-tools">
-                            <a href="categoryList" class="btn btn-primary btn-xs">文章分类列表</a>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
         <div class="row">
             <div class="col-sm-12">
                 <div class="ibox float-e-margins">
                     <div class="ibox-title">
-                        <h5>文章分类添加 <small></small></h5>
+                        <h5>广告修改</h5>
+                        <div class="ibox-tools" style="margin-right: 15px;">
+                            <a class="close-link" href="/index/welcome">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </div>
+                        <div class="ibox-tools" style="margin-right: 15px;">
+                            <a href="index">
+                                <i class="fa fa-plus"></i>
+                                广告列表
+                            </a>
+                        </div>
                     </div>
                     <div class="ibox-content">
-                        <form method="post" class="form-horizontal" enctype="multipart/form-data" action="/Articles/doCategoryAdd">
+
                             <div class="form-group">
-                                <label class="col-sm-2 control-label">分类名称:</label>
+                                <label class="col-sm-2 control-label">广告标题:</label>
 
                                 <div class="col-sm-4">
-                                    <input type="text" name="ac_name" class="form-control">
+                                    <input type="text" name="a_title" class="form-control" value="{{$self_data.a_title}}">
                                 </div>
                             </div>
 
                             <div class="hr-line-dashed"></div>
 
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">广告链接:</label>
+
+                                <div class="col-sm-4">
+                                    <input type="text" name="a_link" class="form-control" value="{{$self_data.a_link}}">
+                                </div>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+<!-- 是否启用 -->
                             <div class="form-group control-label">
-                                <label class="col-sm-2 control-label">是否启用:
+                                <label class="col-sm-2 control-label">状态:
                                     <br/>
                                     <small class="text-navy"></small>
                                 </label>
                                 <div class="col-sm-2">
                                     <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio1"  type="radio" name="ac_status" value="1">
+                                        <input id="inlineRadio1" {{if $self_data.a_status eq 1}}checked=""{{/if}}  type="radio" name="a_status" value="1">
                                         <label for="inlineRadio1">是</label>
                                     </div>
                                     <div class="radio radio-info radio-inline">
-                                            <input id="inlineRadio2"  type="radio" name="ac_status" value="0">
+                                            <input id="inlineRadio2" {{if $self_data.a_status eq 0}}checked=""{{/if}}  type="radio" name="a_status" value="0">
                                             <label for="inlineRadio2">否</label>
                                     </div>
 
@@ -77,45 +87,70 @@
 
                             </div>
 
+<!-- 类型 -->
+                            <div class="form-group control-label">
+                                <label class="col-sm-2 control-label">类型:
+                                    <br/>
+                                    <small class="text-navy"></small>
+                                </label>
+                                <div class="col-sm-2">
+                                    <div class="radio radio-info radio-inline">
+                                        <input id="inlineRadio3" {{if $self_data.a_type eq 0}}checked=""{{/if}} type="radio" name="a_type" value="0">
+                                        <label for="inlineRadio3">文字</label>
+                                    </div>
+                                    <div class="radio radio-info radio-inline">
+                                            <input id="inlineRadio4"  {{if $self_data.a_type eq 1}}checked=""{{/if}} type="radio" name="a_type" value="1">
+                                            <label for="inlineRadio4">单图</label>
+                                    </div>
+                                    <div class="radio radio-info radio-inline">
+                                            <input id="inlineRadio4"  {{if $self_data.a_type eq 2}}checked=""{{/if}} type="radio" name="a_type" value="2">
+                                            <label for="inlineRadio4">多图</label>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+
                             <div class="hr-line-dashed"></div>
 
                             <div class="form-group">
-                                <label class="col-sm-2 control-label">父分类:</label>
+                                <div class="col-sm-2"></div>
+                                <div class="col-sm-4">
+                                    <span>如果不选择图片则不修改原图片</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+
+
+                                <label class="col-sm-2 control-label">广告图片:</label>
 
                                 <div class="col-sm-4">
-                                    <select class="form-control m-b" name="ac_pid">
-                                    <option value="0">顶级分类</option>
-                                    {{foreach from=$ac_tree item=value}}
-                                        <option value="{{$value.ac_id}}">{{'__'|str_repeat:$value.level}} {{$value.ac_name}}</option>
-                                    {{/foreach}}
-                                    </select>
+                                    <input class="form-control" id="fileInput" type="file" name="a_img[]" multiple="">
+                                </div>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">广告简介:</label>
+
+                                <div class="col-sm-4">
+                                    <textarea class="form-control" rows="3" name="a_info">{{$self_data.a_info}}</textarea>
                                 </div>
                             </div>
 
 
                             <div class="hr-line-dashed"></div>
                             <div class="form-group">
-                                <label class="col-sm-2 control-label">分类图标:</label>
-
+                                <div class="col-sm-2"></div>
                                 <div class="col-sm-4">
-                                    <input class="form-control" id="fileInput" type="file" name="ac_img">
+                                    <span>当前选择地区为:{{$self_data.r_name}}   &nbsp;&nbsp;不选择不修改地区;</span>
                                 </div>
                             </div>
-
-                            <div class="hr-line-dashed"></div>
                             <div class="form-group">
-                                <label class="col-sm-2 control-label">分类描述:</label>
-
-                                <div class="col-sm-4">
-                                    <textarea class="form-control" rows="3" name="ac_info"></textarea>
-                                </div>
-                            </div>
-
-
-                            <div class="hr-line-dashed"></div>
-                            <div class="form-group">
-                                <label class="col-sm-2 control-label">地区选择:(不选择默认为全国)</label>
-
+                                <label class="col-sm-2 control-label">地区选择:</label>
                                 <div class="col-sm-2">
                                     <select class="form-control m-b" name="province" id="selProvinces" onchange="region.changed(this, 2, 'selCities')">
                                     <option value="">请选择</option>
@@ -139,21 +174,36 @@
                             </div>
 
                             <div class="hr-line-dashed"></div>
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">广告有效期:</label>
+                                <div class="col-sm-10">
+                                    <input placeholder="开始时间" class="form-control layer-date" id="start" name="a_start_time" value='{{$self_data.a_start_time|date_format:"%y-%m-%d %H:%M:%S"}}'>
+                                    <input placeholder="结束时间" class="form-control layer-date" id="end" name="a_end_time" value='{{$self_data.a_end_time|date_format:"%y-%m-%d %H:%M:%S"}}'>
+                                </div>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+
+
+
                             <div class="form-group">
                                 <div class="col-sm-4 col-sm-offset-2">
-                                    <input type="hidden" name="r_id" id="area_id" value="1">
-                                    <button class="btn btn-primary" type="submit">保存内容</button>
+                                    <input type="hidden" name="img_name" value="{{$self_data.a_img}}">
+                                    <input type="hidden" name="r_id" id="area_id" value="{{$self_data.r_id}}">
+                                    <input type="hidden" name="a_id"  value="{{$self_data.a_id}}">
+                                    <button class="btn btn-primary" type="submit">保存修改</button>
                                 </div>
                             </div>
 
 
-                        </form>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
+  </form>
     <!-- 全局js -->
     <script src="{{$manageurl}}js/jquery.min.js?v=2.1.4"></script>
     <script src="{{$manageurl}}js/bootstrap.min.js?v=3.3.6"></script>
@@ -164,9 +214,55 @@
     <!-- iCheck -->
     <script src="{{$manageurl}}js/plugins/iCheck/icheck.min.js"></script>
 
+    <!-- layerDate plugin javascript -->
+    <script src="{{$manageurl}}js/plugins/layer/laydate/laydate.js"></script>
 
 
 
+    <script>
+      function checkForm()
+      {
+        return true;
+      }
+
+    </script>
+
+
+
+
+    <!-- 时间日期js -->
+    <script>
+
+
+        //日期范围限制
+        var start = {
+            elem: '#start',
+            format: 'YYYY/MM/DD hh:mm:ss',
+            min: laydate.now(), //设定最小日期为当前日期
+            max: '2099-06-16 23:59:59', //最大日期
+            istime: true,
+            istoday: false,
+            event: 'click',
+            choose: function (datas) {
+                end.min = datas; //开始日选好后，重置结束日的最小日期
+                end.start = datas //将结束日的初始值设定为开始日
+            }
+        };
+        var end = {
+            elem: '#end',
+            format: 'YYYY/MM/DD hh:mm:ss',
+            min: laydate.now(),
+            max: '2099-06-16 23:59:59',
+            istime: true,
+            istoday: false,
+            event: 'click',
+            choose: function (datas) {
+                start.max = datas; //结束日选好后，重置开始日的最大日期
+            }
+        };
+        laydate(start);
+        laydate(end);
+    </script>
 
     <script>
         $(document).ready(function(){
@@ -196,7 +292,12 @@
             }
         }
 
+  </script>
 
+
+
+<!-- 地区三级联动 -->
+  <script>
 
 
                 /*地区三级联动

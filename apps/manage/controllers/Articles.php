@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-04 17:11:49
+ * @Last Modified time: 2017-09-05 16:38:15
  */
 
 namespace App\Controller;
@@ -362,12 +362,10 @@ class Articles extends \CLASSES\ManageBase
         $dao_ext_article = new \MDAO\Articles(array('table'=>'articles_ext'));
         $ext_data = $dao_ext_article -> infoData(array('key'=>'a_id','val'=>$a_id));
 
-        /*合并数据*/
-        $self_data['data'][0]['a_desc'] = $ext_data['a_desc'];
-
         /*简化数据格式*/
         $self_data = $self_data['data'][0];
-        $self_data['a_desc'] = htmlspecialchars_decode($self_data['a_desc']);
+        $self_data['a_desc'] = htmlspecialchars_decode($ext_data['a_desc']);
+
 
         /*获取地区名称*/
         $r_name = "";
@@ -428,6 +426,19 @@ class Articles extends \CLASSES\ManageBase
                     $up_pic = implode(",",$up_pic);
 
                     $data['a_img'] = $up_pic;
+
+                    /*删除无效图片*/
+                if(isset($_POST['img_name']) && !empty($_POST['img_name']) ){
+                    $a_img_name = trim($_POST['img_name']);
+                    $img_name_arr = explode(',',$a_img_name);
+                    foreach ($img_name_arr  as  $val) {
+                        $file_name = '';
+                        $file_name = UPLOADPATH.'/images'.$val;
+                        if(is_file($file_name)){
+                            unlink($file_name);
+                        }
+                    }
+                }
 
             }
         }
@@ -493,8 +504,8 @@ class Articles extends \CLASSES\ManageBase
         $data['a_top'] = isset($_POST['a_top'])?intval($_POST['a_top']):0;
         $data['a_recommend'] = isset($_POST['a_recommend'])?intval($_POST['a_recommend']):0;
         $data['a_link'] = isset($_POST['a_link'])?trim($_POST['a_link']):"";
-        $data['a_start_time'] = isset($_POST['a_start_time'])?time($_POST['a_start_time']):0;
-        $data['a_end_time'] = isset($_POST['a_end_time'])?time($_POST['a_end_time']):0;
+        $data['a_start_time'] = isset($_POST['a_start_time'])?strtotime($_POST['a_start_time']):0;
+        $data['a_end_time'] = isset($_POST['a_end_time'])?strtotime($_POST['a_end_time']):0;
 
 
         if(isset($_FILES['a_img']['name'][0])&&!empty($_FILES['a_img']['name'][0])){
@@ -510,7 +521,7 @@ class Articles extends \CLASSES\ManageBase
                     $up_pic = implode(",",$up_pic);
 
 
-                    $data['a_img'] = $up_pic[0];
+                    $data['a_img'] = $up_pic;
             }
         }
 

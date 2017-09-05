@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-    <title> - 项目</title>
+    <title>文章修改</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
 
@@ -53,7 +53,7 @@
             <div class="col-sm-12">
                 <div class="ibox float-e-margins">
                     <div class="ibox-title">
-                        <h5>文章添加</h5>
+                        <h5>文章修改</h5>
                         <div class="ibox-tools" style="margin-right: 15px;">
                             <a class="close-link" href="/index/welcome">
                                 <i class="fa fa-times"></i>
@@ -62,7 +62,7 @@
                         <div class="ibox-tools" style="margin-right: 15px;">
                             <a href="index">
                                 <i class="fa fa-plus"></i>
-                                文章修改
+                                文章列表
                             </a>
                         </div>
                     </div>
@@ -260,6 +260,7 @@
 
                             <div class="form-group">
                                 <div class="col-sm-4 col-sm-offset-2">
+                                    <input type="hidden" name="img_name" value="{{$self_data.a_img}}">
                                     <input type="hidden" name="r_id" id="area_id" value="{{$self_data.r_id}}">
                                     <input type="hidden" name="a_id"  value="{{$self_data.a_id}}">
                                     <button class="btn btn-primary" type="submit">保存内容</button>
