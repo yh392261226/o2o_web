@@ -116,4 +116,43 @@ class ManageBase extends Swoole\Controller
         //$this->tpl->assign('pagesize', $pager->set_pagesize());
     }
 
+    /*多文件上传函数*/
+    /*
+    $form_name:表单中的name名;
+    $prefix:生成的文件名的前缀;
+    $size:约定图片的最大尺寸;
+     */
+    protected function uploadAll($form_name,$prefix,$size=array('max_width'=>60,'max_height'=>60,'max_qulitity'=>90))
+    {
+        /*子目录生成参数*/
+        $this->upload->shard_argv = 'Y/m/d';
+        /*子目录生成方法，可以使用randomkey，或者date,user*/
+        $this->upload->shard_type = 'date';
+         //自动压缩图片
+        $this->upload->max_width = $size['max_width']; /*约定图片的最大宽度*/
+        $this->upload->max_height = $size['max_height']; /*约定图片的最大高度*/
+        $this->upload->max_qulitity = $size['max_qulitity']; /*图片压缩的质量*/
+        $data = $_FILES;
+        $_FILES = array();
+        $up_pic = array();
+        if(!empty($data[$form_name]['name']))
+        {
+            foreach($data[$form_name]['name'] as $k=>$f)
+            {
+                $file_name = $prefix.time().rand(1000,9999);
+                if(!empty($data[$form_name]['name'][$k]))
+                {
+                    $_FILES[$form_name]['name'] = $data[$form_name]['name'][$k];
+                    $_FILES[$form_name]['type'] = $data[$form_name]['type'][$k];
+                    $_FILES[$form_name]['tmp_name'] = $data[$form_name]['tmp_name'][$k];
+                    $_FILES[$form_name]['error'] = $data[$form_name]['error'][$k];
+                    $_FILES[$form_name]['size'] = $data[$form_name]['size'][$k];
+                    $arr = $this->upload->save($form_name,$file_name);
+                    $up_pic[] = $arr['url'];
+                }
+            }
+        }
+        return $up_pic;
+    }
+
 }
