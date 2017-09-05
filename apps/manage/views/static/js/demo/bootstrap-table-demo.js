@@ -110,10 +110,11 @@ function buildTable($el, cells, rows) {
     $('#exampleTableEvents').bootstrapTable({
       //url: "3",
       search: false,
-      pagination: true,
+      pagination: false,
       showRefresh: true,
       showToggle: true,
       showColumns: true,
+      height: 0,
       //formatShowingRows: false,
       iconSize: 'outline',
       toolbar: '#exampleTableEventsToolbar',

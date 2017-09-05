@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-    <title>权限组添加</title>
+    <title>模块修改</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
 
@@ -30,49 +30,33 @@
                    
                     <div class="ibox-content">
                         <form method="post" class="form-horizontal" action="">
-                            <input type="hidden" name="mpg_id" value="{{$info.mpg_id}}">
+                            <input type="hidden" name="mpm_id" value="{{$info.mpm_id}}">
                             <div class="form-group">
-                                <label class="col-sm-2 control-label">组名称</label>
+                                <label class="col-sm-2 control-label">模块名称</label>
 
                                 <div class="col-sm-10">
-                                    <input id="mpg_name" name="mpg_name" minlength="2" type="text" class="form-control" required="true" aria-required="true" value="{{$info.mpg_name}}">
+                                    <input id="mpm_name" name="mpm_name" minlength="2" type="text" class="form-control" required="true" aria-required="true" value="{{$info.mpm_name}}">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-sm-2 control-label"> 状态 </label>
+                                <label class="col-sm-2 control-label">模块值</label>
 
                                 <div class="col-sm-10">
+                                    <input id="mpm_value" name="mpm_value" minlength="2" type="text" class="form-control" value="{{$info.mpm_value}}">
+                                </div>
+                            </div>
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"> 状态 </label>
+                                <div class="col-sm-10 ">
                                     <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio2" {{if $info.mpg_status == -1}}checked="checked"{{/if}}  type="radio" name="mpg_status" value="-1">
-                                        <label for="inlineRadio2">已废弃</label>
-                                    </div>
-                                    <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio3" {{if $info.mpg_status == 0}}checked="checked"{{/if}}   type="radio" name="mpg_status" value="0">
+                                        <input id="inlineRadio3" {{if $info.mpm_status == 0}}checked="checked"{{/if}}   type="radio" name="mpm_status" value="0">
                                         <label for="inlineRadio3">不可用</label>
                                     </div>
                                     <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio4" {{if $info.mpg_status == 1}}checked="checked"{{/if}}   type="radio" name="mpg_status" value="1">
-                                        <label  for="inlineRadio4">未开启</label>
+                                        <input id="inlineRadio4" {{if $info.mpm_status == 1}}checked="checked"{{/if}}   type="radio" name="mpm_status" value="1">
+                                        <label  for="inlineRadio4">可用</label>
                                     </div>
-                                    <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio5" {{if $info.mpg_status == 2}}checked="checked"{{/if}}   type="radio" name="mpg_status" value="2">
-                                        <label for="inlineRadio5">正常</label>
-                                    </div>&nbsp;&nbsp;
-                                </div>
-                            </div>
-
-                             <div class="form-group">
-                                <label class="col-sm-2 control-label">模块</label>
-
-                                <div class="col-sm-10">
-                                    {{if $modules.data}}
-                                    {{foreach from=$modules.data item=value}}
-                                    <div class="checkbox checkbox-success checkbox-inline">
-                                        <input type="checkbox" id="edit_{{$value.mpm_id}}" {{if $value.mpm_id|in_array:$infomodules}}checked="checked"{{/if}} name="mpm_ids[]" value="{{$value.mpm_id}}">
-                                        <label for="edit_{{$value.mpm_id}}"> {{$value.mpm_name}} </label>
-                                    </div>
-                                    {{/foreach}}
-                                    {{/if}}
                                 </div>
                             </div>
 

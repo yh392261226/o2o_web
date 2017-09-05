@@ -50,15 +50,21 @@ $menu = array(
                     3 => array(
                         'name' => '权限组添加', 'icon' => '', 'link' => '/Managers/addGroup',
                     ),
+                    4 => array(
+                        'name' => '模块列表', 'icon' => '', 'link' => '/Managers/listModules',
+                    ),
+                    5 => array(
+                        'name' => '模块添加', 'icon' => '', 'link' => '/Managers/addModules',
+                    ),
                 ),
             ),
             1 => array(
-                "name" => '权限分组', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                "name" => '地区', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
                     0 => array(
-                        'name' => '分组列表', 'icon' => '', 'link' => '/manager/managersPrivilegesGroupList',
+                        'name' => '地区列表', 'icon' => '', 'link' => '/Regions/list',
                     ),
                     1 => array(
-                        'name' => '分组添加', 'icon' => '', 'link' => '/manager/managersPrivilegesGroupAdd',
+                        'name' => '地区添加', 'icon' => '', 'link' => '/Regions/add',
                     ),
                 ),
             ),
