@@ -105,6 +105,18 @@ $menu = array(
             ),
         ),
     ),
+    /*文章管理*/
+    3 => array(
+        'name' => '广告管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
+            0 => array(
+                "name" => '广告管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                    0 => array(
+                        'name' => '广告列表', 'icon' => '', 'link' => '/Advertising/index',
+                    ),
+                ),
+            ),
+        ),
+    ),
 );
 
 return $menu;
