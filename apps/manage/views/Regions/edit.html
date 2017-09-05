@@ -42,7 +42,7 @@
                             <label class="col-sm-2 control-label">短名称</label>
 
                             <div class="col-sm-10">
-                                <input id="r_shortname" value="{{$info.r_shortname}}" name="r_shortname" minlength="2" type="text" class="form-control" required="true" aria-required="true">
+                                <input id="r_shortname" value="{{$info.r_shortname}}" name="r_shortname" minlength="2" type="text" class="form-control">
                             </div>
                         </div>
 
@@ -66,11 +66,11 @@
                             <label class="col-sm-2 control-label"> 状态 </label>
                             <div class="col-sm-10 ">
                                 <div class="radio radio-info radio-inline">
-                                    <input id="inlineRadio3" type="radio" name="r_status" value="0" {{if $value.r_status == 0}}checked="checked"{{/if}}>
+                                    <input id="inlineRadio3" type="radio" name="r_status" value="0" {{if $info.r_status == 0}}checked="checked"{{/if}}>
                                     <label for="inlineRadio3">无效</label>
                                 </div>
                                 <div class="radio radio-info radio-inline">
-                                    <input id="inlineRadio4" type="radio" name="r_status" value="1" {{if $value.r_status == 1}}checked="checked"{{/if}}>
+                                    <input id="inlineRadio4" type="radio" name="r_status" value="1" {{if $info.r_status == 1}}checked="checked"{{/if}}>
                                     <label  for="inlineRadio4">有效</label>
                                 </div>
                             </div>

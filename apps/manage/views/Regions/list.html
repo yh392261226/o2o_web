@@ -55,8 +55,8 @@
                                 <td>{{$value.r_shortname}}</td>
                                 <td>{{$value.r_name}}</td>
                                 <td>
-                                    {{if $value.m_status == 0}}无效{{/if}}
-                                    {{if $value.m_status == 1}}有效{{/if}}
+                                    {{if $value.r_status == 0}}无效{{/if}}
+                                    {{if $value.r_status == 1}}有效{{/if}}
                                 </td>
                                 <td><a href="/Regions/edit?r_id={{$value.r_id}}">修改</a><!-- <a href="/Regions/del?r_id={{$value.r_id}}">删除</a>--></td>
                             </tr>

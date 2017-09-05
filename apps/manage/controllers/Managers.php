@@ -476,6 +476,7 @@ class Managers extends \CLASSES\ManageBase
         $data['page'] = isset($_REQUEST['page']) ? intval($_REQUEST['page']) : 1;
         $list = $this->manager_privileges_modules->listData($data);
         $this->tpl->assign('list', $list);
+        $this->myPager($list['pager']);
         $this->mydisplay();
     }
 
