@@ -56,8 +56,7 @@ class Managers extends \CLASSES\ManageBase
     {
         session_destroy();
         session_unset();
-        $this->http->status(302);
-        $this->http->header('Location', HOSTURL);
+        $this->http->redirect(HOSTURL);
     }
 
     public function add()

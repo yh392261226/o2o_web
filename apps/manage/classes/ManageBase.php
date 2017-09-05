@@ -6,7 +6,7 @@ use Swoole\Controller;
 class ManageBase extends Swoole\Controller
 {
     static $manager_status = false;
-    public $not_validata   = array('login');
+    public $not_validata   = array('Managers_login');
     public $controller_name = '';
     public $view_name = '';
     public $template_ext = '.html';
@@ -17,9 +17,6 @@ class ManageBase extends Swoole\Controller
         //$this->db->debug = 1;
 
         $this->session->start();
-//         $this->validataLoginStatus(); //验证登陆状态
-        $this->managerAssign();
-        //$this->db->debug = true;
 
         clearTemplateC();
 
@@ -28,6 +25,10 @@ class ManageBase extends Swoole\Controller
             $this->controller_name = $this->swoole->env['mvc']['controller'];
             $this->view_name = $this->swoole->env['mvc']['view'];
         }
+        $this->validataLoginStatus(); //验证登陆状态
+        $this->managerAssign();
+        //$this->db->debug = true;
+
     }
 
     /**
@@ -36,24 +37,25 @@ class ManageBase extends Swoole\Controller
      */
     protected function validataLoginStatus()
     {
-        $controller_name = strtolower($this->swoole->env['mvc']['controller']);
-        if ('' != $controller_name)
+        self::$manager_status = 0;
+        if ('' != $this->controller_name && '' != $this->view_name)
         {
-            if (!in_array($controller_name, $this->not_validata))
+            if (!in_array($this->controller_name . '_' . $this->view_name, $this->not_validata))
             {
                 //需要验证状态
-                if (!isset($_SESSION['manager_info']['m_id']) || empty($_SESSION['manager_info']['m_id']))
+                if (isset($_SESSION['manager']['m_id']) && $_SESSION['manager']['m_id'] > 0)
                 {
-                    self::$manager_status = 0;
-                    header('Location:' . HOSTURL . '/Managers/login');
-                    exit;
+                    self::$manager_status = $_SESSION['manager']['m_id'];
                 }
-                self::$manager_status = 1;
-                return true;
+                else
+                {
+                    echo '<script>window.location.href="/Managers/login"</script>';exit;
+                }
+
             }
-            return false; //不需要验证
+            return false;
         }
-        return false;
+        echo '<script>window.location.href="/Managers/login"</script>';exit;
     }
 
     /**
