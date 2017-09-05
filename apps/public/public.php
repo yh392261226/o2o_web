@@ -421,3 +421,9 @@ function getChildren($data,$catid,$key_id,$key_pid,$isClear=false)
     }
     return $child;
 }
+
+
+function clearTemplateC()
+{
+    delFile(WEBPATH . '/apps/manage/cache/templates_c/');
+}
