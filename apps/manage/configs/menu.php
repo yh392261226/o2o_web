@@ -69,12 +69,18 @@ $menu = array(
                 ),
             ),
             2 => array(
-                "name" => '权限模块', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                "name" => '红包', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
                     0 => array(
-                        'name' => '模块列表', 'icon' => '', 'link' => '/manager/managerPrivilegesModulesList',
+                        'name' => '类型列表', 'icon' => '', 'link' => '/Bouns/listType',
                     ),
                     1 => array(
-                        'name' => '模块添加', 'icon' => '', 'link' => '/manager/managerPrivilegesModulesAdd',
+                        'name' => '类型添加', 'icon' => '', 'link' => '/Bouns/addType',
+                    ),
+                    2 => array(
+                        'name' => '红包列表', 'icon' => '', 'link' => '/Bouns/list',
+                    ),
+                    3 => array(
+                        'name' => '红包添加', 'icon' => '', 'link' => '/Bouns/add',
                     ),
                 ),
             ),

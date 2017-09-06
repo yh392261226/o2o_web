@@ -80,8 +80,8 @@ class ModelBase extends \Swoole\Model
             }
             else
             {
-                $type = getArrayDeep($data);
-                if ($type)
+                $type = getArrayDeep($data, 1);//echo $type;
+                if ($type == 1)
                 {
                     $val = isset($data['val']) ? $data['val'] : '';
                     $key = isset($data['key']) ? $data['key'] : '';

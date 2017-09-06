@@ -162,7 +162,7 @@ function getArrayDeep($data = array(), $type = 0) {
         } else { //获取数组深度
             $max1 = 0;
             foreach ($data as $item1) {
-                $t1 = getArrayDeep($item1);
+                $t1 = getArrayDeep($item1, $type);
                 if ($t1 > $max1) {
                     $max1 = $t1;
                 }
@@ -426,4 +426,21 @@ function getChildren($data,$catid,$key_id,$key_pid,$isClear=false)
 function clearTemplateC()
 {
     delFile(WEBPATH . '/apps/manage/cache/templates_c/');
+}
+
+//随机生成一个32位的随机数
+function guid(){
+    if (function_exists('com_create_guid')){
+        return com_create_guid();
+    }else{
+        mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
+        $charid = strtoupper(md5(uniqid(rand(), true)));
+        $hyphen = chr(45);// "-"
+        $uuid = substr($charid, 0, 8).$hyphen
+            .substr($charid, 8, 4).$hyphen
+            .substr($charid,12, 4).$hyphen
+            .substr($charid,16, 4).$hyphen
+            .substr($charid,20,8);// "}"
+        return substr(substr($uuid, 0, -1), 1);
+    }
 }
