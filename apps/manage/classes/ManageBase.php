@@ -14,7 +14,7 @@ class ManageBase extends Swoole\Controller
     public function __construct($swoole)
     {
         parent::__construct($swoole);
-        //$this->db->debug = 1;
+        // $this->db->debug = 1;
 
         $this->session->start();
 
