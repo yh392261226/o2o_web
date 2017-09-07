@@ -251,7 +251,7 @@ class Managers extends \CLASSES\ManageBase
                 msg('操作失败', 0);
             }
             //SUCCESSFUL
-            msg('操作成功', 1);
+            msg('操作成功', 1, 'Managers/listGroup');
         }
 
         $modules = $this->manager_privileges_modules->listData(array('pager' => false));
@@ -294,7 +294,7 @@ class Managers extends \CLASSES\ManageBase
                 msg('操作失败', 0);
             }
             //SUCCESSFUL
-            msg('操作成功', 1);
+            msg('操作成功', 1, 'Managers/listGroup');
         }
         $info = $this->managers_privileges_group_dao->infoData($_REQUEST['mpg_id']);
         $modules = $this->manager_privileges_modules->listData(array('pager' => false));
@@ -382,6 +382,9 @@ class Managers extends \CLASSES\ManageBase
                 'mpm_value' => isset($_POST['mpm_value']) ? trim($_POST['mpm_value']) : '',
                 'mpm_status'=> isset($_POST['mpm_status']) ? intval($_POST['mpm_status']) : '0',
             );
+            $desc = array(
+                'mpm_desc' =>  isset($_POST['mpm_desc']) ? trim($_POST['mpm_desc']) : '',
+            );
             $result = $this->manager_privileges_modules->addData($data);
             if (!$result)
             {
@@ -389,13 +392,16 @@ class Managers extends \CLASSES\ManageBase
                 msg('操作失败', 0);
             }
             //SUCCESSFUL
-            msg('操作成功', 1);
+            $this->manager_privileges_modules_desc_dao = new \MDAO\Manager_privileges_modules_desc();
+            $this->manager_privileges_modules_desc_dao->addData(array('mpm_id' => $result, 'mpm_desc' => $desc['mpm_desc']));
+            msg('操作成功', 1, '/Managers/listModules');
         }
         $this->mydisplay();
     }
 
     public function editModules()
     {
+        $this->manager_privileges_modules_desc_dao = new \MDAO\Manager_privileges_modules_desc();
         if (isset($_POST['mpm_id']))
         {
             $curtime = time();
@@ -403,6 +409,9 @@ class Managers extends \CLASSES\ManageBase
                 'mpm_name'  => isset($_POST['mpm_name']) ? trim($_POST['mpm_name']) : '',
                 'mpm_value' => isset($_POST['mpm_value']) ? trim($_POST['mpm_value']) : '',
                 'mpm_status'=> isset($_POST['mpm_status']) ? intval($_POST['mpm_status']) : '0',
+            );
+            $desc = array(
+                'mpm_desc' =>  isset($_POST['mpm_desc']) ? trim($_POST['mpm_desc']) : '',
             );
             $param = array(
                 'mpm_id' => isset($_POST['mpm_id']) ? trim($_POST['mpm_id']) : 0,
@@ -420,9 +429,15 @@ class Managers extends \CLASSES\ManageBase
                 msg('操作失败', 0);
             }
             //SUCCESSFUL
-            msg('操作成功', 1);
+            $this->manager_privileges_modules_desc_dao->updateData($desc, $param);
+            msg('操作成功', 1, '/Managers/listModules');
         }
         $info = $this->manager_privileges_modules->infoData($_REQUEST['mpm_id']);
+        if (!empty($info))
+        {
+            $desc = $this->manager_privileges_modules_desc_dao->infoData($_REQUEST['mpm_id']);
+            if (!empty($desc)) $info['mpm_desc'] = $desc['mpm_desc'];
+        }
         $this->tpl->assign('info', $info);
         $this->mydisplay();
     }
