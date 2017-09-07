@@ -123,6 +123,20 @@ $menu = array(
             ),
         ),
     ),
+    4 => array(
+        'name' => '站内信管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
+            0 => array(
+                "name" => '站内信', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                    0 => array(
+                        'name' => '站内信列表', 'icon' => '', 'link' => '/Msg/list',
+                    ),
+                    1 => array(
+                        'name' => '站内信添加', 'icon' => '', 'link' => '/Msg/add',
+                    ),
+                ),
+            ),
+        ),
+    ),
 );
 
 return $menu;

@@ -201,7 +201,7 @@ class Managers extends \CLASSES\ManageBase
         if (isset($_REQUEST['m_start_time'])) $data['m_start_time'] = array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['m_start_time']));
         if (isset($_REQUEST['m_end_time'])) $data['m_end_time'] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['m_end_time']));
         $data['page'] = isset($_REQUEST['page']) ? intval($_REQUEST['page']) : 1;
-
+        $data['where'] = ' m_id != ' . $_SESSION['manager']['m_id'];
         $data['notin'] = array('m_status', '-2');
         if (isset($data['m_status']) && '' != $data['m_status'])
         {
