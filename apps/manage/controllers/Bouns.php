@@ -246,15 +246,24 @@ class Bouns extends \CLASSES\ManageBase
                 //FAILED
                 msg('操作失败', 0);
             }
-            $used = $this->bouns_data_dao->countData(array('b_id' => $param['b_id'], 'bd_author' => array('type'=>'=', 'value'=>0)));$used = 1;
-            $del_result = $this->bouns_data_dao->delData(array('b_id' => $param['b_id'], 'where' => ' bd_author = 0'));
-            if (!$del_result)
+
+            if (!in_array($data['b_type'], array(2,3))) //类型不能是线下和第三方才可以删除
             {
-                msg('操作失败，无法删除往期数据', 0);
+                $del_result = $this->bouns_data_dao->delData(array('b_id' => $param['b_id'], 'walk' => array('_where' => array('bd_author' => '0'))));
+                if (!$del_result)
+                {
+                    msg('操作失败，无法删除往期数据', 0);
+                }
             }
+
+            $used = $this->bouns_data_dao->countData(array('b_id' => $param['b_id'], 'bd_author' => array('type'=>'notin', 'value'=>0)));
             if ($used > 0)
             {
-                $data['b_total'] -= $used;
+                $data['b_total'] = $data['b_total'] - $used;
+                if ($data['b_total'] < 1)
+                {
+                    msg('操作成功', 1, '/Bouns/list');
+                }
             }
             $this->addData($param['b_id'], $data['b_total'], $data['bt_id']);
             //SUCCESSFUL
@@ -273,6 +282,12 @@ class Bouns extends \CLASSES\ManageBase
         $result = 0;
         if (isset($_REQUEST['b_id']))
         {
+            $used = $this->bouns_data_dao->countData(array('b_id' => intval($_REQUEST['b_id']), 'bd_author' => array('type'=>'notin', 'value'=>0)));
+            if ($used > 0)
+            {
+                msg('操作失败,已有人使用序列号', 0);
+            }
+
             if (is_array($_REQUEST['b_id']) || strpos($_REQUEST['b_id'], ','))
             {
                 $result = $this->bouns_dao->delData(array('b_id' => array('type' => 'in', 'value' => $_REQUEST['b_id']))); //伪删除

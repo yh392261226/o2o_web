@@ -69,7 +69,7 @@
                                 </td>
                                 <td>{{if $value.b_start_time != 0}}{{$value.b_start_time|date_format:"%y-%m-%d %H:%M:%S"}}{{else}}无限制{{/if}}</td>
                                 <td>{{if $value.b_end_time != 0}}{{$value.b_end_time|date_format:"%y-%m-%d %H:%M:%S"}}{{else}}无限制{{/if}}</td>
-                                <td><a href="/Bouns/edit?b_id={{$value.b_id}}">修改</a> |  <a href="/Bouns/del?b_id={{$value.b_id}}">删除 | <a href="/Bouns/listData?b_id={{$value.b_id}}">数据</a></a></td>
+                                <td><a href="/Bouns/edit?b_id={{$value.b_id}}">修改</a> {{if $value.b_type == 0 || $value.b_type == 1}}|  <a href="/Bouns/del?b_id={{$value.b_id}}">删除 {{/if}}| <a href="/Bouns/listData?b_id={{$value.b_id}}">数据</a></a></td>
                             </tr>
                             {{/foreach}}
                             {{/if}}
