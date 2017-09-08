@@ -346,7 +346,10 @@ function logs($path, $msg)
 function area($parent=1,$type="1",$target="selProvinces",$area_id = "")
 {
     if(!is_file("./area.php")){
-        return false;
+        $m_regions = Swoole::$php->model ->loadModel('Regions');
+        $m_regions->select = 'r_id,r_pid,r_name';
+        $data = $m_regions->getDatas(array('where'=>1));
+        file_put_contents('area.php','<?php $data='.var_export($data['data'],true).'?>');
     }
 
     require './area.php';

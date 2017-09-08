@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-05 16:38:15
+ * @Last Modified time: 2017-09-06 10:30:28
  */
 
 namespace App\Controller;
@@ -25,7 +25,6 @@ class Articles extends \CLASSES\ManageBase
     /*加载文章分类添加模板*/
     public function categoryAdd()
     {
-        // $area = model('Articles')->getArea();
         /*获取地区数组*/
         $area = area(1);
 
