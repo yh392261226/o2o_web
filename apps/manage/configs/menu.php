@@ -20,9 +20,9 @@ $menu = array(
                 "name" => '首页', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '/index/index',
             ),
             1 => array(
-                "name" => 'SEO设置', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                "name" => '支付设置', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
                     0 => array(
-                        'name' => '关键字设置', 'icon' => '', 'link' => '/system/seoKeyword',
+                        'name' => '支付设置', 'icon' => '', 'link' => '/Payments/list',
                     ),
                     1 => array(
                         'name' => '敏感词设置', 'icon' => '', 'link' => '/system/sensitiveWords',

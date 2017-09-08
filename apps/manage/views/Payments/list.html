@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-    <title>消息列表</title>
+    <title>支付信息列表</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
 
@@ -27,7 +27,7 @@
             <div class="example-wrap">
                 <div class="example">
                     <div class="btn-group hidden-xs" id="exampleTableEventsToolbar" role="group">
-                        <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='/Msg/add';">
+                        <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='/Payments/add';">
                             <i class="glyphicon glyphicon-plus" aria-hidden="true"></i>
                         </button>
                         <button type="button" class="btn btn-outline btn-default">
@@ -42,9 +42,8 @@
                                 <th data-field="title" data-sortable="true">标题</th>
                                 <th data-field="type" data-sortable="true">类型</th>
                                 <th data-field="status" data-sortable="true">状态</th>
-                                <th data-field="start_time" data-sortable="true">开始时间</th>
-                                <th data-field="end_time" data-sortable="true">结束时间</th>
-                                <th data-field="in_time" data-sortable="true">添加时间</th>
+                                <th data-field="default" data-sortable="true">默认方式</th>
+                                <th data-field="in_time" data-sortable="true">最后一次修改时间</th>
                                 <th data-field="action" data-sortable="">操作</th>
 
                             </tr>
@@ -53,22 +52,21 @@
                             {{if $list.data}}
                             {{foreach from=$list.data item=value}}
                             <tr>
-                                <td><input type="checkbox" name="wm_id" value="{{$value.wm_id}}"></td>
-                                <td>{{$value.wm_id}}</td>
-                                <td>{{$value.wm_title}}</td>
+                                <td><input type="checkbox" name="p_id" value="{{$value.p_id}}"></td>
+                                <td>{{$value.p_id}}</td>
+                                <td>{{$value.p_name}}</td>
                                 <td>
-                                    {{if $value.wm_type == 0}}系统消息{{/if}}
-                                    {{if $value.wm_type == 1}}任务提醒{{/if}}
-                                    {{if $value.wm_type == 2}}针对用户{{/if}}
+                                    {{if $value.p_type == 0}}支付{{/if}}
+                                    {{if $value.p_type == 1}}提现{{/if}}
+                                    {{if $value.p_type == 2}}双向{{/if}}
                                 </td>
                                 <td>
-                                    {{if $value.wm_status == 0}}未发布{{/if}}
-                                    {{if $value.wm_status == 1}}已发布{{/if}}
+                                    {{if $value.p_status == 0}}未开启{{/if}}
+                                    {{if $value.p_status == 1}}已开启{{/if}}
                                 </td>
-                                <td>{{if $value.wm_start_time > 0}}{{$value.wm_start_time|date_format:"%y-%m-%d %H:%M:%S"}}{{/if}}</td>
-                                <td>{{if $value.wm_end_time > 0}}{{$value.wm_end_time|date_format:"%y-%m-%d %H:%M:%S"}}{{/if}}</td>
-                                <td>{{$value.wm_in_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
-                                <td>{{if $value.wm_type != 1}}<a href="/Msg/edit?wm_id={{$value.wm_id}}">修改</a> | <a href="/Msg/del?wm_id={{$value.wm_id}}">删除</a>{{else}}<a href="/Msg/edit?wm_id={{$value.wm_id}}">查看</a>{{/if}}</td>
+                                <td>{{if $value.p_default == 0}}否{{else}}是{{/if}}</td>
+                                <td>{{if $value.p_last_edit_time > 0}}{{$value.p_last_edit_time|date_format:"%y-%m-%d %H:%M:%S"}}{{/if}}</td>
+                                <td><a href="/Payments/edit?p_id={{$value.p_id}}">修改</a> | <a href="/Payments/del?p_id={{$value.p_id}}">删除</a></td>
                             </tr>
                             {{/foreach}}
                             {{/if}}
