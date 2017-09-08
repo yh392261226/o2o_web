@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-06 10:30:28
+ * @Last Modified time: 2017-09-06 17:53:10
  */
 
 namespace App\Controller;
@@ -85,9 +85,9 @@ class Articles extends \CLASSES\ManageBase
             }
         }
         $data['ac_in_time'] = time();
-        $data['ac_author'] = $_SESSION['m_id'];
+        $data['ac_author'] = static::$manager_status;
         $data['ac_last_edit_time'] = time();
-        $data['ac_last_editor'] = $_SESSION['m_id'];
+        $data['ac_last_editor'] = static::$manager_status;
         $data['r_id'] = isset($_POST['r_id'])&&!empty($_POST['r_id'])?intval($_POST['r_id']):1;
         $res = $dao_article->addData($data);
         if($res){
@@ -232,9 +232,8 @@ class Articles extends \CLASSES\ManageBase
             msg("请填写分类名并选择父分类名", $status = 0, $jump);
         }else{
             /*判断分类名是否存在*/
-
-            $res = $dao_article->infoData(array('key'=>'ac_id','val'=>$ac_id,'fields'=>'ac_id'));
-
+            $ac_name = trim($_POST['ac_name']);
+            $res = $dao_article->infoData(array('key'=>'ac_name','val'=>$ac_name,'fields'=>'ac_id'));
             if(intval($res['ac_id']) > 0 && $res['ac_id'] != $ac_id){
                 msg("分类名已经存在!", $status = 0, $jump);
             }
@@ -275,7 +274,7 @@ class Articles extends \CLASSES\ManageBase
             }
         }
         $data['ac_last_edit_time'] = time();
-        $data['ac_last_editor'] = $_SESSION['m_id'];
+        $data['ac_last_editor'] = static::$manager_status;
         $data['r_id'] = isset($_POST['r_id'])&&!empty($_POST['r_id'])?intval($_POST['r_id']):1;
 
         $where = array('ac_id'=>$ac_id);
@@ -403,14 +402,14 @@ class Articles extends \CLASSES\ManageBase
         $data['a_title'] = trim($_POST['a_title']);
         $data['a_info'] = isset($_POST['a_info'])&&!empty($_POST['a_info'])?deepAddslashes(htmlspecialchars($_POST['a_info'])):"";
         $data['a_last_edit_time'] = time();
-        $data['a_last_editor'] = $_SESSION['m_id'];
+        $data['a_last_editor'] = static::$manager_status;
         $data['r_id'] = isset($_POST['r_id'])&&!empty($_POST['r_id'])?intval($_POST['r_id']):1;
         $data['a_status'] = isset($_POST['a_status'])?intval($_POST['a_status']):0;
         $data['a_top'] = isset($_POST['a_top'])?intval($_POST['a_top']):0;
         $data['a_recommend'] = isset($_POST['a_recommend'])?intval($_POST['a_recommend']):0;
         $data['a_link'] = isset($_POST['a_link'])?trim($_POST['a_link']):"";
-        $data['a_start_time'] = isset($_POST['a_start_time'])?strtotime($_POST['a_start_time']):0;
-        $data['a_end_time'] = isset($_POST['a_end_time'])?strtotime($_POST['a_end_time']):0;
+        $data['a_start_time'] = isset($_POST['a_start_time']) && intval($_POST['a_start_time']) > 0?strtotime($_POST['a_start_time']):0;
+        $data['a_end_time'] = isset($_POST['a_end_time']) && intval($_POST['a_end_time']) > 0 ?strtotime($_POST['a_end_time']):0;
 
         if(isset($_FILES['a_img']['name'][0])&&!empty($_FILES['a_img']['name'][0])){
 
@@ -495,16 +494,16 @@ class Articles extends \CLASSES\ManageBase
         $data['a_title'] = trim($_POST['a_title']);
         $data['a_info'] = isset($_POST['a_info'])&&!empty($_POST['a_info'])?deepAddslashes(htmlspecialchars($_POST['a_info'])):"";
         $data['a_in_time'] = time();
-        $data['a_author'] = $_SESSION['m_id'];
+        $data['a_author'] = static::$manager_status;
         $data['a_last_edit_time'] = time();
-        $data['a_last_editor'] = $_SESSION['m_id'];
+        $data['a_last_editor'] = static::$manager_status;
         $data['r_id'] = isset($_POST['r_id'])&&!empty($_POST['r_id'])?intval($_POST['r_id']):1;
         $data['a_status'] = isset($_POST['a_status'])?intval($_POST['a_status']):0;
         $data['a_top'] = isset($_POST['a_top'])?intval($_POST['a_top']):0;
         $data['a_recommend'] = isset($_POST['a_recommend'])?intval($_POST['a_recommend']):0;
         $data['a_link'] = isset($_POST['a_link'])?trim($_POST['a_link']):"";
-        $data['a_start_time'] = isset($_POST['a_start_time'])?strtotime($_POST['a_start_time']):0;
-        $data['a_end_time'] = isset($_POST['a_end_time'])?strtotime($_POST['a_end_time']):0;
+        $data['a_start_time'] = isset($_POST['a_start_time']) && intval($_POST['a_start_time']) > 0?strtotime($_POST['a_start_time']):0;
+        $data['a_end_time'] = isset($_POST['a_end_time']) && intval($_POST['a_end_time']) > 0 ?strtotime($_POST['a_end_time']):0;
 
 
         if(isset($_FILES['a_img']['name'][0])&&!empty($_FILES['a_img']['name'][0])){
