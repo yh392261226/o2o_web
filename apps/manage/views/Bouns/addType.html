@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-    <title>管理员添加</title>
+    <title>红包类型添加</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
 
@@ -19,7 +19,6 @@
     <link href="{{$manageurl}}css/plugins/summernote/summernote-bs3.css" rel="stylesheet">
     <link href="{{$manageurl}}css/style.css?v=4.1.0" rel="stylesheet">
     <link href="{{$manageurl}}css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
-
 </head>
 
 <body class="gray-bg">
@@ -27,66 +26,57 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="ibox float-e-margins">
-
+                   
                     <div class="ibox-content">
                         <form method="post" class="form-horizontal" action="">
                             <div class="form-group">
-                                <label class="col-sm-2 control-label">管理名称</label>
+                                <label class="col-sm-2 control-label">名称</label>
 
                                 <div class="col-sm-10">
-                                    <input id="m_name" name="m_name" minlength="5" type="text" class="form-control" required="true" aria-required="true">
+                                    <input id="bt_name" name="bt_name" minlength="2" type="text" class="form-control" required="true" aria-required="true">
                                 </div>
                             </div>
+                            <div class="hr-line-dashed"></div>
                             <div class="form-group">
-                                <label class="col-sm-2 control-label">密码</label>
-
-                                <div class="col-sm-10">
-                                    <input id="m_pass" name="m_pass" minlength="5" type="text" class="form-control" required="true" aria-required="true">
+                                <label class="col-sm-2 control-label"> 提现 </label>
+                                <div class="col-sm-10 ">
+                                    <div class="radio radio-info radio-inline">
+                                        <input id="inlineRadio3" type="radio" name="bt_withdraw" value="0" {{if $info.bt_withdraw == 0}}checked="checked"{{/if}}>
+                                        <label for="inlineRadio3">不可提现</label>
+                                    </div>
+                                    <div class="radio radio-info radio-inline">
+                                        <input id="inlineRadio4" type="radio" name="bt_withdraw" value="1" {{if $info.bt_withdraw == 1}}checked="checked"{{/if}}>
+                                        <label  for="inlineRadio4">可提现</label>
+                                    </div>
                                 </div>
                             </div>
-
-                             <div class="form-group">
-                                <label class="col-sm-2 control-label">管理组</label>
-
-                                <div class="col-sm-10">
-                                    <select class="form-control m-b" name="mpg_id">
-                                        <option value="0">请选择</option>
-                                        {{if $group}}
-                                        {{foreach from=$group.data item=value}}
-                                        <option value="{{$value.mpg_id}}" {{if $value.mpg_id == $info.mpg_id}}selected="selected"{{/if}}>{{$value.mpg_name}}</option>
-                                        {{/foreach}}
-                                        {{/if}}
-                                    </select>
-                                </div>
-                            </div>
-
                             <div class="hr-line-dashed"></div>
                             <div class="form-group">
                                 <label class="col-sm-2 control-label"> 状态 </label>
                                 <div class="col-sm-10 ">
                                     <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio1"  type="radio" name="m_status" value="-2">
-                                        <label for="inlineRadio1">删除</label>
+                                        <input id="inlineRadio3" type="radio" name="bt_status" value="0">
+                                        <label for="inlineRadio3">无效</label>
                                     </div>
                                     <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio2"  type="radio" name="m_status" value="-1">
-                                        <label for="inlineRadio2">禁止登陆</label>
-                                    </div>
-                                    <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio3" type="radio" name="m_status" value="0" checked="checked">
-                                        <label for="inlineRadio3">正常</label>
-                                    </div>
-                                    <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio4" type="radio" name="m_status" value="1">
-                                        <label  for="inlineRadio4">限制类管理</label>
-                                    </div>
-                                    <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio5" type="radio" name="m_status" value="9">
-                                        <label for="inlineRadio5">总管理</label>
+                                        <input id="inlineRadio4" type="radio" name="bt_status" value="1" checked="checked">
+                                        <label  for="inlineRadio4">有效</label>
                                     </div>
                                 </div>
                             </div>
-
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">简介</label>
+                                <div class="col-sm-10">
+                                    <textarea id="bt_info" name="bt_info" class="form-control"></textarea>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">时间区间</label>
+                                <div class="col-sm-10">
+                                    <input placeholder="开始日期" class="form-control layer-date" id="start" name="bt_start_time">
+                                    <input placeholder="结束日期" class="form-control layer-date" id="end" name="bt_end_time">
+                                </div>
+                            </div>
                             <div class="hr-line-dashed"></div>
                             <div class="form-group">
                                 <div class="col-sm-4 col-sm-offset-2">
@@ -137,7 +127,7 @@
             </div>
         </div>
     </div>
-
+        
     <!-- 全局js -->
     <script src="{{$manageurl}}js/jquery.min.js?v=2.1.4"></script>
     <script src="{{$manageurl}}js/bootstrap.min.js?v=3.3.6"></script>
@@ -150,6 +140,41 @@
      <!-- SUMMERNOTE -->
     <script src="{{$manageurl}}js/plugins/summernote/summernote.min.js"></script>
     <script src="{{$manageurl}}js/plugins/summernote/summernote-zh-CN.js"></script>
+    <!-- layerDate plugin javascript -->
+    <script src="{{$manageurl}}js/plugins/layer/laydate/laydate.js"></script>
+    <!-- 时间日期js -->
+    <script>
+
+
+        //日期范围限制
+        var start = {
+            elem: '#start',
+            format: 'YYYY/MM/DD hh:mm:ss',
+            min: laydate.now(), //设定最小日期为当前日期
+            max: '2099-06-16 23:59:59', //最大日期
+            istime: true,
+            istoday: false,
+            event: 'click',
+            choose: function (datas) {
+                end.min = datas; //开始日选好后，重置结束日的最小日期
+                end.start = datas //将结束日的初始值设定为开始日
+            }
+        };
+        var end = {
+            elem: '#end',
+            format: 'YYYY/MM/DD hh:mm:ss',
+            min: laydate.now(),
+            max: '2099-06-16 23:59:59',
+            istime: true,
+            istoday: false,
+            event: 'click',
+            choose: function (datas) {
+                start.max = datas; //结束日选好后，重置开始日的最大日期
+            }
+        };
+        laydate(start);
+        laydate(end);
+    </script>
     <script>
         $(document).ready(function () {
 
@@ -171,7 +196,7 @@
             $('.click2edit').destroy();
         };
     </script>
-
+    
     <script>
         $(document).ready(function () {
             $('.i-checks').iCheck({
@@ -181,7 +206,7 @@
         });
     </script>
 
-
+    
 
 </body>
 

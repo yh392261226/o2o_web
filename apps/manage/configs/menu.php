@@ -20,9 +20,9 @@ $menu = array(
                 "name" => '首页', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '/index/index',
             ),
             1 => array(
-                "name" => 'SEO设置', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                "name" => '支付设置', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
                     0 => array(
-                        'name' => '关键字设置', 'icon' => '', 'link' => '/system/seoKeyword',
+                        'name' => '支付设置', 'icon' => '', 'link' => '/Payments/list',
                     ),
                     1 => array(
                         'name' => '敏感词设置', 'icon' => '', 'link' => '/system/sensitiveWords',
@@ -69,12 +69,18 @@ $menu = array(
                 ),
             ),
             2 => array(
-                "name" => '权限模块', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                "name" => '红包', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
                     0 => array(
-                        'name' => '模块列表', 'icon' => '', 'link' => '/manager/managerPrivilegesModulesList',
+                        'name' => '类型列表', 'icon' => '', 'link' => '/Bouns/listType',
                     ),
                     1 => array(
-                        'name' => '模块添加', 'icon' => '', 'link' => '/manager/managerPrivilegesModulesAdd',
+                        'name' => '类型添加', 'icon' => '', 'link' => '/Bouns/addType',
+                    ),
+                    2 => array(
+                        'name' => '红包列表', 'icon' => '', 'link' => '/Bouns/list',
+                    ),
+                    3 => array(
+                        'name' => '红包添加', 'icon' => '', 'link' => '/Bouns/add',
                     ),
                 ),
             ),
@@ -112,6 +118,20 @@ $menu = array(
                 "name" => '广告管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
                     0 => array(
                         'name' => '广告列表', 'icon' => '', 'link' => '/Advertising/index',
+                    ),
+                ),
+            ),
+        ),
+    ),
+    4 => array(
+        'name' => '站内信管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
+            0 => array(
+                "name" => '站内信', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                    0 => array(
+                        'name' => '站内信列表', 'icon' => '', 'link' => '/Msg/list',
+                    ),
+                    1 => array(
+                        'name' => '站内信添加', 'icon' => '', 'link' => '/Msg/add',
                     ),
                 ),
             ),
