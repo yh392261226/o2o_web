@@ -233,8 +233,8 @@
                             <div class="form-group">
                                 <label class="col-sm-2 control-label">定时发布时间：</label>
                                 <div class="col-sm-10">
-                                    <input placeholder="开始日期" class="form-control layer-date" id="start" name="a_start_time" value='{{$self_data.a_start_time|date_format:"%y-%m-%d %H:%M:%S"}}'>
-                                    <input placeholder="结束日期" class="form-control layer-date" id="end" name="a_end_time" value='{{$self_data.a_end_time|date_format:"%y-%m-%d %H:%M:%S"}}'>
+                                    <input placeholder="开始日期" class="form-control layer-date" id="start" name="a_start_time" value='{{if $self_data.a_start_time gt 0}}{{$self_data.a_start_time|date_format:"%y-%m-%d %H:%M:%S"}}{{/if}}'>
+                                    <input placeholder="结束日期" class="form-control layer-date" id="end" name="a_end_time" value='{{if $self_data.a_end_time gt 0}}{{$self_data.a_end_time|date_format:"%y-%m-%d %H:%M:%S"}}{{/if}}'>
                                 </div>
                             </div>
 

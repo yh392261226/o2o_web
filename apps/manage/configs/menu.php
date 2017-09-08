@@ -82,34 +82,25 @@ $menu = array(
     ),
     /*文章管理*/
     2 => array(
-        'name' => '文章管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
+        'name' => '文章管理', 'icon' => '', 'link' => '/Articles/index', 'sub_menu' => array(
             0 => array(
-                "name" => '文章分类管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                "name" => '文章分类管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '/Articles/index', 'sub_menu' => array(
                     0 => array(
                         'name' => '文章分类列表', 'icon' => '', 'link' => '/Articles/categoryList',
                     ),
                     1 => array(
                         'name' => '文章分类添加', 'icon' => '', 'link' => '/Articles/categoryAdd',
                     ),
-                ),
-            ),
-            1 => array(
-                "name" => '文章管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
-                    0 => array(
+                    2 => array(
                         'name' => '文章列表', 'icon' => '', 'link' => '/Articles/index',
                     ),
-                    1 => array(
+                    3 => array(
                         'name' => '文章添加', 'icon' => '', 'link' => '/Articles/articleAdd',
                     ),
                 ),
             ),
-        ),
-    ),
-    /*文章管理*/
-    3 => array(
-        'name' => '广告管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
-            0 => array(
-                "name" => '广告管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+            1 => array(
+                "name" => '广告管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '/Advertising/index', 'sub_menu' => array(
                     0 => array(
                         'name' => '广告列表', 'icon' => '', 'link' => '/Advertising/index',
                     ),
@@ -117,6 +108,23 @@ $menu = array(
             ),
         ),
     ),
+
+    /*消息管理*/
+    3 => array(
+        'name' => '消息管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
+            0 => array(
+                "name" => '投诉管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '/Complaints/index', 'sub_menu' => array(
+                    0 => array(
+                        'name' => '投诉类型列表', 'icon' => '', 'link' => '/Complaints/categoryList',
+                    ),
+                    1 => array(
+                        'name' => '投诉列表', 'icon' => '', 'link' => '/Complaints/index',
+                    ),
+                ),
+            ),
+        ),
+    ),
+
 );
 
 return $menu;

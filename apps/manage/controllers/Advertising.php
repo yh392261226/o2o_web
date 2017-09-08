@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-04 17:53:06
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-05 16:28:41
+ * @Last Modified time: 2017-09-06 17:15:21
  */
 namespace App\Controller;
 
@@ -77,8 +77,8 @@ class Advertising extends \CLASSES\ManageBase
         $data['a_status'] = isset($_POST['a_status'])?intval($_POST['a_status']):0;
         $data['a_type'] = isset($_POST['a_type'])?intval($_POST['a_type']):0;
         $data['a_link'] = isset($_POST['a_link'])?trim($_POST['a_link']):"";
-        $data['a_start_time'] = isset($_POST['a_start_time'])?strtotime($_POST['a_start_time']):0;
-        $data['a_end_time'] = isset($_POST['a_end_time'])?strtotime($_POST['a_end_time']):0;
+        $data['a_start_time'] = isset($_POST['a_start_time']) && intval($_POST['a_start_time']) > 0?strtotime($_POST['a_start_time']):0;
+        $data['a_end_time'] =  isset($_POST['a_end_time']) && intval($_POST['a_end_time']) > 0?strtotime($_POST['a_end_time']):0;
 
 
         if(isset($_FILES['a_img']['name'][0])&&!empty($_FILES['a_img']['name'][0])){
@@ -183,8 +183,8 @@ class Advertising extends \CLASSES\ManageBase
         $data['a_status'] = isset($_POST['a_status'])?intval($_POST['a_status']):0;
         $data['a_type'] = isset($_POST['a_type'])?intval($_POST['a_type']):0;
         $data['a_link'] = isset($_POST['a_link'])?trim($_POST['a_link']):"";
-        $data['a_start_time'] = isset($_POST['a_start_time'])?strtotime($_POST['a_start_time']):0;
-        $data['a_end_time'] = isset($_POST['a_end_time'])?strtotime($_POST['a_end_time']):0;
+        $data['a_start_time'] = isset($_POST['a_start_time']) && intval($_POST['a_start_time']) > 0?strtotime($_POST['a_start_time']):0;
+        $data['a_end_time'] =  isset($_POST['a_end_time']) && intval($_POST['a_end_time']) > 0?strtotime($_POST['a_end_time']):0;
 
         if(isset($_FILES['a_img']['name'][0])&&!empty($_FILES['a_img']['name'][0])){
 
@@ -220,10 +220,10 @@ class Advertising extends \CLASSES\ManageBase
 
 
         if($res){
-            // msg("文章修改成功", $status = 1, $jump);
+            msg("广告修改成功", $status = 1, $jump);
         }
 
-            // msg("文章修改失败!", $status = 0, $jump);
+            msg("广告修改失败!", $status = 0, $jump);
 
 
     }
