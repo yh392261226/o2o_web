@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>任务信息列表</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+
+    <link rel="shortcut icon" href="favicon.ico"> <link href="{{$manageurl}}css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="{{$manageurl}}css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="{{$manageurl}}css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/animate.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/style.css?v=4.1.0" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+
+
+        <div class="col-sm-12">
+            <!-- Example Events -->
+            <div class="example-wrap">
+                <div class="example">
+                    <div class="btn-group hidden-xs" id="exampleTableEventsToolbar" role="group">
+                        <!--<button type="button" class="btn btn-outline btn-default" onclick="window.location.href='/';">-->
+                            <!--<i class="glyphicon glyphicon-plus" aria-hidden="true"></i>-->
+                        <!--</button>-->
+                        <!--<button type="button" class="btn btn-outline btn-default">-->
+                            <!--<i class="glyphicon glyphicon-trash" aria-hidden="true"></i>-->
+                        <!--</button>-->
+                    </div>
+                    <table id="exampleTableEvents" data-height="400" data-mobile-responsive="true" data-striped="true">
+                        <thead>
+                            <tr>
+                                <th data-field="state" data-checkbox="true"></th>
+                                <th data-field="id" data-sortable="true">ID</th>
+                                <th data-field="title" data-sortable="true">标题</th>
+                                <th data-field="amount" data-sortable="true">初始总价</th>
+                                <th data-field="last_amount" data-sortable="true">最终总价</th>
+                                <th data-field="status" data-sortable="true">状态</th>
+                                <th data-field="default" data-sortable="true">时长(天)</th>
+                                <th data-field="in_time" data-sortable="true">最后一次修改时间</th>
+                                <th data-field="action" data-sortable="">操作</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{if $list.data}}
+                            {{foreach from=$list.data item=value}}
+                            <tr>
+                                <td><input type="checkbox" name="p_id" value="{{$value.t_id}}"></td>
+                                <td>{{$value.t_id}}</td>
+                                <td>{{$value.t_title}}</td>
+                                <td>{{$value.t_amount}}</td>
+                                <td>{{if $value.t_edit_amount > 0}}{{$value.t_edit_amount}}{{else}}{{$value.t_amount}}{{/if}}</td>
+                                <td>
+                                    {{if $value.t_status == -9}}发布者删除{{/if}}
+                                    {{if $value.t_status == -3}}纠纷关闭{{/if}}
+                                    {{if $value.t_status == -2}}管理员关闭{{/if}}
+                                    {{if $value.t_status == -1}}发布者关闭{{/if}}
+                                    {{if $value.t_status == 0}}等待认领{{/if}}
+                                    {{if $value.t_status == 1}}洽谈中{{/if}}
+                                    {{if $value.t_status == 2}}工作中{{/if}}
+                                    {{if $value.t_status == 3}}工作完成{{/if}}
+                                    {{if $value.t_status == 4}}纠纷解决{{/if}}
+                                </td>
+                                <td>{{$value.t_duration}}</td>
+                                <td>{{$value.t_in_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
+                                <td><a href="/Tasks/info?t_id={{$value.t_id}}">详情</a></td>
+                            </tr>
+                            {{/foreach}}
+                            {{/if}}
+                        </tbody>
+                    </table>
+                    {{include file='layout/pager.html'}}
+                </div>
+            </div>
+            <!-- End Example Events -->
+        </div>
+    </div>
+
+        <!-- End Panel Other -->
+
+    <!-- 全局js -->
+    <script src="{{$manageurl}}js/jquery.min.js?v=2.1.4"></script>
+    <script src="{{$manageurl}}js/bootstrap.min.js?v=3.3.6"></script>
+
+    <!-- 自定义js -->
+    <script src="{{$manageurl}}js/content.js?v=1.0.0"></script>
+
+
+    <!-- Bootstrap table -->
+    <script src="{{$manageurl}}js/plugins/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="{{$manageurl}}js/plugins/bootstrap-table/bootstrap-table-mobile.min.js"></script>
+    <script src="{{$manageurl}}js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js"></script>
+
+    <!-- Peity -->
+    <script src="{{$manageurl}}js/demo/bootstrap-table-demo.js"></script>
+
+
+
+
+</body>
+
+</html>
