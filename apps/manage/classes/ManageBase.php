@@ -18,7 +18,7 @@ class ManageBase extends Swoole\Controller
 
         $this->session->start();
 
-        clearTemplateC();
+        $this->clearTemplateC(APPPATH . '/manage/cache/templates_c/');
 
         if (!empty($this->swoole->env['mvc']))
         {
@@ -111,13 +111,16 @@ class ManageBase extends Swoole\Controller
 
     public function myPager($pager)
     {
-        $pager->set_class('next', 'btn btn-white');
-        $pager->set_class('previous', 'btn btn-white');
-        $pager->set_class('first', 'btn btn-white');
-        $pager->set_class('last', 'btn btn-white');
-        $this->tpl->assign('pager', $pager->render());
-        $this->tpl->assign('pagesize', '');
-        //$this->tpl->assign('pagesize', $pager->set_pagesize());
+        if (!empty($pager))
+        {
+            $pager->set_class('next', 'btn btn-white');
+            $pager->set_class('previous', 'btn btn-white');
+            $pager->set_class('first', 'btn btn-white');
+            $pager->set_class('last', 'btn btn-white');
+            $this->tpl->assign('pager', $pager->render());
+            $this->tpl->assign('pagesize', '');
+            //$this->tpl->assign('pagesize', $pager->set_pagesize());
+        }
     }
 
     /*多文件上传函数*/
@@ -157,6 +160,26 @@ class ManageBase extends Swoole\Controller
             }
         }
         return $up_pic;
+    }
+
+    private function clearTemplateC($dir)
+    {
+        $handler = opendir($dir);
+        while($file = readdir($handler))
+        {
+            if ($file != '.' && $file != '..')
+            {
+                $path = $dir . '/' . $file;
+                if (!is_dir($path))
+                {
+                    unlink($path);
+                }
+                else
+                {
+                    $this->clearTemplateC($path);
+                }
+            }
+        }
     }
 
 }

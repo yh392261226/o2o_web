@@ -81,6 +81,11 @@ class Managers extends \CLASSES\ManageBase
 
             if ('' == $data['m_name']) msg('管理员名称不能为空', 0);
             if ('' == $data['m_pass']) msg('密码不能为空', 0);
+            if (isset($_POST['m_start_time']) && isset($_POST['m_end_time']) && $_POST['m_start_time'] != 0 && $_POST['m_end_time'] != 0 && strtotime($_POST['m_end_time']) < strtotime($_POST['m_start_time']))
+            {
+                //结束时间不能小于开始时间
+                msg('结束时间不能小于开始时间', 0);
+            }
             if ($this->managers_dao->checkManagerName($data['m_name'])) msg('管理员名称已被占用', 0);
 
             $result = $this->managers_dao->addData($data);
@@ -114,7 +119,11 @@ class Managers extends \CLASSES\ManageBase
             );
 
             if ('' == $data['m_pass']) unset($data['m_pass']);
-
+            if (isset($_POST['m_start_time']) && isset($_POST['m_end_time']) && $_POST['m_start_time'] != 0 && $_POST['m_end_time'] != 0 && strtotime($_POST['m_end_time']) < strtotime($_POST['m_start_time']))
+            {
+                //结束时间不能小于开始时间
+                msg('结束时间不能小于开始时间', 0);
+            }
             $param = array(
                 'm_id' => isset($_POST['m_id']) ? trim($_POST['m_id']) : 0,
             );
@@ -192,14 +201,14 @@ class Managers extends \CLASSES\ManageBase
         if (isset($_REQUEST['m_start_time'])) $data['m_start_time'] = array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['m_start_time']));
         if (isset($_REQUEST['m_end_time'])) $data['m_end_time'] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['m_end_time']));
         $data['page'] = isset($_REQUEST['page']) ? intval($_REQUEST['page']) : 1;
-
+        $data['where'] = ' m_id != ' . $_SESSION['manager']['m_id'];
         $data['notin'] = array('m_status', '-2');
         if (isset($data['m_status']) && '' != $data['m_status'])
         {
             unset($data['notin']);
         }
 
-        if (isset($_REQUEST['m_start_time']) && isset($_REQUEST['m_end_time']) && strtotime($_REQUEST['m_end_time']) < strtotime($_REQUEST['m_start_time']))
+        if (isset($_REQUEST['m_start_time']) && isset($_REQUEST['m_end_time']) && $_REQUEST['m_start_time'] != 0 && $_REQUEST['m_end_time'] != 0 && strtotime($_REQUEST['m_end_time']) < strtotime($_REQUEST['m_start_time']))
         {
             //结束时间不能小于开始时间
             msg('结束时间不能小于开始时间', 0);
@@ -242,7 +251,7 @@ class Managers extends \CLASSES\ManageBase
                 msg('操作失败', 0);
             }
             //SUCCESSFUL
-            msg('操作成功', 1);
+            msg('操作成功', 1, 'Managers/listGroup');
         }
 
         $modules = $this->manager_privileges_modules->listData(array('pager' => false));
@@ -285,7 +294,7 @@ class Managers extends \CLASSES\ManageBase
                 msg('操作失败', 0);
             }
             //SUCCESSFUL
-            msg('操作成功', 1);
+            msg('操作成功', 1, 'Managers/listGroup');
         }
         $info = $this->managers_privileges_group_dao->infoData($_REQUEST['mpg_id']);
         $modules = $this->manager_privileges_modules->listData(array('pager' => false));
@@ -353,12 +362,6 @@ class Managers extends \CLASSES\ManageBase
             array('type' => 'le', 'le_value' => strtotime($_REQUEST['end_mpg_in_time'])),
         );
         $data['page'] = isset($_REQUEST['page']) ? intval($_REQUEST['page']) : 1;
-        if (isset($_REQUEST['m_start_time']) && isset($_REQUEST['m_end_time']) && strtotime($_REQUEST['m_end_time']) < strtotime($_REQUEST['m_start_time']))
-        {
-            //结束时间不能小于开始时间
-            //failed
-            msg('结束时间不能小于开始时间', 0);
-        }
         $list = $this->managers_privileges_group_dao->listData($data);
         $this->tpl->assign('list', $list);
         $this->myPager($list['pager']);
@@ -379,6 +382,9 @@ class Managers extends \CLASSES\ManageBase
                 'mpm_value' => isset($_POST['mpm_value']) ? trim($_POST['mpm_value']) : '',
                 'mpm_status'=> isset($_POST['mpm_status']) ? intval($_POST['mpm_status']) : '0',
             );
+            $desc = array(
+                'mpm_desc' =>  isset($_POST['mpm_desc']) ? trim($_POST['mpm_desc']) : '',
+            );
             $result = $this->manager_privileges_modules->addData($data);
             if (!$result)
             {
@@ -386,13 +392,16 @@ class Managers extends \CLASSES\ManageBase
                 msg('操作失败', 0);
             }
             //SUCCESSFUL
-            msg('操作成功', 1);
+            $this->manager_privileges_modules_desc_dao = new \MDAO\Manager_privileges_modules_desc();
+            $this->manager_privileges_modules_desc_dao->addData(array('mpm_id' => $result, 'mpm_desc' => $desc['mpm_desc']));
+            msg('操作成功', 1, '/Managers/listModules');
         }
         $this->mydisplay();
     }
 
     public function editModules()
     {
+        $this->manager_privileges_modules_desc_dao = new \MDAO\Manager_privileges_modules_desc();
         if (isset($_POST['mpm_id']))
         {
             $curtime = time();
@@ -400,6 +409,9 @@ class Managers extends \CLASSES\ManageBase
                 'mpm_name'  => isset($_POST['mpm_name']) ? trim($_POST['mpm_name']) : '',
                 'mpm_value' => isset($_POST['mpm_value']) ? trim($_POST['mpm_value']) : '',
                 'mpm_status'=> isset($_POST['mpm_status']) ? intval($_POST['mpm_status']) : '0',
+            );
+            $desc = array(
+                'mpm_desc' =>  isset($_POST['mpm_desc']) ? trim($_POST['mpm_desc']) : '',
             );
             $param = array(
                 'mpm_id' => isset($_POST['mpm_id']) ? trim($_POST['mpm_id']) : 0,
@@ -417,9 +429,15 @@ class Managers extends \CLASSES\ManageBase
                 msg('操作失败', 0);
             }
             //SUCCESSFUL
-            msg('操作成功', 1);
+            $this->manager_privileges_modules_desc_dao->updateData($desc, $param);
+            msg('操作成功', 1, '/Managers/listModules');
         }
         $info = $this->manager_privileges_modules->infoData($_REQUEST['mpm_id']);
+        if (!empty($info))
+        {
+            $desc = $this->manager_privileges_modules_desc_dao->infoData($_REQUEST['mpm_id']);
+            if (!empty($desc)) $info['mpm_desc'] = $desc['mpm_desc'];
+        }
         $this->tpl->assign('info', $info);
         $this->mydisplay();
     }
