@@ -93,6 +93,7 @@ class Regions extends \CLASSES\ManageBase
                 $result = $this->regions_dao->delData(array('r_id' => intval($_REQUEST['r_id']))); //伪删除
             }
         }
+
         if (!$result) {
             //FAILED
             msg('操作失败,不允许删除', 0);

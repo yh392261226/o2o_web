@@ -4,14 +4,7 @@ class Tasks extends \MMODEL\ModelBase
 {
     public $table = 'tasks';
     public $primary = "t_id";
-
-    public function delData($data = array())
-    {
-        if ($this->allow_delete == false)
-        {
-            return false;
-        }
-    }
+    protected $allow_delete = false;
 
     //public function delData($data = array())
     //{

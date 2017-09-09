@@ -8,7 +8,7 @@ namespace MMODEL;
 class ModelBase extends \Swoole\Model
 {
     public $primary;
-    private $allow_delete = true;
+    protected $allow_delete = true;
     public $select = '*';
 
     public function __construct(\Swoole $swoole, $db_key = 'master')
