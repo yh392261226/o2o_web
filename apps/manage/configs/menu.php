@@ -140,7 +140,6 @@ $menu = array(
             ),
         ),
     ),
-
     /*技能管理*/
     4 => array(
         'name' => '技能管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
@@ -153,6 +152,21 @@ $menu = array(
             ),
         ),
     ),
+
+    /*任务*/
+    5 => array(
+        'name' => '任务管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
+            0 => array(
+                "name" => '任务管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                    0 => array(
+                        'name' => '任务列表', 'icon' => '', 'link' => '/Tasks/list',
+
+                    ),
+                ),
+            ),
+        ),
+    ),
+
 
     /*日志管理*/
     6 => array(
@@ -171,7 +185,7 @@ $menu = array(
                     3 => array(
                         'name' => '用户体现记录', 'icon' => '', 'link' => '/Log/userWithdraw',
                     ),
-                ),
+                )
             ),
         ),
     ),

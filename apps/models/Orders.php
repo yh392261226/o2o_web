@@ -15,7 +15,7 @@ class Orders extends \MMODEL\ModelBase
         if (!empty($data))
         {
             $param['o_id'] = isset($data['o_id']) ? $data['o_id'] : '';
-            $status = isset($data['o_status']) intval($data['o_status']) : ''; //-9工人删除 -8雇主删除
+            $status = isset($data['o_status']) ? intval($data['o_status']) : ''; //-9工人删除 -8雇主删除
             if ('' == $status)
             {
                 return false;
