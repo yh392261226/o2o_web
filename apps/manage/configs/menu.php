@@ -119,7 +119,7 @@ $menu = array(
     3 => array(
         'name' => '消息管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
             0 => array(
-                "name" => '投诉管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '/Complaints/index', 'sub_menu' => array(
+                "name" => '投诉管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
                     0 => array(
                         'name' => '投诉类型列表', 'icon' => '', 'link' => '/Complaints/categoryList',
                     ),
@@ -145,9 +145,31 @@ $menu = array(
     4 => array(
         'name' => '技能管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
             0 => array(
-                "name" => '技能管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '/Complaints/index', 'sub_menu' => array(
+                "name" => '技能管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
                     0 => array(
                         'name' => '技能列表', 'icon' => '', 'link' => '/Skills/index',
+                    ),
+                ),
+            ),
+        ),
+    ),
+
+    /*日志管理*/
+    6 => array(
+        'name' => '日志管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
+            0 => array(
+                "name" => '日志管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                    0 => array(
+                        'name' => '任务日志', 'icon' => '', 'link' => '/Log/orders',
+                    ),
+                    1 => array(
+                        'name' => '平台资金流向记录', 'icon' => '', 'link' => '/Log/platformFunds',
+                    ),
+                    2 => array(
+                        'name' => '用户充值记录', 'icon' => '', 'link' => '/Log/userRecharge',
+                    ),
+                    3 => array(
+                        'name' => '用户体现记录', 'icon' => '', 'link' => '/Log/userWithdraw',
                     ),
                 ),
             ),
