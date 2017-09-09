@@ -22,7 +22,7 @@ class Msg extends \CLASSES\ManageBase
             $data   = array(
                 'wm_title'     => isset($_POST['wm_title']) ? trim($_POST['wm_title']) : '',
                 'wm_in_time'   => $curtime,
-                'wm_author'    => $_SESSION['manager']['m_id'],
+                'wm_author'    => parent::$manager_status,
                 'wm_type'      => isset($_POST['wm_type']) ? trim($_POST['wm_type']) : '0',
                 'wm_status'    => isset($_POST['wm_status']) ? trim($_POST['wm_status']) : 0,
                 'wm_start_time'=> (isset($_POST['wm_start_time']) && intval($_POST['wm_start_time']) > 0) ? strtotime($_POST['wm_start_time']) : '0',
@@ -56,7 +56,7 @@ class Msg extends \CLASSES\ManageBase
             $data   = array(
                 'wm_title'     => isset($_POST['wm_title']) ? trim($_POST['wm_title']) : '',
                 'wm_in_time'   => $curtime,
-                'wm_author'    => $_SESSION['manager']['m_id'],
+                'wm_author'    => parent::$manager_status,
                 'wm_type'      => isset($_POST['wm_type']) ? trim($_POST['wm_type']) : '0',
                 'wm_status'    => isset($_POST['wm_status']) ? trim($_POST['wm_status']) : 0,
                 'wm_start_time'=> (isset($_POST['wm_start_time']) && intval($_POST['wm_start_time']) > 0) ? strtotime($_POST['wm_start_time']) : '0',
