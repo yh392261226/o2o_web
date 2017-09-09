@@ -7,6 +7,7 @@ class Tasks extends \CLASSES\ManageBase
     {
         parent::__construct($swoole);
         $this->tasks_dao = new \MDAO\Tasks();
+        $this->orders_dao = new \MDAO\Orders();
         //$this->db->debug = 1;
     }
 
@@ -27,9 +28,16 @@ class Tasks extends \CLASSES\ManageBase
                 $info = $this->tasks_dao->infoData(array('key' => trim($_REQUEST['key']), 'val' =>  $_REQUEST['val']));
             }
         }
-        print_r($info);exit;
+        //print_r($info);exit;
+        $data = array(
+            'page' => isset($_REQUEST['page']) ? intval($_REQUEST['page']) : 1,
+            't_id' => intval($_REQUEST['t_id']),
+        );
+        $orders_list = $this->orders_dao->listData($data);
         $this->tpl->assign('info', $info);
-        $this->mydisplay('info');
+        $this->tpl->assign('orders_list', $orders_list);
+        $this->myPager($orders_list['pager']);
+        $this->mydisplay();
     }
 
     public function list()
