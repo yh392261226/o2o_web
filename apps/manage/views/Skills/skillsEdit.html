@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-    <title>投诉类型修改</title>
+    <title>技能修改</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
 
@@ -29,27 +29,27 @@
                 <div class="ibox float-e-margins">
 
                     <div class="ibox-title">
-                        <h5>投诉类型修改</h5>
+                        <h5>技能修改</h5>
                         <div class="ibox-tools" style="margin-right: 15px;">
                             <a class="close-link" href="/index/welcome">
                                 <i class="fa fa-times"></i>
                             </a>
                         </div>
                         <div class="ibox-tools" style="margin-right: 15px;">
-                            <a href="categoryList">
+                            <a href="index">
                                 <i class="fa fa-plus"></i>
-                                投诉类型列表
+                                技能列表
                             </a>
                         </div>
                     </div>
 
                     <div class="ibox-content">
-                        <form method="post" class="form-horizontal" action="/Complaints/doCategoryEdit">
+                        <form method="post" class="form-horizontal" action="/Skills/doSkillsEdit">
                             <div class="form-group">
-                                <label class="col-sm-2 control-label">类型名称</label>
+                                <label class="col-sm-2 control-label">技能名称</label>
 
                                 <div class="col-sm-10">
-                                    <input id="m_name" name="ct_name" minlength="2" type="text" class="form-control" required="true" aria-required="true" value="{{$self_data.ct_name}}">
+                                    <input id="m_name" name="s_name" minlength="2" type="text" class="form-control" required="true" aria-required="true" value="{{$self_data.s_name}}">
                                 </div>
                             </div>
 
@@ -58,20 +58,39 @@
                                 <label class="col-sm-2 control-label"> 是否启用 </label>
                                 <div class="col-sm-10 ">
                                     <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio1" {{if $self_data.ct_status eq 1 }} checked="" {{/if}}  type="radio" name="ct_status" value="1">
+                                        <input id="inlineRadio1" {{if $self_data.s_status eq 1 }} checked="" {{/if}}  type="radio" name="s_status" value="1">
                                         <label for="inlineRadio1">启用</label>
                                     </div>
                                     <div class="radio radio-info radio-inline">
-                                        <input id="inlineRadio2" {{if $self_data.ct_status eq 0 }} checked="" {{/if}} type="radio" name="ct_status" value="0">
+                                        <input id="inlineRadio2" {{if $self_data.s_status eq 0 }} checked="" {{/if}} type="radio" name="s_status" value="0">
                                         <label for="inlineRadio2">不启用</label>
                                     </div>
+                                </div>
+                            </div>
+
+
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">技能简介:</label>
+
+                                <div class="col-sm-4">
+                                    <textarea class="form-control" rows="3" name="s_info">{{$self_data.s_info}}</textarea>
+                                </div>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">技能介绍:</label>
+
+                                <div class="col-sm-4">
+                                    <textarea class="form-control" rows="3" name="s_desc">{{$self_data.s_desc}}</textarea>
                                 </div>
                             </div>
 
                             <div class="hr-line-dashed"></div>
                             <div class="form-group">
                                 <div class="col-sm-4 col-sm-offset-2">
-                                    <input type="hidden" name="ct_id" value="{{$self_data.ct_id}}">
+                                    <input type="hidden" name="s_id" value="{{$self_data.s_id}}">
                                     <button class="btn btn-primary" type="submit">修改内容</button>
                                     <button class="btn btn-white" type="reset">取消</button>
                                 </div>

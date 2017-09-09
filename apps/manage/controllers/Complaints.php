@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-06 11:30:52
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-08 11:20:47
+ * @Last Modified time: 2017-09-09 13:33:25
  */
 
 namespace App\Controller;
@@ -64,7 +64,7 @@ class Complaints extends \CLASSES\ManageBase
 
 
 
-    /*文章分类修改*/
+    /*投诉分类修改*/
     public function categoryEdit()
     {
         $jump = "/Complaints/categoryList";
@@ -88,7 +88,7 @@ class Complaints extends \CLASSES\ManageBase
     }
 
 
-     /*处理文章分类修改数据*/
+     /*处理投诉分类修改数据*/
     public function doCategoryEdit()
     {
 
@@ -103,7 +103,7 @@ class Complaints extends \CLASSES\ManageBase
             $ct_id = intval($_POST['ct_id']);
 
 
-            if(intval($res['ct_id']) > 0 && $res['ct_id'] != $ct_id){
+            if(isset($res['ct_id']) && intval($res['ct_id']) > 0 && $res['ct_id'] != $ct_id){
                 msg("类型名已经存在!", $status = 0, $jump);
             }
         }
@@ -127,7 +127,7 @@ class Complaints extends \CLASSES\ManageBase
 
 
 
-/**********************************************************文章部分******************************************************************/
+/**********************************************************投诉部分******************************************************************/
 
 
 
@@ -194,11 +194,12 @@ class Complaints extends \CLASSES\ManageBase
        if(isset($_GET['c_id'],$_GET['c_status'])&&!empty($_GET['c_id'])){
             $c_id = intval($_GET['c_id']);
             $c_status = intval($_GET['c_status']);
+            $c_last_edit_time = time();
+            $c_last_editor = static::$manager_status;
 
             $dao_complaints = new \MDAO\Complaints(array('table'=>'complaints'));
-            $res = $dao_complaints ->updateData(array('c_status'=>$c_status),array('c_id'=>$c_id));
+            $res = $dao_complaints ->updateData(array('c_status'=>$c_status,'c_last_edit_time'=>$c_last_edit_time,'c_last_editor'=>$c_last_editor),array('c_id'=>$c_id));
 
-            var_dump($res);
             if($res){
                 echo 1;
             }
