@@ -140,12 +140,11 @@ $menu = array(
             ),
         ),
     ),
-
     /*技能管理*/
     4 => array(
         'name' => '技能管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
             0 => array(
-                "name" => '技能管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '/Complaints/index', 'sub_menu' => array(
+                "name" => '技能管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
                     0 => array(
                         'name' => '技能列表', 'icon' => '', 'link' => '/Skills/index',
                     ),
@@ -153,8 +152,18 @@ $menu = array(
             ),
         ),
     ),
-
-
+    /*任务*/
+    5 => array(
+        'name' => '任务管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
+            0 => array(
+                "name" => '任务管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                    0 => array(
+                        'name' => '任务列表', 'icon' => '', 'link' => '/Tasks/list',
+                    ),
+                ),
+            ),
+        ),
+    ),
 );
 
 return $menu;
