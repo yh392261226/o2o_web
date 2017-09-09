@@ -141,6 +141,20 @@ $menu = array(
         ),
     ),
 
+    /*技能管理*/
+    4 => array(
+        'name' => '技能管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
+            0 => array(
+                "name" => '技能管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '/Complaints/index', 'sub_menu' => array(
+                    0 => array(
+                        'name' => '技能列表', 'icon' => '', 'link' => '/Skills/index',
+                    ),
+                ),
+            ),
+        ),
+    ),
+
+
 );
 
 return $menu;

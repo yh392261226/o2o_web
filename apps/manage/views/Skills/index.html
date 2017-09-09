@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-    <title>文章列表</title>
+    <title>技能列表</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
 
@@ -27,30 +27,21 @@
             <div class="example-wrap">
                 <div class="example">
                     <div class="btn-group hidden-xs" id="exampleTableEventsToolbar" role="group">
-                        <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='/Articles/articleAdd';">
+                        <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='/Skills/skillsAdd';">
                             <i class="glyphicon glyphicon-plus" aria-hidden="true"></i>
                         </button>
                         <button type="button" class="btn btn-outline btn-default">
                             <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
                         </button>
 
-                        <form action="index" method="get" accept-charset="utf-8">
-                                <div class="col-sm-4 m-b-xs">
-                                    <select class="input-sm form-control input-s-sm inline" name="ac_id" id="cat_search" onchange="">
-                                        <option value="">请选择</option>
-                                        {{foreach from=$ac_tree item=value}}
-                                        <option {{if $ac_id eq $value.ac_id}} selected {{/if}} value="{{$value.ac_id}}">{{'__'|str_repeat:$value.level}} {{$value.ac_name}}</option>
-                                        {{/foreach}}
-                                    </select>
-                                </div>
-                                <div class="col-sm-5">
-                                    <div class="input-group">
+                        <form action="index" method="get" accept-charset="utf-8" id="serch">
 
+                                    <div class="input-group">
                                             <input type="text" placeholder="请输入关键词" class="input-sm form-control" name="search_condition" value="{{$search_condition}}"> <span class="input-group-btn">
 
                                             <button type="submit" class="btn btn-sm btn-primary"> 搜索</button> </span>
                                     </div>
-                                </div>
+
                         </form>
 
                     </div>
@@ -59,27 +50,30 @@
                             <tr>
                                 <th data-field="state" data-checkbox="true"></th>
                                 <th data-field="id" data-sortable="true">ID</th>
-                                <th data-field="name" data-sortable="true">文章标题</th>
-                                <th data-field="status" data-sortable="true">作者</th>
-                                <th data-field="time" data-sortable="true">修改时间</th>
-                                <th data-field="info" data-sortable="true">描述</th>
+                                <th data-field="name" data-sortable="true">技能名称</th>
+                                <th data-field="synopsis" data-sortable="true">技能简介</th>
+                                <th data-field="introduce" data-sortable="true">技能介绍</th>
+                                <th data-field="status" data-sortable="true">状态</th>
                                 <th data-field="action" data-sortable="">操作</th>
 
                             </tr>
                         </thead>
                         <tbody>
-                            {{if $artivle_list_arr.data}}
-                            {{foreach from=$artivle_list_arr.data item=info}}
+                            {{if $data}}
+                            {{foreach from=$data item=info}}
                             <tr>
                                 <td><input type="checkbox" name="a_id" value="{{$info.a_id}}"></td>
-                                <td>{{$info.a_id}}</td>
-                                <td>{{$info.a_title}}</td>
+                                <td>{{$info.s_id}}</td>
+                                <td>{{$info.s_name}}</td>
+                                <td>{{$info.s_info}}</td>
+                                <td>{{$info.s_desc}}</td>
                                 <td>
-                                    {{$info.a_author}}
+                                    <select class="input-sm form-control input-s-sm inline" name="" id="" onchange="submitChange(this.value,{{$info.s_id}});">
+                                            <option value="0" {{if $info.s_status eq 0}} selected {{/if}} >禁用</option>
+                                            <option value="1" {{if $info.s_status eq 1}} selected {{/if}} >启用</option>
+                                    </select>
                                 </td>
-                                <td>{{$info.a_last_edit_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
-                                <td>{{$info.a_info}}</td>
-                                <td><a href="/Articles/articleEdit?a_id={{$info.a_id}}">修改</a> |  <a href="#" onclick="articleDel({{$info.a_id}})" >删除</a></td>
+                                <td><a href="/Skills/skillsEdit?s_id={{$info.s_id}}">修改</a> </td>
                             </tr>
                             {{/foreach}}
                             {{/if}}
@@ -109,20 +103,34 @@
 
     <!-- Peity -->
     <script src="{{$manageurl}}js/demo/bootstrap-table-demo.js"></script>
-    <script >
-        function articleDel(a_id)
-        {
-            if(confirm("确认删除?")){
-                window.location.href="/Articles/articleDel?a_id="+a_id;
+    <script>
+    /*提交查询选项*/
+    function getSerch()
+    {
+
+            $('form').submit();
+    }
+
+    /*提交修改s_status*/
+    function submitChange( val,s_id)
+    {
+        $.ajax({
+            url: 'changeStatus?s_id='+s_id+'&s_status='+val,
+            type: 'GET',
+            success : function(result) {
+                if(result==1){
+                    alert('修改成功');
+                }else{
+                    alert('修改失败');
+                }
+            },
+            error:function() {
+                alert('修改失败了');
             }
+        })
 
-        }
+    }
 
-         function getListByCat()
-        {
-            var ac_id = $('#cat_search').val();
-            window.location.href="index?ac_id="+ac_id;
-        }
     </script>
 
 

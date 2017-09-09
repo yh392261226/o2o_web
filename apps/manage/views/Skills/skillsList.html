@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-    <title>文章列表</title>
+    <title>投诉分类列表</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
 
@@ -24,62 +24,40 @@
 
         <div class="col-sm-12">
             <!-- Example Events -->
+
             <div class="example-wrap">
                 <div class="example">
+
                     <div class="btn-group hidden-xs" id="exampleTableEventsToolbar" role="group">
-                        <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='/Articles/articleAdd';">
+                        <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='/Complaints/categoryAdd';">
                             <i class="glyphicon glyphicon-plus" aria-hidden="true"></i>
                         </button>
                         <button type="button" class="btn btn-outline btn-default">
                             <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
                         </button>
 
-                        <form action="index" method="get" accept-charset="utf-8">
-                                <div class="col-sm-4 m-b-xs">
-                                    <select class="input-sm form-control input-s-sm inline" name="ac_id" id="cat_search" onchange="">
-                                        <option value="">请选择</option>
-                                        {{foreach from=$ac_tree item=value}}
-                                        <option {{if $ac_id eq $value.ac_id}} selected {{/if}} value="{{$value.ac_id}}">{{'__'|str_repeat:$value.level}} {{$value.ac_name}}</option>
-                                        {{/foreach}}
-                                    </select>
-                                </div>
-                                <div class="col-sm-5">
-                                    <div class="input-group">
-
-                                            <input type="text" placeholder="请输入关键词" class="input-sm form-control" name="search_condition" value="{{$search_condition}}"> <span class="input-group-btn">
-
-                                            <button type="submit" class="btn btn-sm btn-primary"> 搜索</button> </span>
-                                    </div>
-                                </div>
-                        </form>
-
                     </div>
+
+
                     <table id="exampleTableEvents" data-height="400" data-mobile-responsive="true" data-striped="true">
                         <thead>
                             <tr>
                                 <th data-field="state" data-checkbox="true"></th>
                                 <th data-field="id" data-sortable="true">ID</th>
-                                <th data-field="name" data-sortable="true">文章标题</th>
-                                <th data-field="status" data-sortable="true">作者</th>
-                                <th data-field="time" data-sortable="true">修改时间</th>
-                                <th data-field="info" data-sortable="true">描述</th>
+                                <th data-field="name" data-sortable="true">类型名称</th>
+                                <th data-field="status" data-sortable="true">是否启用</th>
                                 <th data-field="action" data-sortable="">操作</th>
-
                             </tr>
                         </thead>
                         <tbody>
-                            {{if $artivle_list_arr.data}}
-                            {{foreach from=$artivle_list_arr.data item=info}}
+                            {{if $ct_data}}
+                            {{foreach from=$ct_data item=info}}
                             <tr>
-                                <td><input type="checkbox" name="a_id" value="{{$info.a_id}}"></td>
-                                <td>{{$info.a_id}}</td>
-                                <td>{{$info.a_title}}</td>
-                                <td>
-                                    {{$info.a_author}}
-                                </td>
-                                <td>{{$info.a_last_edit_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
-                                <td>{{$info.a_info}}</td>
-                                <td><a href="/Articles/articleEdit?a_id={{$info.a_id}}">修改</a> |  <a href="#" onclick="articleDel({{$info.a_id}})" >删除</a></td>
+                                <td><input type="checkbox" name="ct_id" value="{{$info.ct_id}}"></td>
+                                <td>{{$info.ct_id}}</td>
+                                <td>{{$info.ct_name}}</td>
+                                <td>{{if $info.ct_status eq 1}}启用{{else}}禁用{{/if}}</td>
+                                <td><a href="/Complaints/categoryEdit?ct_id={{$info.ct_id}}">修改</a></td>
                             </tr>
                             {{/foreach}}
                             {{/if}}
@@ -110,18 +88,12 @@
     <!-- Peity -->
     <script src="{{$manageurl}}js/demo/bootstrap-table-demo.js"></script>
     <script >
-        function articleDel(a_id)
+        function advertisingDel(ct_id)
         {
             if(confirm("确认删除?")){
-                window.location.href="/Articles/articleDel?a_id="+a_id;
+                window.location.href="/Complaints/complaintsDel?ct_id="+ct_id;
             }
 
-        }
-
-         function getListByCat()
-        {
-            var ac_id = $('#cat_search').val();
-            window.location.href="index?ac_id="+ac_id;
         }
     </script>
 
