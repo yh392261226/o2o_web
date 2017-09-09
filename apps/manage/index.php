@@ -18,7 +18,7 @@ Swoole::$php->template_dir = WEBPATH."/views";              //view目录设置
 Swoole\Loader::addNameSpace("MDAO", WEBPATH."/dao");        //dao层命名空间
 Swoole\Loader::addNameSpace('MMODEL', APPPATH . '/modelbase'); //modelbase命名空间
 Swoole\Loader::addNameSpace('MDAOBASE', APPPATH . '/daobase'); //daobase命名空间
-// Swoole\Loader::addNameSpace("MANAGECONTROLLERS", WEBPATH."/controllers");   //新增命名空间
+Swoole\Loader::addNameSpace("MLIB", APPPATH."/../libraries");   //第三方类库
 Swoole\Loader::addNameSpace("CLASSES", WEBPATH."/classes"); //定义class文件夹位置
 Swoole::$default_controller = array('controller' => 'index', 'view' => 'index'); //默认访问的控制器及方法
 Swoole::$php->runMVC();

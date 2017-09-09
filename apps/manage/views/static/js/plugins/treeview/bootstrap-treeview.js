@@ -259,6 +259,9 @@
 					.attr('data-nodeid', node.nodeId)
 					.attr('style', self._buildStyleOverride(node));
 				var btn = $(self._template.btn);
+                if (node._nodes || node.nodes) {
+                    var btn = $(self._template.btn1);
+                }
 				// Add indent/spacer to mimic tree structure
 				for (var i = 0; i < (level - 1); i++) {
 					treeItem.append(self._template.indent);
@@ -405,7 +408,8 @@
 			icon: '<i></i>',
 			link: '<a href="#" style="color:inherit;"></a>',
 			badge: '<span class="badge"></span>',
-			btn:'<a href="javascript:;" onclick="delAc(this)">删除</a>'
+			btn:'<a href="javascript:;" onclick="delAc(this)">删除</a>',
+			btn1:''
 		},
 
 		_css: '.list-group-item{cursor:pointer;display:inline-block;width:96%;}span.indent{margin-left:10px;margin-right:10px}span.icon{margin-right:5px}'

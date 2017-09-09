@@ -5,7 +5,7 @@ use Swoole\Controller;
 
 class ManageBase extends Swoole\Controller
 {
-    static $manager_status = false;
+    static $manager_status = 0;
     public $not_validata   = array('Managers_login');
     public $controller_name = '';
     public $view_name = '';
@@ -14,7 +14,7 @@ class ManageBase extends Swoole\Controller
     public function __construct($swoole)
     {
         parent::__construct($swoole);
-        $this->db->debug = 1;
+        //$this->db->debug = 1;
 
         $this->session->start();
 
