@@ -19,9 +19,9 @@ class Regions extends \CLASSES\ManageBase
         {
             $data   = array(
                 'r_pid'        => isset($_POST['r_pid']) ? trim($_POST['r_pid']) : 1,
-                'r_shortname'  => isset($_POST['r_shortname']) ? trim($_POST['r_shortname']) : '',
+                'r_shortname'  => (isset($_POST['r_name']) && trim($_POST['r_name']) != '') ? \MLIB\CUtf8_PY::encode(trim($_POST['r_name'])) : '',
                 'r_name'       => isset($_POST['r_name']) ? trim($_POST['r_name']) : '',
-                'r_first'      => isset($_POST['r_first']) ? trim($_POST['r_first']) : '',
+                'r_first'      => (isset($_POST['r_name']) && trim($_POST['r_name']) != '') ? \MLIB\CUtf8_PY::encode(trim($_POST['r_name']), 'first') : '',
                 'r_status'     => isset($_POST['r_status']) ? trim($_POST['r_status']) : 0,
             );
 
@@ -48,9 +48,9 @@ class Regions extends \CLASSES\ManageBase
         {
             $data   = array(
                 'r_pid'        => isset($_POST['r_pid']) ? trim($_POST['r_pid']) : 1,
-                'r_shortname'  => isset($_POST['r_shortname']) ? trim($_POST['r_shortname']) : '',
+                'r_shortname'  => (isset($_POST['r_name']) && trim($_POST['r_name']) != '') ? \MLIB\CUtf8_PY::encode(trim($_POST['r_name'])) : '',
                 'r_name'       => isset($_POST['r_name']) ? trim($_POST['r_name']) : '',
-                'r_first'      => isset($_POST['r_first']) ? trim($_POST['r_first']) : '',
+                'r_first'      => (isset($_POST['r_name']) && trim($_POST['r_name']) != '') ? \MLIB\CUtf8_PY::encode(trim($_POST['r_name']), 'first') : '',
                 'r_status'     => isset($_POST['r_status']) ? trim($_POST['r_status']) : 0,
             );
 
@@ -93,6 +93,7 @@ class Regions extends \CLASSES\ManageBase
                 $result = $this->regions_dao->delData(array('r_id' => intval($_REQUEST['r_id']))); //伪删除
             }
         }
+
         if (!$result) {
             //FAILED
             msg('操作失败,不允许删除', 0);

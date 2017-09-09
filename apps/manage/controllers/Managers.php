@@ -37,6 +37,7 @@ class Managers extends \CLASSES\ManageBase
                 $_SESSION['manager'] = $result;
                 if (isset($_SESSION['manager']) && !empty($_SESSION['manager']) && isset($_SESSION['manager']['m_id']) && intval($_SESSION['manager']['m_id']) > 0)
                 {
+                    parent::$manager_status = $result['m_id'];
                     echo json_encode(array('status' => 200, 'data' => 'success', 'url' => HOSTURL . '/Managers/index'));exit;
                 }
                 echo json_encode(array('status' => 200, 'data' => '数据信息错误，请联系管理员处理'));exit;
@@ -70,12 +71,12 @@ class Managers extends \CLASSES\ManageBase
                 'm_status'  => isset($_POST['m_status']) ? trim($_POST['m_status']) : 0,
                 'm_in_time' => $curtime,
                 'm_inip'    => getIp(),
-                'm_author'  => $_SESSION['manager']['m_id'],
+                'm_author'  => parent::$manager_status,
                 'mpg_id'    => isset($_POST['mpg_id']) ? trim($_POST['mpg_id']) : 0,
                 'm_start_time'      => isset($_POST['m_start_time']) ? trim($_POST['m_start_time']) : 0,
                 'm_end_time'        => isset($_POST['m_end_time']) ? trim($_POST['m_end_time']) : 0,
                 'm_last_edit_time'  => $curtime,
-                'm_last_editor'     => $_SESSION['manager']['m_id'],
+                'm_last_editor'     => parent::$manager_status,
                 'm_last_ip'         => getIp(),
             );
 
@@ -114,7 +115,7 @@ class Managers extends \CLASSES\ManageBase
                 'm_start_time'     => isset($_POST['m_start_time']) ? trim($_POST['m_start_time']) : 0,
                 'm_end_time'       => isset($_POST['m_end_time']) ? trim($_POST['m_end_time']) : 0,
                 'm_last_edit_time' => $curtime,
-                'm_last_editor'    => $_SESSION['manager']['m_id'],
+                'm_last_editor'    => parent::$manager_status,
                 'm_last_ip'         => getIp(),
             );
 
@@ -239,9 +240,9 @@ class Managers extends \CLASSES\ManageBase
                 'mpg_name'          => isset($_POST['mpg_name']) ? trim($_POST['mpg_name']) : '',
                 'mpg_status'        => isset($_POST['mpg_status']) ? trim($_POST['mpg_status']) : 0,
                 'mpg_in_time'       => $curtime,
-                'mpg_author'        => $_SESSION['manager']['m_id'],
+                'mpg_author'        => parent::$manager_status,
                 'mpg_last_edit_time'=> $curtime,
-                'mpg_last_editor'   => $_SESSION['manager']['m_id'],
+                'mpg_last_editor'   => parent::$manager_status,
                 'mpm_ids'           => $mpm_ids,
             );
             $result = $this->managers_privileges_group_dao->addData($data);
@@ -275,7 +276,7 @@ class Managers extends \CLASSES\ManageBase
                 'mpg_name'          => isset($_POST['mpg_name']) ? trim($_POST['mpg_name']) : '',
                 'mpg_status'        => isset($_POST['mpg_status']) ? trim($_POST['mpg_status']) : '0',
                 'mpg_last_edit_time'=> $curtime,
-                'mpg_last_editor'   => $_SESSION['manager']['m_id'],
+                'mpg_last_editor'   => parent::$manager_status,
                 'mpm_ids'           => $mpm_ids,
             );
             $param = array(

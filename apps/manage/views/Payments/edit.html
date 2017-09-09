@@ -87,6 +87,12 @@
                         </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
+                            <label class="col-sm-2 control-label">开发者</label>
+                            <div class="col-sm-10">
+                                <input id="p_name" value="{{$info.p_author}}" name="p_author" minlength="2" type="text" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label class="col-sm-2 control-label">简介</label>
                             <div class="col-sm-10">
                                 <textarea id="p_info" name="p_info" class="form-control">{{$info.p_info}}</textarea>

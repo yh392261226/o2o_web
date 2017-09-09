@@ -21,6 +21,16 @@ class Demo extends \CLASSES\ManageBase
             //$this->showTrace(1);
             //$this->showTime();
         }
+        //Regions修改数据:
+        //$this->regions = new \MDAO\Regions();
+        //$list = $this->regions->listData(array('pager' => 0));
+        //if (!empty($list['data']))
+        //{
+        //    foreach ($list['data'] as $key => $val)
+        //    {
+        //        echo 'update regions set r_shortname = "' . \MLIB\CUtf8_PY::encode($val['r_name']) . '", r_first = "' . \MLIB\CUtf8_PY::encode($val['r_name'], 'first') . '" where r_id = ' . $val['r_id'] . ';' . "\n";
+        //    }
+        //}
         //Login:
         //$data = array(
         //    'm_name' => 'test',
