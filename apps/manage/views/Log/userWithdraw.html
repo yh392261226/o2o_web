@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-    <title>用户充值记录</title>
+    <title>用户提现记录</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
 
@@ -28,7 +28,7 @@
                 <div class="example">
 
                     <div class="row">
-                         <form action="userRecharge" method="get" accept-charset="utf-8" id="serch">
+                         <form action="userWithdraw" method="get" accept-charset="utf-8" id="serch">
                             <div class="form-group">
                                 <label class="col-sm-1 control-label">时间:</label>
                                 <div class="col-sm-2">
@@ -54,17 +54,19 @@
 
                             <div class="form-group">
                             <label class="col-sm-1 control-label">状态:</label>
-                                <div class="col-sm-1">
-                                    <select class="input-sm form-control input-s-sm inline" name="url_status" id="" onchange="">
-                                        <option value="" {{if $url_status eq -100}} selected {{/if}} >请选择</option>
-                                        <option value="-1" {{if $url_status eq -1}} selected {{/if}} >确认失败</option>
-                                        <option value="0" {{if $url_status eq 0}} selected {{/if}} >待确认</option>
-                                        <option value="1" {{if $url_status eq 1}} selected {{/if}} >已确认成功</option>
+                                <div class="col-sm-2">
+                                    <select class="input-sm form-control input-s-sm inline" name="uwl_status" id="" onchange="">
+                                        <option value="" {{if $uwl_status eq -100}} selected {{/if}} >请选择</option>
+                                        <option value="-2" {{if $uwl_status eq -2}} selected {{/if}} >提现失败</option>
+                                        <option value="-1" {{if $uwl_status eq -1}} selected {{/if}} >审核不通过</option>
+                                        <option value="0" {{if $uwl_status eq 0}} selected {{/if}} >等待审核</option>
+                                        <option value="1" {{if $uwl_status eq 1}} selected {{/if}} >审核通过</option>
+                                        <option value="2" {{if $uwl_status eq 2}} selected {{/if}} >提现成功</option>
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="col-sm-1">
+                            <div class="col-sm-2">
                                 <div class="input-group">
                                     <button type="submit" class="btn btn-sm btn-primary"> 搜索</button> </span>
                                 </div>
@@ -87,18 +89,17 @@
                         <thead>
                             <tr>
                                 <th data-field="state" data-checkbox="true"></th>
-                                <th data-field="url_id" data-sortable="true">ID</th>
+                                <th data-field="uwl_id" data-sortable="true">ID</th>
                                 <th data-field="u_id" data-sortable="true">用户id</th>
+                                <th data-field="uwl_in_time" data-sortable="true">提现申请时间</th>
+                                <th data-field="uwl_solut_time" data-sortable="true">受理时间</th>
+                                <th data-field="uwl_solut_author" data-sortable="true">管理员id</th>
+                                <th data-field="uwl_status" data-sortable="true">状态</th>
+                                <th data-field="uwl_amount" data-sortable="true">资金数额</th>
                                 <th data-field="p_id" data-sortable="true">支付方式</th>
-                                <th data-field="url_amount" data-sortable="true">资金数额</th>
-                                <th data-field="url_in_time" data-sortable="true">时间</th>
-                                <th data-field="url_solut_time" data-sortable="true">确认时间</th>
-                                <th data-field="url_solut_author" data-sortable="true">确认人id</th>
-                                <th data-field="url_status" data-sortable="true">状态</th>
-                                <th data-field="url_card" data-sortable="true">卡号</th>
-                                <th data-field="url_truename" data-sortable="true">卡号真实姓名</th>
-                                <th data-field="url_remark" data-sortable="true">备注</th>
-
+                                <th data-field="uwl_truename" data-sortable="true">卡号真实姓名</th>
+                                <th data-field="uwl_card" data-sortable="true">卡号</th>
+                                <th data-field="uwl_remark" data-sortable="true">备注</th>
 
 
 
@@ -109,17 +110,17 @@
                             {{foreach from=$data item=info}}
                             <tr>
                                 <td><input type="checkbox" name="a_id" value="{{$info.a_id}}"></td>
-                                <td>{{$info.url_id}}</td>
+                                <td>{{$info.uwl_id}}</td>
                                 <td>{{$info.u_id}}</td>
+                                <td>{{$info.uwl_in_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
+                                <td>{{$info.uwl_solut_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
+                                <td>{{$info.uwl_solut_author}}</td>
+                                <td>{{if $info.uwl_status eq -2}}提现失败{{elseif $info.url_status eq -1}}审核不通过{{elseif $info.url_status eq 0}}等待审核{{elseif $info.url_status eq 1}}审核通过{elseif $info.url_status eq 2}}提现成功{{/if}}</td>
+                                <td>{{$info.uwl_amount}}</td>
                                 <td>{{$info.p_id}}</td>
-                                <td>{{$info.url_amount}}</td>
-                                <td>{{$info.url_in_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
-                                <td>{{$info.url_solut_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
-                                <td>{{$info.url_solut_author}}</td>
-                                <td>{{if $info.url_status eq -1}}确认失败{{elseif $info.url_status eq 0}}待确认{{elseif $info.url_status eq 1}}已确认成功{{/if}}</td>
-                                <td>{{$info.url_card}}</td>
-                                <td>{{$info.url_truename}}</td>
-                                <td>{{$info.url_remark}}</td>
+                                <td>{{$info.uwl_truename}}</td>
+                                <td>{{$info.uwl_card}}</td>
+                                <td>{{$info.uwl_remark}}</td>
                             </tr>
                             {{/foreach}}
                             {{/if}}

@@ -183,7 +183,7 @@ $menu = array(
                         'name' => '用户充值记录', 'icon' => '', 'link' => '/Log/userRecharge',
                     ),
                     3 => array(
-                        'name' => '用户体现记录', 'icon' => '', 'link' => '/Log/userWithdraw',
+                        'name' => '用户提现记录', 'icon' => '', 'link' => '/Log/userWithdraw',
                     ),
                 )
             ),
