@@ -142,6 +142,18 @@ $menu = array(
     ),
     /*技能管理*/
     4 => array(
+        'name' => '用户管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
+            0 => array(
+                "name" => '用户管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                    0 => array(
+                        'name' => '用户列表', 'icon' => '', 'link' => '/Users/list',
+                    ),
+                ),
+            ),
+        ),
+    ),
+    /*技能管理*/
+    5 => array(
         'name' => '技能管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
             0 => array(
                 "name" => '技能管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
@@ -152,9 +164,8 @@ $menu = array(
             ),
         ),
     ),
-
     /*任务*/
-    5 => array(
+    6 => array(
         'name' => '任务管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
             0 => array(
                 "name" => '任务管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
@@ -169,7 +180,7 @@ $menu = array(
 
 
     /*日志管理*/
-    6 => array(
+    7 => array(
         'name' => '日志管理', 'icon' => '', 'link' => '', 'sub_menu' => array(
             0 => array(
                 "name" => '日志管理', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(

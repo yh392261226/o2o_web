@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>用户列表</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+
+    <link rel="shortcut icon" href="favicon.ico"> <link href="{{$manageurl}}css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="{{$manageurl}}css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="{{$manageurl}}css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/animate.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/style.css?v=4.1.0" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight">
+
+
+    <div class="col-sm-12">
+        <!-- Example Events -->
+        <div class="example-wrap">
+            <div class="example">
+                <div class="btn-group hidden-xs" id="exampleTableEventsToolbar" role="group">
+                    <!--<button type="button" class="btn btn-outline btn-default" onclick="window.location.href='/';">-->
+                    <!--<i class="glyphicon glyphicon-plus" aria-hidden="true"></i>-->
+                    <!--</button>-->
+                    <!--<button type="button" class="btn btn-outline btn-default">-->
+                    <!--<i class="glyphicon glyphicon-trash" aria-hidden="true"></i>-->
+                    <!--</button>-->
+                </div>
+                <table id="exampleTableEvents" data-height="400" data-mobile-responsive="true" data-striped="true">
+                    <thead>
+                    <tr>
+                        <th data-field="state" data-checkbox="true"></th>
+                        <th data-field="id" data-sortable="true">ID</th>
+                        <th data-field="name" data-sortable="true">用户名</th>
+                        <th data-field="mobile" data-sortable="true">手机号</th>
+                        <th data-field="bindmobile" data-sortable="true">绑定手机</th>
+                        <th data-field="sex" data-sortable="true">性别</th>
+                        <th data-field="status" data-sortable="true">状态</th>
+                        <th data-field="online" data-sortable="true">在线</th>
+                        <th data-field="pub" data-sortable="true">发布数</th>
+                        <th data-field="work" data-sortable="true">工作数</th>
+                        <th data-field="dissensions" data-sortable="true">纠纷数</th>
+                        <th data-field="time" data-sortable="">注册时间</th>
+                        <th data-field="action" data-sortable="">操作</th>
+
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{if $list.data}}
+                    {{foreach from=$list.data item=value}}
+                    <tr>
+                        <td><input type="checkbox" name="p_id" value="{{$value.u_id}}"></td>
+                        <td>{{$value.u_id}}</td>
+                        <td>{{$value.u_name}}</td>
+                        <td>{{$value.u_mobile}}</td>
+                        <td>{{if $value.u_bind_mobile > 0}}{{$value.u_bind_mobile}}{{else}}无{{/if}}</td>
+                        <td>
+                            {{if $value.u_sex == -1}}无{{/if}}
+                            {{if $value.u_sex == 1}}男{{/if}}
+                            {{if $value.u_sex == 0}}女{{/if}}
+                        </td>
+                        <td>
+                            {{if $value.u_status == -9}}已删除{{/if}}
+                            {{if $value.u_status == 0}}正常{{/if}}
+                            {{if $value.u_status == 1}}VIP{{/if}}
+                        </td>
+                        <td>
+                            {{if $value.u_online == -1}}隐身{{/if}}
+                            {{if $value.u_online == 0}}离线{{/if}}
+                            {{if $value.u_online == 1}}在线{{/if}}
+                        </td>
+                        <td>{{$value.u_jobs_num}}</td>
+                        <td>{{$value.u_worked_num}}</td>
+                        <td>{{$value.u_dissensions}}</td>
+                        <td>{{$value.u_in_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
+                        <td><a href="/Users/info?u_id={{$value.u_id}}">详情</a></td>
+                    </tr>
+                    {{/foreach}}
+                    {{/if}}
+                    </tbody>
+                </table>
+                {{include file='layout/pager.html'}}
+            </div>
+        </div>
+        <!-- End Example Events -->
+    </div>
+</div>
+
+<!-- End Panel Other -->
+
+<!-- 全局js -->
+<script src="{{$manageurl}}js/jquery.min.js?v=2.1.4"></script>
+<script src="{{$manageurl}}js/bootstrap.min.js?v=3.3.6"></script>
+
+<!-- 自定义js -->
+<script src="{{$manageurl}}js/content.js?v=1.0.0"></script>
+
+
+<!-- Bootstrap table -->
+<script src="{{$manageurl}}js/plugins/bootstrap-table/bootstrap-table.min.js"></script>
+<script src="{{$manageurl}}js/plugins/bootstrap-table/bootstrap-table-mobile.min.js"></script>
+<script src="{{$manageurl}}js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js"></script>
+
+<!-- Peity -->
+<script src="{{$manageurl}}js/demo/bootstrap-table-demo.js"></script>
+
+
+
+
+</body>
+
+</html>

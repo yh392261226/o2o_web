@@ -1,6 +1,6 @@
 <?php 
 namespace App\Model;
-class Tasks extends \MMODEL\ModelBase
+class Task_ext_info extends \MMODEL\ModelBase
 {
     public $table = 'task_ext_info';
     public $primary = "t_id";

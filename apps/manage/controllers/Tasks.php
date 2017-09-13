@@ -7,6 +7,8 @@ class Tasks extends \CLASSES\ManageBase
     {
         parent::__construct($swoole);
         $this->tasks_dao = new \MDAO\Tasks();
+        $this->task_ext_info_dao = new \MDAO\Task_ext_info();
+        $this->task_ext_worker_dao = new \MDAO\Task_ext_worker();
         $this->orders_dao = new \MDAO\Orders();
         //$this->db->debug = 1;
     }
@@ -28,15 +30,51 @@ class Tasks extends \CLASSES\ManageBase
                 $info = $this->tasks_dao->infoData(array('key' => trim($_REQUEST['key']), 'val' =>  $_REQUEST['val']));
             }
         }
-        //print_r($info);exit;
+        if (!empty($info))
+        {
+            $desc = $this->task_ext_info_dao->infoData(intval($_REQUEST['t_id']));
+            if (!empty($desc))
+            {
+                $info['t_desc'] = $desc['t_desc'];
+            }
+            else
+            {
+                $info['t_desc'] = '';
+            }
+            unset($desc);
+
+            $workers = $this->task_ext_worker_dao->listData(
+                array(
+                    'fields' => 'task_ext_worker.*, skills.s_name',
+                    't_id' => intval($_REQUEST['t_id']
+                    ),
+                    'pager' => 0,
+                    'join' => array(
+                        'skills',
+                        'task_ext_worker.tew_skills = skills.s_id',
+                    )
+                ));
+            if (!empty($workers['data']))
+            {
+                $info['workers'] = $workers['data'];
+            }
+            else
+            {
+                $info['workers'] = array();
+            }
+            unset($workers);
+        }
+
+//print_r($info);
+
         $data = array(
-            'page' => isset($_REQUEST['page']) ? intval($_REQUEST['page']) : 1,
+            'pager' => 0,
             't_id' => intval($_REQUEST['t_id']),
         );
         $orders_list = $this->orders_dao->listData($data);
+        //print_r($orders_list);
         $this->tpl->assign('info', $info);
         $this->tpl->assign('orders_list', $orders_list);
-        $this->myPager($orders_list['pager']);
         $this->mydisplay();
     }
 
