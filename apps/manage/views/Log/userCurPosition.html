@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-    <title>用户提现记录</title>
+    <title>用户位置信息记录</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
 
@@ -28,41 +28,13 @@
                 <div class="example">
 
                     <div class="row">
-                         <form action="userWithdraw" method="get" accept-charset="utf-8" id="serch">
-                            <div class="form-group">
-                                <label class="col-sm-1 control-label">申请时间:</label>
-                                <div class="col-sm-2">
-                                    <input placeholder="开始时间" class="form-control layer-date" id="start" name="start_time" value="{{$start_time}}">
-                                    <input placeholder="结束时间" class="form-control layer-date" id="end" name="end_time" value="{{$end_time}}">
-                                </div>
-                            </div>
+                         <form action="userCurPosition" method="get" accept-charset="utf-8" id="serch">
 
-                            <div class="form-group">
-                                <label class="col-sm-1 control-label">资金数额:</label>
-                                <div class="col-sm-1">
-                                    <input placeholder="最小数额" class="form-control" id="" name="start_amount" value="{{$start_amount}}">
-                                    <input placeholder="最大数额" class="form-control" id="" name="end_amount" value="{{$end_amount}}">
-                                </div>
-                            </div>
 
                             <div class="form-group">
                             <label class="col-sm-1 control-label">用户id:</label>
                                 <div class="col-sm-1">
                                     <input placeholder="用户id" class="form-control" id="" name="u_id" value="{{$u_id}}">
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                            <label class="col-sm-1 control-label">状态:</label>
-                                <div class="col-sm-2">
-                                    <select class="input-sm form-control input-s-sm inline" name="uwl_status" id="" onchange="">
-                                        <option value="" {{if $uwl_status eq -100}} selected {{/if}} >请选择</option>
-                                        <option value="-2" {{if $uwl_status eq -2}} selected {{/if}} >提现失败</option>
-                                        <option value="-1" {{if $uwl_status eq -1}} selected {{/if}} >审核不通过</option>
-                                        <option value="0" {{if $uwl_status eq 0}} selected {{/if}} >等待审核</option>
-                                        <option value="1" {{if $uwl_status eq 1}} selected {{/if}} >审核通过</option>
-                                        <option value="2" {{if $uwl_status eq 2}} selected {{/if}} >提现成功</option>
-                                    </select>
                                 </div>
                             </div>
 
@@ -89,17 +61,10 @@
                         <thead>
                             <tr>
                                 <th data-field="state" data-checkbox="true"></th>
-                                <th data-field="uwl_id" data-sortable="true">ID</th>
                                 <th data-field="u_id" data-sortable="true">用户id</th>
-                                <th data-field="uwl_in_time" data-sortable="true">提现申请时间</th>
-                                <th data-field="uwl_solut_time" data-sortable="true">受理时间</th>
-                                <th data-field="uwl_solut_author" data-sortable="true">管理员id</th>
-                                <th data-field="uwl_status" data-sortable="true">状态</th>
-                                <th data-field="uwl_amount" data-sortable="true">资金数额</th>
-                                <th data-field="p_id" data-sortable="true">支付方式</th>
-                                <th data-field="uwl_truename" data-sortable="true">卡号真实姓名</th>
-                                <th data-field="uwl_card" data-sortable="true">卡号</th>
-                                <th data-field="uwl_remark" data-sortable="true">备注</th>
+                                <th data-field="ucp_last_edit_time" data-sortable="true">更新时间</th>
+                                <th data-field="ucp_posit_x" data-sortable="true">X轴</th>
+                                <th data-field="ucp_posit_y" data-sortable="true">Y轴</th>
 
 
 
@@ -110,17 +75,10 @@
                             {{foreach from=$data item=info}}
                             <tr>
                                 <td><input type="checkbox" name="a_id" value="{{$info.a_id}}"></td>
-                                <td>{{$info.uwl_id}}</td>
                                 <td>{{$info.u_id}}</td>
-                                <td>{{$info.uwl_in_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
-                                <td>{{$info.uwl_solut_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
-                                <td>{{$info.uwl_solut_author}}</td>
-                                <td>{{if $info.uwl_status eq -2}}提现失败{{elseif $info.uwl_status eq -1}}审核不通过{{elseif $info.uwl_status eq 0}}等待审核{{elseif $info.uwl_status eq 1}}审核通过{{elseif $info.uwl_status eq 2}}提现成功{{/if}}</td>
-                                <td>{{$info.uwl_amount}}</td>
-                                <td>{{$info.p_id}}</td>
-                                <td>{{$info.uwl_truename}}</td>
-                                <td>{{$info.uwl_card}}</td>
-                                <td>{{$info.uwl_remark}}</td>
+                                <td>{{$info.ucp_last_edit_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
+                                <td>{{$info.ucp_posit_x}}</td>
+                                <td>{{$info.ucp_posit_y}}</td>
                             </tr>
                             {{/foreach}}
                             {{/if}}
