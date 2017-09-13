@@ -169,6 +169,25 @@ $menu = array(
                     3 => array(
                         'name' => '用户提现记录', 'icon' => '', 'link' => '/Log/userWithdraw',
                     ),
+                    4 => array(
+                        'name' => '用户位置记录', 'icon' => '', 'link' => '/Log/userCurPosition',
+                    ),
+                )
+            ),
+        ),
+    ),
+
+    /*配置管理*/
+    7 => array(
+        'name' => '系统配置', 'icon' => '', 'link' => '', 'sub_menu' => array(
+            0 => array(
+                "name" => '系统配置', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
+                    0 => array(
+                        'name' => '前台配置', 'icon' => '', 'link' => '/Application_config/index',
+                    ),
+                    1 => array(
+                        'name' => '后台配置', 'icon' => '', 'link' => '/Web_config/index',
+                    ),
                 )
             ),
         ),

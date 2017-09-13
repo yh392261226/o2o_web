@@ -1,0 +1,126 @@
+ <!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>后台配置</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+
+    <link rel="shortcut icon" href="favicon.ico"> <link href="{{$manageurl}}css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="{{$manageurl}}css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="{{$manageurl}}css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/animate.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/style.css?v=4.1.0" rel="stylesheet">
+
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>前台配置</h5>
+                    </div>
+                    <div class="ibox-content">
+
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>id</th>
+                                    <th>配置名称</th>
+                                    <th>配置值</th>
+                                    <th>wc_id</th>
+                                    <th>配置状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <form action="doWebConfigEdit" method="post" accept-charset="utf-8">
+                                {{if $data}}
+                                {{foreach from=$data item=info}}
+                                <tr>
+                                    <td>{{$info.wc_id}}<input type="hidden" name="wc_id[]" value="{{$info.wc_id}}"></td>
+                                    <td><input type="text" name="key_{{$info.wc_id}}" value="{{$info.wc_name}}"></td>
+                                    <td><input type="text" name="val_{{$info.wc_id}}" value="{{$info.wc_value}}"></td>
+                                    <td><input type="text" name="web_{{$info.wc_id}}" value="{{$info.web_id}}"></td>
+                                    <td>
+                                        <select class="input-sm form-control input-s-sm inline" name="status_{{$info.wc_id}}" id="" onchange="">
+                                            <option value="0" {{if $info.wc_status eq 0}} selected {{/if}} >未开启</option>
+                                            <option value="1" {{if $info.wc_status eq 1}} selected {{/if}} >开启</option>
+                                        </select>
+                                    </td>
+                                    <td><a href="configDel?wc_id={{$info.wc_id}}">删除</a></td>
+                                </tr>
+                                {{/foreach}}
+                                {{/if}}
+                                <tr>
+
+                                    <td>插入数据</td>
+                                    <td><input type="text" name="wc_name" value=""></td>
+                                    <td><input type="text" name="wc_value" value=""></td>
+                                    <td><input type="text" name="web_id" value=""></td>
+                                    <td>
+                                        <select class="input-sm form-control input-s-sm inline" name="wc_status" id="" onchange="">
+                                            <option value="0" selected >未开启</option>
+                                            <option value="1"  >开启</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="submit" value="提交"></td>
+                                </form>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        {{include file='layout/pager.html'}}
+
+
+    </div>
+
+    <!-- 全局js -->
+    <script src="{{$manageurl}}js/jquery.min.js?v=2.1.4"></script>
+    <script src="{{$manageurl}}js/bootstrap.min.js?v=3.3.6"></script>
+
+
+
+    <!-- Peity -->
+    <script src="{{$manageurl}}js/plugins/peity/jquery.peity.min.js"></script>
+
+    <!-- 自定义js -->
+    <script src="{{$manageurl}}js/content.js?v=1.0.0"></script>
+
+
+    <!-- iCheck -->
+    <script src="{{$manageurl}}js/plugins/iCheck/icheck.min.js"></script>
+
+    <!-- Peity -->
+    <script src="{{$manageurl}}js/demo/peity-demo.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.i-checks').iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green',
+            });
+        });
+    </script>
+
+
+
+
+</body>
+
+</html>
