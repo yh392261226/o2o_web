@@ -46,11 +46,14 @@
                                 <div class="radio radio-info radio-inline">
                                     <label  for="inlineRadio4">任务提醒</label>
                                 </div>
-                                {{else}}
+                                {{/if}}
+                                {{if $info.wm_type == 0}}
                                 <div class="radio radio-info radio-inline">
                                     <input id="inlineRadio3" type="radio" name="wm_type" value="0" {{if $info.wm_type == 0}} checked="checked"{{/if}}>
                                     <label for="inlineRadio3">系统消息</label>
                                 </div>
+                                {{/if}}
+                                {{if $info.wm_type == 2}}
                                 <div class="radio radio-info radio-inline">
                                     <input id="inlineRadio1" type="radio" name="wm_type" value="2" {{if $info.wm_type == 2}} checked="checked"{{/if}}>
                                     <label  for="inlineRadio1">针对用户</label>

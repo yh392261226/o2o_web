@@ -43,7 +43,7 @@ class Msg extends \CLASSES\ManageBase
             }
             //SUCCESSFUL
             $this->web_msg_ext_dao->addData(array('wm_id' => $result, 'wm_desc' => $desc['wm_desc']));
-            if ($data['wm_type'] == '1' && isset($_POST['touser']) && intval($_POST['touser']) > 0)
+            if ($data['wm_type'] == '2' && isset($_POST['touser']) && intval($_POST['touser']) > 0)
             {
                 $this->user_msg_dao->addData(array('u_id' => intval($_POST['touser']), 'wm_id' => $result, 'from_id' => 0, 'um_in_time' => $curtime, 'um_last_edit_time' => $curtime));
             }
