@@ -8,6 +8,7 @@ class Msg extends \CLASSES\ManageBase
         parent::__construct($swoole);
         $this->web_msg_dao = new \MDAO\Web_msg();
         $this->web_msg_ext_dao = new \MDAO\Web_msg_ext();
+        $this->user_msg_dao = new \MDAO\User_msg();
         //$this->db->debug = 1;
     }
 
@@ -42,6 +43,10 @@ class Msg extends \CLASSES\ManageBase
             }
             //SUCCESSFUL
             $this->web_msg_ext_dao->addData(array('wm_id' => $result, 'wm_desc' => $desc['wm_desc']));
+            if ($data['wm_type'] == '1' && isset($_POST['touser']) && intval($_POST['touser']) > 0)
+            {
+                $this->user_msg_dao->addData(array('u_id' => intval($_POST['touser']), 'wm_id' => $result, 'from_id' => 0, 'um_in_time' => $curtime, 'um_last_edit_time' => $curtime));
+            }
             msg('操作成功', 1, '/Msg/list');
         }
 
