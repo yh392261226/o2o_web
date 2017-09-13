@@ -40,8 +40,8 @@
                         <th data-field="state" data-checkbox="true"></th>
                         <th data-field="id" data-sortable="true">ID</th>
                         <th data-field="name" data-sortable="true">类型</th>
-                        <th data-field="total" data-sortable="true">序列号</th>
-                        <th data-field="status" data-sortable="true">拥有者</th>
+                        <th data-field="total" data-sortable="false">序列号</th>
+                        <th data-field="owner" data-sortable="true">拥有者ID</th>
                         <th data-field="start_time" data-sortable="true">使用时间</th>
                         <th data-field="action" data-sortable="">操作</th>
                     </tr>
@@ -54,8 +54,13 @@
                         <td>{{$value.bd_id}}</td>
                         <td>{{$value.bt_name}}</td>
                         <td>{{$value.bd_serial}}</td>
-                        <td>
-                            {{if $value.bd_author > 0}}拥有者ID：{{$value.bd_author}}{{/if}}
+                        <td id="owner_td_{{$value.bd_id}}">
+                            {{if $value.bd_author > 0}}
+                            {{$value.bd_author}}
+                            {{else}}
+                            <input type="text" placeholder="用户ID"  id="owner_input_{{$value.bd_id}}" name="bd_author" value="" size="8">
+                            <input type="button" class="owner_btn btn" value="提交" bd_id="{{$value.bd_id}}">
+                            {{/if}}
                         </td>
                         <td>{{if $value.bd_use_time != 0}}{{$value.bd_use_time|date_format:"%y-%m-%d %H:%M:%S"}}{{else}}未使用{{/if}}</td>
                         <td><a href="/Bouns/delData?bd_id={{$value.bd_id}}">删除</a></td>
@@ -90,7 +95,31 @@
 <script src="{{$manageurl}}js/demo/bootstrap-table-demo.js"></script>
 
 
+<script>
+    $(function(){
+        $('.owner_btn').click(function(i){
+            var bd_id = $(this).attr('bd_id');
+            var owner_id = parseInt($('#owner_input_' + bd_id).val());
+            if (owner_id > 0) {
+                //ajax
+                $.ajax({
+                    url: "/Bouns/ownerData?is_ajax=1",
+                    type: 'get',
+                    data:{'bd_id':bd_id, 'bd_author':owner_id},
+                    dataType: 'json',
+                    success: function(result) {
+                        if (result.status == 1) {
+                            $('#owner_td_' + bd_id).text(owner_id);
+                        } else {
+                            swal(result.msg);
+                        }
+                    }
+                });
 
+            }
+        });
+    });
+</script>
 
 </body>
 

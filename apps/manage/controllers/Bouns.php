@@ -174,9 +174,10 @@ class Bouns extends \CLASSES\ManageBase
                 'bt_id'       => isset($_POST['bt_id']) ? trim($_POST['bt_id']) : '0',
                 'b_start_time' => (isset($_POST['b_start_time']) && $_POST['b_start_time'] > 0) ? strtotime($_POST['b_start_time']) : 0,
                 'b_end_time'   => (isset($_POST['b_end_time']) && $_POST['b_end_time'] > 0) ? strtotime($_POST['b_end_time']) : 0,
-                'b_total'     => isset($_POST['b_total']) ? trim($_POST['b_total']) : 1,
-                'b_status'     => isset($_POST['b_status']) ? trim($_POST['b_status']) : 0,
-                'b_type'     => isset($_POST['b_type']) ? trim($_POST['b_type']) : 0,
+                'b_total'     => isset($_POST['b_total']) ? intval($_POST['b_total']) : 1,
+                'b_status'     => isset($_POST['b_status']) ? intval($_POST['b_status']) : 0,
+                'b_type'     => isset($_POST['b_type']) ? intval($_POST['b_type']) : 0,
+                'b_amount'     => isset($_POST['b_amount']) ? floatval($_POST['b_amount']) : 0,
                 'b_author'     => parent::$manager_status,
                 'b_in_time'    => $curtime,
                 'b_last_editor'=> parent::$manager_status,
@@ -213,12 +214,13 @@ class Bouns extends \CLASSES\ManageBase
         {
             $curtime = time();
             $data   = array(
-                'bt_id'       => isset($_POST['bt_id']) ? trim($_POST['bt_id']) : '0',
+                'bt_id'        => isset($_POST['bt_id']) ? trim($_POST['bt_id']) : '0',
                 'b_start_time' => (isset($_POST['b_start_time']) && $_POST['b_start_time'] > 0) ? strtotime($_POST['b_start_time']) : 0,
                 'b_end_time'   => (isset($_POST['b_end_time']) && $_POST['b_end_time'] > 0) ? strtotime($_POST['b_end_time']) : 0,
-                'b_total'     => isset($_POST['b_total']) ? trim($_POST['b_total']) : 1,
-                'b_status'     => isset($_POST['b_status']) ? trim($_POST['b_status']) : 0,
-                'b_type'     => isset($_POST['b_type']) ? trim($_POST['b_type']) : 0,
+                'b_total'      => isset($_POST['b_total']) ? intval($_POST['b_total']) : 1,
+                'b_status'     => isset($_POST['b_status']) ? intval($_POST['b_status']) : 0,
+                'b_type'       => isset($_POST['b_type']) ? intval($_POST['b_type']) : 0,
+                'b_amount'     => isset($_POST['b_amount']) ? floatval($_POST['b_amount']) : 0,
                 'b_last_editor'=> parent::$manager_status,
                 'b_last_edit_time' => $curtime,
                 'b_info'       => isset($_POST['b_info']) ? trim($_POST['b_info']) : '',
@@ -411,6 +413,7 @@ class Bouns extends \CLASSES\ManageBase
     public function listData()
     {
         $list = $data = array();
+        if (isset($_REQUEST['bd_id'])) $data['bd_id'] = array('type' => 'in', value => $_REQUEST['bd_id']);
         if (isset($_REQUEST['b_id'])) $data['b_id'] = intval($_REQUEST['b_id']);
         if (isset($_REQUEST['bd_serial'])) $data['bd_serial'] = trim($_REQUEST['bd_serial']);
         if (isset($_REQUEST['b_status'])) $data['b_status'] = intval($_REQUEST['b_status']);
@@ -443,6 +446,53 @@ class Bouns extends \CLASSES\ManageBase
         $this->tpl->assign('list', $list);
         $this->myPager($list['pager']);
         $this->mydisplay();
+    }
+
+    public function ownerData()
+    {
+        if (isset($_REQUEST['bd_id']) && intval($_REQUEST['bd_id']) > 0 && isset($_REQUEST['bd_author']) && intval($_REQUEST['bd_author']) > 0)
+        {
+            $result = $this->bouns_data_dao->updateData(array('bd_author' => intval($_REQUEST['bd_author'])), array('bd_id' => intval($_REQUEST['bd_id'])));
+            if (isset($_REQUEST['is_ajax']) && $_REQUEST['is_ajax'])
+            {
+                if (!$result)
+                {
+                    echo json_encode(array('msg' => '操作失败', 'status' => 0));exit;
+                }
+                echo json_encode(array('msg' => '操作成功', 'status' => 1));exit;
+            }
+            else
+            {
+                if (!$result)
+                {
+                    msg('操作失败', 0);
+                }
+                msg('操作成功', 1);
+            }
+        }
+    }
+
+    public function exportData()
+    {
+        $list = $data = array();
+        if (isset($_REQUEST['b_id'])) $data['b_id'] = intval($_REQUEST['b_id']);
+        $data['pager'] = 0;
+        $list = $this->bouns_data_dao->listData($data);
+        $serials = '';
+        if (!empty($list['data']))
+        {
+            foreach ($list['data'] as $key => $val)
+            {
+                $serials .= iconv('UTF-8','GB2312', "{$val['bd_serial']}\n");
+            }
+        }
+
+        header("Content-type:text/csv");
+        header("Content-Disposition:attachment;filename={$_REQUEST['b_id']}.csv"); //“生成文件名称”=自定义
+        header('Cache-Control:must-revalidate,post-check=0,pre-check=0');
+        header('Expires:0');
+        header('Pragma:public');
+        echo $serials;
     }
 
 }

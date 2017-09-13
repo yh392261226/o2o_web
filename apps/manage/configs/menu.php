@@ -24,9 +24,9 @@ $menu = array(
                     0 => array(
                         'name' => '支付设置', 'icon' => '', 'link' => '/Payments/list',
                     ),
-                    1 => array(
-                        'name' => '敏感词设置', 'icon' => '', 'link' => '/system/sensitiveWords',
-                    ),
+                    //1 => array(
+                    //    'name' => '敏感词设置', 'icon' => '', 'link' => '/system/sensitiveWords',
+                    //),
                 ),
             ),
         ),
@@ -42,19 +42,10 @@ $menu = array(
                         'name' => '管理员列表', 'icon' => '', 'link' => '/Managers/list',
                     ),
                     1 => array(
-                        'name' => '管理员添加', 'icon' => '', 'link' => '/Managers/add',
-                    ),
-                    2 => array(
                         'name' => '权限组列表', 'icon' => '', 'link' => '/Managers/listGroup',
                     ),
-                    3 => array(
-                        'name' => '权限组添加', 'icon' => '', 'link' => '/Managers/addGroup',
-                    ),
-                    4 => array(
+                    2 => array(
                         'name' => '模块列表', 'icon' => '', 'link' => '/Managers/listModules',
-                    ),
-                    5 => array(
-                        'name' => '模块添加', 'icon' => '', 'link' => '/Managers/addModules',
                     ),
                 ),
             ),
@@ -62,9 +53,6 @@ $menu = array(
                 "name" => '地区', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
                     0 => array(
                         'name' => '地区列表', 'icon' => '', 'link' => '/Regions/list',
-                    ),
-                    1 => array(
-                        'name' => '地区添加', 'icon' => '', 'link' => '/Regions/add',
                     ),
                 ),
             ),
@@ -74,13 +62,7 @@ $menu = array(
                         'name' => '类型列表', 'icon' => '', 'link' => '/Bouns/listType',
                     ),
                     1 => array(
-                        'name' => '类型添加', 'icon' => '', 'link' => '/Bouns/addType',
-                    ),
-                    2 => array(
                         'name' => '红包列表', 'icon' => '', 'link' => '/Bouns/list',
-                    ),
-                    3 => array(
-                        'name' => '红包添加', 'icon' => '', 'link' => '/Bouns/add',
                     ),
                 ),
             ),
@@ -95,13 +77,7 @@ $menu = array(
                         'name' => '文章分类列表', 'icon' => '', 'link' => '/Articles/categoryList',
                     ),
                     1 => array(
-                        'name' => '文章分类添加', 'icon' => '', 'link' => '/Articles/categoryAdd',
-                    ),
-                    2 => array(
                         'name' => '文章列表', 'icon' => '', 'link' => '/Articles/index',
-                    ),
-                    3 => array(
-                        'name' => '文章添加', 'icon' => '', 'link' => '/Articles/articleAdd',
                     ),
                 ),
             ),
@@ -132,9 +108,6 @@ $menu = array(
                 "name" => '站内信', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(
                     0 => array(
                         'name' => '站内信列表', 'icon' => '', 'link' => '/Msg/list',
-                    ),
-                    1 => array(
-                        'name' => '站内信添加', 'icon' => '', 'link' => '/Msg/add',
                     ),
                 ),
             ),

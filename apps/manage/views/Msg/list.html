@@ -68,7 +68,12 @@
                                 <td>{{if $value.wm_start_time > 0}}{{$value.wm_start_time|date_format:"%y-%m-%d %H:%M:%S"}}{{/if}}</td>
                                 <td>{{if $value.wm_end_time > 0}}{{$value.wm_end_time|date_format:"%y-%m-%d %H:%M:%S"}}{{/if}}</td>
                                 <td>{{$value.wm_in_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
-                                <td>{{if $value.wm_type != 1}}<a href="/Msg/edit?wm_id={{$value.wm_id}}">修改</a> | <a href="/Msg/del?wm_id={{$value.wm_id}}">删除</a>{{else}}<a href="/Msg/edit?wm_id={{$value.wm_id}}">查看</a>{{/if}}</td>
+                                <td>
+                                    {{if $value.wm_type != 1 && $value.wm_status != 1}}
+                                    <a href="/Msg/edit?wm_id={{$value.wm_id}}">修改</a> | <a href="/Msg/del?wm_id={{$value.wm_id}}">删除</a>
+                                    {{else}}<a href="/Msg/edit?wm_id={{$value.wm_id}}">查看</a>
+                                    {{/if}}
+                                </td>
                             </tr>
                             {{/foreach}}
                             {{/if}}

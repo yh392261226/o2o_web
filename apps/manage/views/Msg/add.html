@@ -41,7 +41,7 @@
                                 <label class="col-sm-2 control-label">类型</label>
 
                                 <div class="col-sm-10">
-                                    <div class="radio radio-info radio-inline">
+                                    <div class="radio radio-info radio-inline"  onclick="javascript:removeToUserInput();">
                                         <input id="inlineRadio3" type="radio" name="wm_type" value="0" checked="checked">
                                         <label for="inlineRadio3">系统消息</label>
                                     </div>
@@ -49,9 +49,10 @@
                                         <input id="inlineRadio4" type="radio" name="wm_type" value="1">
                                         <label  for="inlineRadio4">任务提醒</label>
                                     </div>-->
-                                    <div class="radio radio-info radio-inline">
+                                    <div class="radio radio-info radio-inline" onclick="javascript:addToUserInput();">
                                         <input id="inlineRadio1" type="radio" name="wm_type" value="2">
                                         <label  for="inlineRadio1">针对用户</label>
+                                        <input type="text" name="touser" value="" placeholder="用户ID" id="to_user_input" style="display: none;">
                                     </div>
                                 </div>
                             </div>
@@ -171,6 +172,13 @@
                 radioClass: 'iradio_square-green',
             });
         });
+
+        function addToUserInput() {
+            $('#to_user_input').show();
+        }
+        function removeToUserInput() {
+            $('#to_user_input').hide();
+        }
     </script>
 
 

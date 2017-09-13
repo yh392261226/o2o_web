@@ -41,6 +41,7 @@
                                 <th data-field="id" data-sortable="true">ID</th>
                                 <th data-field="name" data-sortable="true">类型</th>
                                 <th data-field="total" data-sortable="true">总数</th>
+                                <th data-field="price" data-sortable="true">价值</th>
                                 <th data-field="status" data-sortable="true">状态</th>
                                 <th data-field="type" data-sortable="true">发放方式</th>
                                 <th data-field="start_time" data-sortable="true">开始时间</th>
@@ -56,6 +57,7 @@
                                 <td>{{$value.b_id}}</td>
                                 <td>{{$value.bt_name}}</td>
                                 <td>{{$value.b_total}}</td>
+                                <td>{{$value.b_amount}}</td>
                                 <td>
                                     {{if $value.b_status == -1}}已删除{{/if}}
                                     {{if $value.b_status == 0}}无效{{/if}}
@@ -69,7 +71,15 @@
                                 </td>
                                 <td>{{if $value.b_start_time != 0}}{{$value.b_start_time|date_format:"%y-%m-%d %H:%M:%S"}}{{else}}无限制{{/if}}</td>
                                 <td>{{if $value.b_end_time != 0}}{{$value.b_end_time|date_format:"%y-%m-%d %H:%M:%S"}}{{else}}无限制{{/if}}</td>
-                                <td><a href="/Bouns/edit?b_id={{$value.b_id}}">修改</a> {{if $value.b_type == 0 || $value.b_type == 1}}|  <a href="/Bouns/del?b_id={{$value.b_id}}">删除 {{/if}}| <a href="/Bouns/listData?b_id={{$value.b_id}}">数据</a></a></td>
+                                <td>
+                                    <a href="/Bouns/edit?b_id={{$value.b_id}}">修改</a>
+                                    {{if $value.b_type == 0 || $value.b_type == 1}}
+                                    | <a href="/Bouns/del?b_id={{$value.b_id}}">删除</a>
+                                    | <a href="/Bouns/listData?b_id={{$value.b_id}}">数据</a>
+                                    {{else}}
+                                    | <a href="/Bouns/exportData?b_id={{$value.b_id}}">导出</a>
+                                    {{/if}}
+                                </td>
                             </tr>
                             {{/foreach}}
                             {{/if}}
