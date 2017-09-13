@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-09 14:37:08
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-11 11:10:12
+ * @Last Modified time: 2017-09-12 15:31:26
  */
 
 namespace App\Controller;
@@ -192,6 +192,8 @@ class Log extends \CLASSES\ManageBase
         if(isset($_REQUEST['url_status']) && $_REQUEST['url_status'] !== '')
         {
             $this->tpl->assign("url_status",$_REQUEST['url_status']);
+        }else{
+            $this->tpl->assign("url_status",-100);
         }
 
         $this->tpl->assign('data',$arr_order['data']);
@@ -303,12 +305,40 @@ class Log extends \CLASSES\ManageBase
         if(isset($_REQUEST['uwl_status'])&& $_REQUEST['uwl_status'] !== '')
         {
             $this->tpl->assign("uwl_status",$_REQUEST['uwl_status']);
+        }else{
+            $this->tpl->assign("uwl_status",-100);
         }
 
         $this->tpl->assign('data',$arr_order['data']);
         $this->tpl->display("Log/userWithdraw.html");
     }
+/*用户位置记录*/
 
+    public function userCurPosition()
+    {
+        $dao_log = new \MDAO\Log(array('table'=>'users_cur_position'));
+        $data = array();
+
+/*用户id*/
+        if(isset($_REQUEST['u_id']) && $_REQUEST['u_id'] !== '')  $data['u_id'] = intval($_REQUEST['u_id']);
+
+        $data['page'] = (isset($_REQUEST['page']) && !empty($_REQUEST['page'])) ? intval($_REQUEST['page']) : 1;
+
+        /*获取位置数组*/
+        $arr_order = $dao_log ->listData($data);
+
+        if(isset($arr_order['pager'])){
+            $this->myPager($arr_order['pager']);
+        }
+
+        if(isset($_REQUEST['u_id'])&& $_REQUEST['u_id'] !== '')
+        {
+            $this->tpl->assign("u_id",$_REQUEST['u_id']);
+        }
+
+        $this->tpl->assign('data',$arr_order['data']);
+        $this->tpl->display("Log/userCurPosition.html");
+    }
 
 
 
