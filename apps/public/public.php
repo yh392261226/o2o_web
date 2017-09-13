@@ -447,3 +447,21 @@ function guid(){
         return substr(substr($uuid, 0, -1), 1);
     }
 }
+
+function createRegionsArray()
+{
+    $m_regions = Swoole::$php->model ->loadModel('Regions');
+    $data = $result = array();
+    $data = $m_regions->getDatas(array('where' => 1));
+    if (!empty($data['data']))
+    {
+        foreach ($data['data'] as $key => $val)
+        {
+            $result[$val['r_id']] = $val;
+        }
+    }
+    if (!empty($result))
+    {
+        file_put_contents('regions.php','<?php $regions = '.var_export($result,true).'?>');
+    }
+}

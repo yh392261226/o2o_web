@@ -71,6 +71,16 @@ class ManageBase extends Swoole\Controller
             $this->tpl->assign("host_url", HOSTURL);
         }
         $manager_info = !empty($_SESSION['manager']) ? $_SESSION['manager'] : array();
+        //regions
+        include 'regions.php';
+        if (!empty($regions))
+        {
+            $regions_cache = $regions;
+        }
+        $this->tpl->assign('regions_cache', $regions_cache);
+        $this->tpl->assign('request', $_REQUEST);
+        $this->tpl->assign('post', $_POST);
+        $this->tpl->assign('get', $_GET);
         $this->tpl->assign('manager_info', $manager_info);
         $this->tpl->assign('menu_list', $this->config['menu']);
     }
