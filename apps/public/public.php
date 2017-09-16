@@ -79,6 +79,18 @@ function msg($message, $status = 1, $jumpUrl = '', $time = 3)
     }
 }
 
+/*输出json数据*/
+function json_msg($code = 200,$datas='')
+{
+    $data = array();
+    $data['code'] = $code;
+    $data['datas'] = $datas;
+    echo json_encode($data);
+    exit;
+}
+
+
+
 function deepAddslashes($data = array())
 {
     if (get_magic_quotes_gpc()) {
