@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-12 15:53:36
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-13 16:22:12
+ * @Last Modified time: 2017-09-16 13:31:28
  */
 
 namespace App\Controller;
@@ -128,6 +128,6 @@ class Web_config extends \CLASSES\ManageBase
             $res["{$v['wc_name']}"] = $v['wc_value'];
         }
 
-        file_put_contents('./configs/web_config.php','<?php $data='.var_export($res,true).'?>');
+        file_put_contents('./configs/web_config.php','<?php $web_config='.var_export($res,true).'?>');
     }
 }
