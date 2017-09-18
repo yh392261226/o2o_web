@@ -8,5 +8,4 @@ class Users extends \MDAOBASE\DaoBase
         parent::__construct($data);
     }
 
-
 }

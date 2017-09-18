@@ -12,10 +12,29 @@ class WebBase extends Swoole\Controller
     public function __construct($swoole)
     {
         parent::__construct($swoole);
-        //$this->db->debug = 1;
-        $app_config = array();
-        if (file_exists(WEBPATH . '/configs/application_config.php')) require WEBPATH . '/configs/application_config.php';
-        $this->app_config = $app_config;
+
+        $this->db->debug = 1;
+        $web_config = array();
+        if (file_exists(WEBPATH . '/configs/web_config.php')){
+            require WEBPATH . '/configs/web_config.php';
+        }else{
+            $dao_Web_config = new \WDAO\Users(array('table'=>'web_config'));
+            $data = $dao_Web_config ->listData(array('pager'=>false,'fields'=>'wc_name,wc_value','wc_status'=>1,'web_id'=>1));
+
+            $res = array();
+            foreach ($data['data'] as  $v) {
+                $res["{$v['wc_name']}"] = $v['wc_value'];
+            }
+            file_put_contents(WEBPATH . '/configs/web_config.php','<?php $web_config='.var_export($res,true).'?>');
+            if (file_exists(WEBPATH . '/configs/web_config.php')){
+                require WEBPATH . '/configs/web_config.php';
+            }else{
+                json_msg(0,"系统错误请联系管理员");
+            }
+        }
+        $this->web_config = $web_config;
+
+
 
 
         $this->session->start();
