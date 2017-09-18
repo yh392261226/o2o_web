@@ -15,9 +15,9 @@ class WebBase extends Swoole\Controller
     {
         parent::__construct($swoole);
         $this->db->debug = 1;
-        $app_config = array();
-        require WEBPATH . '/configs/application_config.php';
-        $this->app_config = $app_config;
+        $web_config = array();
+        require MANAGEPATH . '/configs/web_config.php';
+        $this->web_config = $web_config;
 
 
         $this->session->start();

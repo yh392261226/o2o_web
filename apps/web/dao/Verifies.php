@@ -1,13 +1,13 @@
 <?php
 /**
  * @Author: Zhaoyu
- * @Date:   2017-09-09 15:40:30
+ * @Date:   2017-09-18 10:47:27
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-12 16:25:32
+ * @Last Modified time: 2017-09-18 10:49:31
  */
-namespace MDAO;
+namespace WDAO;
 
-class Log extends \MDAOBASE\DaoBase
+class Verifies extends \MDAOBASE\DaoBase
 {
     public function __construct($data)
     {
