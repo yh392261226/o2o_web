@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-18 17:31:39
+ * @Last Modified time: 2017-09-18 18:08:21
  */
 namespace App\Controller;
 
@@ -15,8 +15,8 @@ class Users extends \CLASSES\WebBase
     }
     public function Login()
     {
-        $phone_number = !empty($_GET['phone_number']) ? intval($_GET['phone_number']) : 0;
-        $verify_code = !empty($_GET['verify_code']) ? intval($_GET['verify_code']) : 0;
+        $phone_number = !empty($_POST['phone_number']) ? intval($_POST['phone_number']) : 0;
+        $verify_code = !empty($_POST['verify_code']) ? intval($_POST['verify_code']) : 0;
         if(empty($phone_number) || empty($verify_code))
         {
             $this->exportData( 0,array('msg' => '手机号或验证码不能为空'));
@@ -103,8 +103,15 @@ class Users extends \CLASSES\WebBase
             $data['u_mobile'] = $phone_number;
             $data['code'] = $code;
             $data['v_in_time'] = time();
-            $dao_verify_code->addData($data);
-            $this->exportData(array('msg'=>'短信发送成功'),1);
+            $res = $dao_verify_code->addData($data);
+            if($res){
+                $this->exportData(array('msg'=>'短信发送成功'),1);
+            }else{
+                $this->exportData(array('msg'=>'短信发送失败'),0);
+            }
+
+        }else{
+            $this->exportData(array('msg'=>'请填写手机号码'),0);
         }
     }
 
