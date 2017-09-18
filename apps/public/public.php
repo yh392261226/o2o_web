@@ -477,3 +477,25 @@ function createRegionsArray()
         file_put_contents('regions.php','<?php $regions = '.var_export($result,true).'?>');
     }
 }
+
+function searchKeyFromRegions($key, $data = array())
+{
+    if (!empty($data) && $key)
+    {
+        $return = array();
+        foreach($data as $k => $v)
+        {
+            if (isset($v['r_id']) && $v['r_id'] == $key)
+            {
+                return $v;
+            }
+            elseif (isset($v['sub']) && is_array($v['sub']))
+            {
+                $return = searchKeyFromRegions($key, $v['sub']);
+            }
+        }
+
+        return $return;
+    }
+    return array();
+}
