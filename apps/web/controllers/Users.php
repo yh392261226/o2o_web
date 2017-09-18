@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-18 16:41:58
+ * @Last Modified time: 2017-09-18 17:31:39
  */
 namespace App\Controller;
 
@@ -19,7 +19,7 @@ class Users extends \CLASSES\WebBase
         $verify_code = !empty($_GET['verify_code']) ? intval($_GET['verify_code']) : 0;
         if(empty($phone_number) || empty($verify_code))
         {
-            json_msg(0,'手机号或验证码不能为空');
+            $this->exportData( 0,array('msg' => '手机号或验证码不能为空'));
         }
 
         /*获取验证码信息*/
@@ -32,14 +32,14 @@ class Users extends \CLASSES\WebBase
                 ));
 
         if(empty($self_data['data']['0']['code']) || empty($self_data['data']['0']['v_in_time'])){
-            json_msg(0,'系统错误请联系管理员');
+            $this->exportData(array('msg'=>'系统错误请联系管理员'),0);
         }
         $time_max = $this ->web_config['verify_code_time'] + $self_data['data']['0']['v_in_time'];
         $time = time();
 
         if($verify_code != $self_data['data']['0']['code'] || ($time > $time_max))
         {
-            json_msg(0,'验证码不正确或验证码已过有效期');
+            $this->exportData(array('msg'=>'验证码不正确或验证码已过有效期'),0);
         }
 
         /*获取用户信息*/
@@ -56,7 +56,7 @@ class Users extends \CLASSES\WebBase
         if(!empty($user_data['data']['0']['u_id'])){
             /*用户存在*/
             if($user_data['data']['0']['u_status'] < 0){
-                json_msg(0,'用户登录受限,请联系管理员!');
+                $this->exportData(array('msg'=>'用户登录受限,请联系管理员!'),0);
             }
             $data = array();
             $data['u_token'] = $time;
@@ -64,7 +64,7 @@ class Users extends \CLASSES\WebBase
             $res = $dao_users ->updateData($data,array('u_id'=>$user_data['data']['0']['u_id']));
             if($res){
                 $token = $this->createToken($user_data['data']['0']['u_name'],$user_data['data']['0']['u_pass']);
-                json_msg(1,array('token'=>$token));
+                $this->exportData(array('token'=>$token),1);
             }
 
 
@@ -80,7 +80,7 @@ class Users extends \CLASSES\WebBase
             $res = $dao_users ->addData($data);
             if($res){
                 $token = $this->createToken($data['u_name'],$data['u_pass']);
-                json_msg(1,array('token'=>$token));
+                $this->exportData(array('token'=>$token),1);
             }
 
         }
@@ -104,6 +104,7 @@ class Users extends \CLASSES\WebBase
             $data['code'] = $code;
             $data['v_in_time'] = time();
             $dao_verify_code->addData($data);
+            $this->exportData(array('msg'=>'短信发送成功'),1);
         }
     }
 
