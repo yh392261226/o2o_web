@@ -80,10 +80,10 @@ class WebBase extends Swoole\Controller
     /*
      * 前台接口输出
      */
-    public function exportData($data = array(), $type = 'json')
+    public function exportData($data = array(), $code = 200, $type = 'json')
     {
         $result = array();
-        $result['code'] = 200;
+        $result['code'] = $code;
         $result['data'] = array();
 
         if (!empty($data))
