@@ -123,7 +123,7 @@ class Regions extends \CLASSES\ManageBase
     public function list()
     {
         $list = $data = array();
-        if (isset($_REQUEST['r_id'])) $data['r_id'] = array('type' => 'in', value => $_REQUEST['r_id']);
+        if (isset($_REQUEST['r_id'])) $data['r_id'] = array('type' => 'in', 'value' => $_REQUEST['r_id']);
         if (isset($_REQUEST['r_pid'])) $data['r_pid'] = $_REQUEST['r_pid'];
         if (isset($_REQUEST['r_shortname'])) $data['r_shortname'] = trim($_REQUEST['r_shortname']);
         if (isset($_REQUEST['r_name'])) $data['r_name'] = array('type'=>'like', 'value' => trim($_REQUEST['r_name']));

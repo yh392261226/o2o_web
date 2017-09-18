@@ -5,24 +5,20 @@ use Swoole\Controller;
 
 class WebBase extends Swoole\Controller
 {
-    static $manager_status = 0;
-    public $not_validata   = array('Managers_login');
+    static $user_status = 0;
     public $controller_name = '';
     public $view_name = '';
-    public $template_ext = '.html';
 
     public function __construct($swoole)
     {
         parent::__construct($swoole);
-        $this->db->debug = 1;
+        //$this->db->debug = 1;
         $app_config = array();
-        require WEBPATH . '/configs/application_config.php';
+        if (file_exists(WEBPATH . '/configs/application_config.php')) require WEBPATH . '/configs/application_config.php';
         $this->app_config = $app_config;
 
 
         $this->session->start();
-
-        $this->clearTemplateC(APPPATH . '/manage/cache/templates_c/');
 
         if (!empty($this->swoole->env['mvc']))
         {
@@ -30,8 +26,6 @@ class WebBase extends Swoole\Controller
             $this->view_name = $this->swoole->env['mvc']['view'];
         }
         //$this->validataTokenStatus(); //验证token值是否有效;
-        // $this->managerAssign();
-        //$this->db->debug = true;
 
     }
 
@@ -64,113 +58,30 @@ class WebBase extends Swoole\Controller
         echo '<script>window.location.href="/Managers/login"</script>';exit;
     }
 
-
-
-    /**
-     * 合并基本条件
-     * @param array $data
+    /*
+     * 前台接口输出
      */
-    protected function params($data)
+    public function exportData($data = array(), $type = 'json')
     {
-        $param = array();
+        $result = array();
+        $result['code'] = 200;
+        $result['data'] = array();
+
         if (!empty($data))
         {
-            if (is_array($data))
-            {
+            $result['data'] = $data;
+        }
 
-            }
-        }
-        else
+        switch($type)
         {
-            $param = $data;
-        }
-        return $param;
-    }
-
-    public function mydisplay($name = '')
-    {
-        if ('' != trim($name))
-        {
-            $template = $name . $this->template_ext;
-        }
-        else
-        {
-            $template = ucfirst($this->controller_name) . '/' . $this->view_name . $this->template_ext;
-        }
-        $this->tpl->display($template);
-    }
-
-    public function myPager($pager)
-    {
-        if (!empty($pager))
-        {
-            $pager->set_class('next', 'btn btn-white');
-            $pager->set_class('previous', 'btn btn-white');
-            $pager->set_class('first', 'btn btn-white');
-            $pager->set_class('last', 'btn btn-white');
-            $this->tpl->assign('pager', $pager->render());
-            $this->tpl->assign('pagesize', '');
-            //$this->tpl->assign('pagesize', $pager->set_pagesize());
+            case 'json':
+                echo json_encode($result);exit;
+                break;
+            default:
+                echo json_encode($result);exit;
+                break;
         }
     }
 
-    /*多文件上传函数*/
-    /*
-    $form_name:表单中的name名;
-    $prefix:生成的文件名的前缀;
-    $size:约定图片的最大尺寸;
-     */
-    protected function uploadAll($form_name,$prefix,$size=array('max_width'=>60,'max_height'=>60,'max_qulitity'=>90))
-    {
-        /*子目录生成参数*/
-        $this->upload->shard_argv = 'Y/m/d';
-        /*子目录生成方法，可以使用randomkey，或者date,user*/
-        $this->upload->shard_type = 'date';
-         //自动压缩图片
-        $this->upload->max_width = $size['max_width']; /*约定图片的最大宽度*/
-        $this->upload->max_height = $size['max_height']; /*约定图片的最大高度*/
-        $this->upload->max_qulitity = $size['max_qulitity']; /*图片压缩的质量*/
-        $data = $_FILES;
-        $_FILES = array();
-        $up_pic = array();
-        if(!empty($data[$form_name]['name']))
-        {
-            foreach($data[$form_name]['name'] as $k=>$f)
-            {
-                $file_name = $prefix.time().rand(1000,9999);
-                if(!empty($data[$form_name]['name'][$k]))
-                {
-                    $_FILES[$form_name]['name'] = $data[$form_name]['name'][$k];
-                    $_FILES[$form_name]['type'] = $data[$form_name]['type'][$k];
-                    $_FILES[$form_name]['tmp_name'] = $data[$form_name]['tmp_name'][$k];
-                    $_FILES[$form_name]['error'] = $data[$form_name]['error'][$k];
-                    $_FILES[$form_name]['size'] = $data[$form_name]['size'][$k];
-                    $arr = $this->upload->save($form_name,$file_name);
-                    $up_pic[] = $arr['url'];
-                }
-            }
-        }
-        return $up_pic;
-    }
-
-    private function clearTemplateC($dir)
-    {
-        $handler = opendir($dir);
-        while($file = readdir($handler))
-        {
-            if ($file != '.' && $file != '..')
-            {
-                $path = $dir . '/' . $file;
-                if (!is_dir($path))
-                {
-                    unlink($path);
-                }
-                else
-                {
-                    $this->clearTemplateC($path);
-                }
-            }
-        }
-    }
 
 }
