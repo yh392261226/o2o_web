@@ -29,7 +29,7 @@ class WebBase extends Swoole\Controller
             if (file_exists(WEBPATH . '/configs/web_config.php')){
                 require WEBPATH . '/configs/web_config.php';
             }else{
-                json_msg(0,"系统错误请联系管理员");
+                $this->exportData(0,array('msg'=>'系统错误请联系管理员'));
             }
         }
         $this->web_config = $web_config;
