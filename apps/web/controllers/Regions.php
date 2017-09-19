@@ -16,7 +16,7 @@ class Regions extends \CLASSES\WebBase
 
     public function index()
     {
-        $action = isset($_REQUEST['action']) ? trim($_REQUEST['action']) : 'list';
+        $action = (isset($_REQUEST['action']) && '' != trim($_REQUEST['action'])) ? trim($_REQUEST['action']) : 'list';
         if ('' != trim($action))
         {
             $this->$action();
