@@ -40,7 +40,6 @@
                         </div>
                         <div class="form-group">
                             <label class="col-sm-2 control-label">父级地区</label>
-
                             <div class="col-sm-10">
                                 <select class="form-control m-b" name="r_pid">
                                     <option value="0">请选择</option>
@@ -50,6 +49,20 @@
                                     {{/foreach}}
                                     {{/if}}
                                 </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">首字母</label>
+
+                            <div class="col-sm-10">
+                                <input id="r_first" value="{{$info.r_first}}" name="r_first" minlength="2" type="text" class="form-control" required="true" aria-required="true">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">短名称</label>
+
+                            <div class="col-sm-10">
+                                <input id="r_shortname" value="{{$info.r_shortname}}" name="r_shortname" minlength="2" type="text" class="form-control" required="true" aria-required="true">
                             </div>
                         </div>
 
@@ -67,7 +80,20 @@
                                 </div>
                             </div>
                         </div>
-
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">热门</label>
+                            <div class="col-sm-10">
+                                <div class="switch">
+                                    <div class="onoffswitch">
+                                        <input class="onoffswitch-checkbox" value="1" id="r_hot" name="r_hot" type="checkbox" {{if $info.r_hot == 1}}checked="checked"{{/if}}>
+                                        <label class="onoffswitch-label" for="r_hot">
+                                            <span class="onoffswitch-inner"></span>
+                                            <span class="onoffswitch-switch"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="hr-line-dashed"></div>
                         <div class="form-group">
                             <div class="col-sm-4 col-sm-offset-2">

@@ -52,6 +52,7 @@
                                 <th data-field="state" data-checkbox="true"></th>
                                 <th data-field="id" data-sortable="true">ID</th>
                                 <th data-field="name" data-sortable="true">广告标题</th>
+                                <th data-field="postion" data-sortable="true">位置</th>
                                 <th data-field="status" data-sortable="true">作者</th>
                                 <th data-field="time" data-sortable="true">修改时间</th>
                                 <th data-field="info" data-sortable="true">描述</th>
@@ -65,6 +66,7 @@
                                 <td><input type="checkbox" name="a_id" value="{{$info.a_id}}"></td>
                                 <td>{{$info.a_id}}</td>
                                 <td>{{$info.a_title}}</td>
+                                <td>{{$info.a_position}}</td>
                                 <td>{{$info.a_author}}</td>
                                 <td>{{$info.a_last_edit_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
                                 <td>{{$info.a_info}}</td>

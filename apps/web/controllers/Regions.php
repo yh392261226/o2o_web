@@ -16,7 +16,7 @@ class Regions extends \CLASSES\WebBase
 
     public function index()
     {
-        $action = isset($_REQUEST['action']) ? trim($_REQUEST['action']) : 'list';
+        $action = (isset($_REQUEST['action']) && '' != trim($_REQUEST['action'])) ? trim($_REQUEST['action']) : 'list';
         if ('' != trim($action))
         {
             $this->$action();
@@ -35,6 +35,23 @@ class Regions extends \CLASSES\WebBase
         if (isset($_REQUEST['r_first'])) $data['r_first'] = $_REQUEST['r_first'];
         if (isset($_REQUEST['mpg_id'])) $data['mpg_id'] = intval($_REQUEST['mpg_id']);
         $data['pager'] = 0;
+        $data['order'] = 'r_id asc';
+        $list = $this->regions_dao->listData($data);
+        if (!empty($list))
+        {
+            $this->exportData($list['data']);
+        }
+        else
+        {
+            $this->exportData();
+        }
+    }
+
+    private function hot()
+    {
+        $list = $data = array();
+        $data['pager'] = 0;
+        $data['r_hot'] = 1;
         $data['order'] = 'r_id asc';
         $list = $this->regions_dao->listData($data);
         if (!empty($list))
