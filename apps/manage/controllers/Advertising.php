@@ -71,14 +71,14 @@ class Advertising extends \CLASSES\ManageBase
         $data['a_in_time'] = time();
         $data['a_author'] = parent::$manager_status;
         $data['a_last_edit_time'] = time();
-        $data['a_last_editor'] = $_SESSION['m_id'];
+        $data['a_last_editor'] = parent::$manager_status;
         $data['r_id'] = isset($_POST['r_id'])&&!empty($_POST['r_id'])?intval($_POST['r_id']):1;
         $data['a_status'] = isset($_POST['a_status'])?intval($_POST['a_status']):0;
         $data['a_type'] = isset($_POST['a_type'])?intval($_POST['a_type']):0;
         $data['a_link'] = isset($_POST['a_link'])?trim($_POST['a_link']):"";
         $data['a_start_time'] = isset($_POST['a_start_time']) && intval($_POST['a_start_time']) > 0?strtotime($_POST['a_start_time']):0;
         $data['a_end_time'] =  isset($_POST['a_end_time']) && intval($_POST['a_end_time']) > 0?strtotime($_POST['a_end_time']):0;
-        $data['a_position'] = (isset($_POST['a_postion']) && trim($_POST['a_postion']) != '') ? trim($_POST['a_postion']) : '';
+        $data['a_position'] = (isset($_POST['a_position']) && trim($_POST['a_position']) != '') ? trim($_POST['a_position']) : '';
 
 
         if(isset($_FILES['a_img']['name'][0])&&!empty($_FILES['a_img']['name'][0])){
