@@ -6,8 +6,6 @@ namespace App\Controller;
 
 class Skills extends \CLASSES\WebBase
 {
-    public $data = array();
-
     public function __construct($swoole)
     {
         parent::__construct($swoole);
