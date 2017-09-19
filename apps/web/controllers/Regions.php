@@ -47,6 +47,23 @@ class Regions extends \CLASSES\WebBase
         }
     }
 
+    private function hot()
+    {
+        $list = $data = array();
+        $data['pager'] = 0;
+        $data['r_hot'] = 1;
+        $data['order'] = 'r_id asc';
+        $list = $this->regions_dao->listData($data);
+        if (!empty($list))
+        {
+            $this->exportData($list['data']);
+        }
+        else
+        {
+            $this->exportData();
+        }
+    }
+
     //详情
     private function info()
     {

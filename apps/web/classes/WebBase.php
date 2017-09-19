@@ -13,7 +13,7 @@ class WebBase extends Swoole\Controller
     {
         parent::__construct($swoole);
 
-        $this->db->debug = 1;
+        //$this->db->debug = 1;
         $web_config = array();
         if (file_exists(WEBPATH . '/configs/web_config.php')){
             require WEBPATH . '/configs/web_config.php';
