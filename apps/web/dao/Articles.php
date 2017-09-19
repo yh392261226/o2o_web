@@ -114,34 +114,40 @@ class Articles extends \MDAOBASE\DaoBase
     {
         $a_id_arr = array();
         $page = $condition['page'];
+        $pager = empty($page) ? false : true;
         $info = array();
         $info = array(
-            'pager'=>true,'page'=>$page,
-            'fields'=>'a_id,a_title,a_info,managers.m_name as a_author,a_last_edit_time' ,
-            'leftjoin'=>array('managers',"managers.m_id = articles.a_author"),
+            'pager'=>$pager,'page'=>$page,
+            'fields'=>'a_id,a_title,a_in_time,a_link,a_img,a_top,a_recommend' ,
             );
+        $info['a_status'] = 1;
+        $time = time();
+        $info['a_end_time'] = array('type' => 'ge', 'ge_value' => $time);
+        $info['a_start_time'] = array('type' => 'le', 'le_value' => $time);
 
        if($condition['ac_id'] > 0)
        {
-            /*获取文章信息*/
-            $d_ac = new \MDAO\Articles(array('table'=>'Articles_category'));
-            $ac_id = $condition['ac_id'];
-            $page = $condition['page'];
-            $data_ac = $d_ac->listData();
-            $child_arr = array();
+            /*如果要求有子集*/
+            if($condition['son'] > 0){
+                /*获取文章信息*/
+                $d_ac = new \WDAO\Articles(array('table'=>'Articles_category'));
+                $ac_id = $condition['ac_id'];
+                $data_ac = $d_ac->listData();
+                $child_arr = array();
 
-            $child_arr = getChildren($data_ac['data'],$ac_id,"ac_id","ac_pid",true);
-            array_unshift($child_arr,"{$ac_id}");
-            $info['in'] = array('ac_id',$child_arr);
+                $child_arr = getChildren($data_ac['data'],$ac_id,"ac_id","ac_pid",true);
+                array_unshift($child_arr,"{$ac_id}");
+                $info['in'] = array('ac_id',$child_arr);
+            }else{
+               /*不要求子集*/
+                $info['ac_id'] = $condition['ac_id'];
+            }
+
+
 
 
        }
-       if(!empty($condition['search_condition'])){
 
-            $info['a_title'] =  array('type' => 'like', 'value' => $condition['search_condition']);
-
-       }
-       // var_dump($info);die;
             /*获取所有文章信息*/
             $a_id_arr = $this->listData($info);
 
