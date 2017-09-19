@@ -22,7 +22,7 @@ class Advertising extends \MDAOBASE\DaoBase
         $info = array();
         $info = array(
             'pager'=>true,'page'=>$page,
-            'fields'=>'a_id,a_title,a_info,managers.m_name as a_author,a_last_edit_time' ,
+            'fields'=>'a_id,a_title,a_info,managers.m_name as a_author,a_last_edit_time, a_position' ,
             'leftjoin'=>array('managers',"managers.m_id = advertising.a_author"),
             );
 

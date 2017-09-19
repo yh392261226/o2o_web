@@ -23,6 +23,7 @@ class Regions extends \CLASSES\ManageBase
                 'r_name'       => isset($_POST['r_name']) ? trim($_POST['r_name']) : '',
                 'r_first'      => (isset($_POST['r_name']) && trim($_POST['r_name']) != '') ? \MLIB\CUtf8_PY::encode(trim($_POST['r_name']), 'first') : '',
                 'r_status'     => isset($_POST['r_status']) ? trim($_POST['r_status']) : 0,
+                'r_hot'        => isset($_POST['r_hot']) ? trim($_POST['r_hot']) : 0,
             );
 
             if ('' == $data['r_name']) msg('名称不能为空', 0);
@@ -48,10 +49,11 @@ class Regions extends \CLASSES\ManageBase
         {
             $data   = array(
                 'r_pid'        => isset($_POST['r_pid']) ? trim($_POST['r_pid']) : 1,
-                'r_shortname'  => (isset($_POST['r_name']) && trim($_POST['r_name']) != '') ? \MLIB\CUtf8_PY::encode(trim($_POST['r_name'])) : '',
+                'r_shortname'  => (isset($_POST['r_shortname']) && trim($_POST['r_shortname']) != '') ? trim($_POST['r_shortname']) : '',
                 'r_name'       => isset($_POST['r_name']) ? trim($_POST['r_name']) : '',
-                'r_first'      => (isset($_POST['r_name']) && trim($_POST['r_name']) != '') ? \MLIB\CUtf8_PY::encode(trim($_POST['r_name']), 'first') : '',
+                'r_first'      => (isset($_POST['r_first']) && trim($_POST['r_first']) != '') ? trim($_POST['r_first']) : '',
                 'r_status'     => isset($_POST['r_status']) ? trim($_POST['r_status']) : 0,
+                'r_hot'        => isset($_POST['r_hot']) ? trim($_POST['r_hot']) : 0,
             );
 
             $param = array(
@@ -129,7 +131,7 @@ class Regions extends \CLASSES\ManageBase
         if (isset($_REQUEST['r_name'])) $data['r_name'] = array('type'=>'like', 'value' => trim($_REQUEST['r_name']));
         if (isset($_REQUEST['r_status'])) $data['r_status'] = intval($_REQUEST['r_status']);
         if (isset($_REQUEST['r_first'])) $data['r_first'] = $_REQUEST['r_first'];
-        if (isset($_REQUEST['mpg_id'])) $data['mpg_id'] = intval($_REQUEST['mpg_id']);
+        if (isset($_REQUEST['r_hot'])) $data['r_hot'] = intval($_REQUEST['r_hot']);
 
         $data['page'] = isset($_REQUEST['page']) ? intval($_REQUEST['page']) : 1;
         $data['order'] = 'r_id asc';

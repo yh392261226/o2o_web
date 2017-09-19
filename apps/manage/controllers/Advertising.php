@@ -27,7 +27,6 @@ class Advertising extends \CLASSES\ManageBase
         $list = $dao_advertising -> advertisingList($condition);
 
 
-
         $this->myPager($list['pager']);
 
 
@@ -70,15 +69,16 @@ class Advertising extends \CLASSES\ManageBase
         $data['a_title'] = trim($_POST['a_title']);
         $data['a_info'] = isset($_POST['a_info'])&&!empty($_POST['a_info'])?deepAddslashes(htmlspecialchars($_POST['a_info'])):"";
         $data['a_in_time'] = time();
-        $data['a_author'] = $_SESSION['m_id'];
+        $data['a_author'] = parent::$manager_status;
         $data['a_last_edit_time'] = time();
-        $data['a_last_editor'] = $_SESSION['m_id'];
+        $data['a_last_editor'] = parent::$manager_status;
         $data['r_id'] = isset($_POST['r_id'])&&!empty($_POST['r_id'])?intval($_POST['r_id']):1;
         $data['a_status'] = isset($_POST['a_status'])?intval($_POST['a_status']):0;
         $data['a_type'] = isset($_POST['a_type'])?intval($_POST['a_type']):0;
         $data['a_link'] = isset($_POST['a_link'])?trim($_POST['a_link']):"";
         $data['a_start_time'] = isset($_POST['a_start_time']) && intval($_POST['a_start_time']) > 0?strtotime($_POST['a_start_time']):0;
         $data['a_end_time'] =  isset($_POST['a_end_time']) && intval($_POST['a_end_time']) > 0?strtotime($_POST['a_end_time']):0;
+        $data['a_position'] = (isset($_POST['a_position']) && trim($_POST['a_position']) != '') ? trim($_POST['a_position']) : '';
 
 
         if(isset($_FILES['a_img']['name'][0])&&!empty($_FILES['a_img']['name'][0])){
@@ -144,7 +144,7 @@ class Advertising extends \CLASSES\ManageBase
         $self_data = $dao_article->infoData(array(
             'a_id' => $a_id,
             'pager'=>false,
-            'fields'=>'a_id,a_title,a_info,a_link,a_type,a_status,a_start_time,a_end_time,r_id,a_img',
+            'fields'=>'a_id,a_title,a_info,a_link,a_type,a_status,a_start_time,a_end_time,r_id,a_img, a_position',
                 ));
 
 
@@ -178,13 +178,14 @@ class Advertising extends \CLASSES\ManageBase
         $data['a_title'] = trim($_POST['a_title']);
         $data['a_info'] = isset($_POST['a_info'])&&!empty($_POST['a_info'])?deepAddslashes(htmlspecialchars($_POST['a_info'])):"";
         $data['a_last_edit_time'] = time();
-        $data['a_last_editor'] = $_SESSION['m_id'];
+        $data['a_last_editor'] = parent::$manager_status;
         $data['r_id'] = isset($_POST['r_id'])&&!empty($_POST['r_id'])?intval($_POST['r_id']):1;
         $data['a_status'] = isset($_POST['a_status'])?intval($_POST['a_status']):0;
         $data['a_type'] = isset($_POST['a_type'])?intval($_POST['a_type']):0;
         $data['a_link'] = isset($_POST['a_link'])?trim($_POST['a_link']):"";
         $data['a_start_time'] = isset($_POST['a_start_time']) && intval($_POST['a_start_time']) > 0?strtotime($_POST['a_start_time']):0;
         $data['a_end_time'] =  isset($_POST['a_end_time']) && intval($_POST['a_end_time']) > 0?strtotime($_POST['a_end_time']):0;
+        $data['a_position'] = (isset($_POST['a_position']) && trim($_POST['a_position']) != '') ? trim($_POST['a_position']) : '';
 
         if(isset($_FILES['a_img']['name'][0])&&!empty($_FILES['a_img']['name'][0])){
 
