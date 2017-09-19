@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-18 18:08:21
+ * @Last Modified time: 2017-09-19 14:33:57
  */
 namespace App\Controller;
 
@@ -15,11 +15,11 @@ class Users extends \CLASSES\WebBase
     }
     public function Login()
     {
-        $phone_number = !empty($_POST['phone_number']) ? intval($_POST['phone_number']) : 0;
-        $verify_code = !empty($_POST['verify_code']) ? intval($_POST['verify_code']) : 0;
+        $phone_number = !empty($_GET['phone_number']) ? intval($_GET['phone_number']) : 0;
+        $verify_code = !empty($_GET['verify_code']) ? intval($_GET['verify_code']) : 0;
         if(empty($phone_number) || empty($verify_code))
         {
-            $this->exportData( 0,array('msg' => '手机号或验证码不能为空'));
+            $this->exportData( array('msg' => '手机号或验证码不能为空'),0);
         }
 
         /*获取验证码信息*/
@@ -47,7 +47,7 @@ class Users extends \CLASSES\WebBase
         $user_data = $dao_users->listData(array(
             'u_mobile' => $phone_number,
             'pager' => false,
-            'fields'=>'u_id,u_name,u_pass,u_status',
+            'fields'=>'u_id,u_name,u_pass,u_status,u_online',
                 ));
 
 
@@ -64,7 +64,7 @@ class Users extends \CLASSES\WebBase
             $res = $dao_users ->updateData($data,array('u_id'=>$user_data['data']['0']['u_id']));
             if($res){
                 $token = $this->createToken($user_data['data']['0']['u_name'],$user_data['data']['0']['u_pass']);
-                $this->exportData(array('token'=>$token),1);
+                $this->exportData(array('token'=>$token,'u_img'=>'','u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_name']),1);
             }
 
 
@@ -80,7 +80,7 @@ class Users extends \CLASSES\WebBase
             $res = $dao_users ->addData($data);
             if($res){
                 $token = $this->createToken($data['u_name'],$data['u_pass']);
-                $this->exportData(array('token'=>$token),1);
+                $this->exportData(array('token'=>$token,'u_img'=>'','u_online'=>'0','u_name'=>$data['u_name']),1);
             }
 
         }
