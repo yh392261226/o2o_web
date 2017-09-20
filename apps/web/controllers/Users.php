@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-19 14:33:57
+ * @Last Modified time: 2017-09-20 10:48:11
  */
 namespace App\Controller;
 
@@ -121,4 +121,48 @@ class Users extends \CLASSES\WebBase
         if($hash=='') $hash = time();
         return encyptPassword($u_name.$u_pass).'|'.base64_encode($hash);
     }
+
+    /*收藏任务列表*/
+    public function favorateTasks()
+    {
+        $u_id = isset($_GET['u_id']) ? intval($_GET['u_id']) : 0;
+        if(empty($u_id)){
+            $this->exportData( array('msg'=>'请输入用户id'),0);
+        }
+
+        $dao_favorate = new \WDAO\Users_favorate(array('table'=>'users_favorate'));
+        $favorate_arr = $dao_favorate -> listData(array('users_favorate.u_id'=>$u_id,'f_type'=>0,'join'=>array('tasks',"tasks.t_id = users_favorate.f_type_id"),'fields'=>'tasks.t_title,tasks.t_amount,tasks.t_duration,tasks.t_author,tasks.t_status','pager'=>false));
+        $this->exportData( $favorate_arr,1);
+    }
+    /*收藏工人列表*/
+    public function favorateUsers()
+    {
+        $u_id = isset($_GET['u_id']) ? intval($_GET['u_id']) : 0;
+        if(empty($u_id)){
+            $this->exportData( array('msg'=>'请输入用户id'),0);
+        }
+
+        $dao_favorate = new \WDAO\Users_favorate(array('table'=>'users_favorate'));
+        $favorate_arr = $dao_favorate -> listData(array('users_favorate.u_id'=>$u_id,'f_type'=>1,'join'=>array('users',"users.u_id = users_favorate.f_type_id"),'fields'=>'users.u_id,users.u_sex,users.u_online,users.u_start,users.u_worked_num,f_id','pager'=>false));
+        /*获取分类数组*/
+        $this->exportData( $favorate_arr,1);
+    }
+
+    /*用户余额接口*/
+    public function usersFunds()
+    {
+        $u_id = isset($_GET['u_id']) ? intval($_GET['u_id']) : 0;
+        if(empty($u_id)){
+            $this->exportData( array('msg'=>'请输入用户id'),0);
+        }
+
+        $dao_funds = new \WDAO\Users_ext_funds(array('table'=>'users_ext_funds'));
+        $res = $dao_funds -> infoData(array('fields'=>'u_id,uef_overage,uef_ticket,uef_envelope','key'=>'u_id','val' => $u_id,'pager'=>false));
+        $funds_arr = array();
+        $funds_arr['data'] = $res;
+        // var_dump($funds_arr);die;
+        // $funds_arr[''] =
+        $this->exportData( $funds_arr,1);
+    }
+
 }
