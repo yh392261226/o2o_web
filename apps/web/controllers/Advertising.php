@@ -1,4 +1,7 @@
 <?php
+/*
+ * 广告
+ */
 namespace App\Controller;
 
 class Advertising extends \CLASSES\WebBase
