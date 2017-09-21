@@ -1,6 +1,6 @@
 <?php
 /**
- * 地区接口
+ * 工种接口
  */
 namespace App\Controller;
 

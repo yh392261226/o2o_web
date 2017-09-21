@@ -1,6 +1,6 @@
 <?php
 /**
- * 地区接口
+ * 支付接口
  */
 namespace App\Controller;
 
