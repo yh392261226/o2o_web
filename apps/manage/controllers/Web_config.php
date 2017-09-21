@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-12 15:53:36
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-18 10:35:40
+ * @Last Modified time: 2017-09-20 17:00:44
  */
 
 namespace App\Controller;
@@ -121,13 +121,31 @@ class Web_config extends \CLASSES\ManageBase
     private function createFile()
     {
         $dao_Web_config = new \MDAO\Web_config(array('table'=>'web_config'));
-        $data = $dao_Web_config ->listData(array('pager'=>false,'fields'=>'wc_name,wc_value','wc_status'=>1));
+        $data_0 = $dao_Web_config ->listData(array('pager'=>false,'fields'=>'wc_name,wc_value','wc_status'=>1,'web_id'=>0));
 
-        $res = array();
-        foreach ($data['data'] as  $v) {
-            $res["{$v['wc_name']}"] = $v['wc_value'];
+        $res_0 = array();
+        foreach ($data_0['data'] as  $v) {
+            $res_0["{$v['wc_name']}"] = $v['wc_value'];
         }
 
-        return file_put_contents('./configs/web_config.php','<?php $web_config='.var_export($res,true).'?>');
+        $f_0 = file_put_contents('./configs/web_config.php','<?php $web_config='.var_export($res_0,true).'?>');
+
+        $data_1 = $dao_Web_config ->listData(array('pager'=>false,'fields'=>'wc_name,wc_value','wc_status'=>1,'web_id'=>1));
+
+        $res_1 = array();
+        foreach ($data_1['data'] as  $v) {
+            $res_1["{$v['wc_name']}"] = $v['wc_value'];
+        }
+
+        $f_1 = file_put_contents('../web/configs/web_config.php','<?php $web_config='.var_export($res_1,true).'?>');
+
+        if($f_0 && $f_1)
+        {
+            return true;
+        }else{
+            return false;
+        }
+
+
     }
 }
