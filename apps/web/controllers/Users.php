@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-21 11:31:05
+ * @Last Modified time: 2017-09-23 17:13:09
  */
 namespace App\Controller;
 
@@ -63,7 +63,7 @@ class Users extends \CLASSES\WebBase
             $data['u_token'] = $time;
             $data['u_last_edit_time'] = $time;
             $res = $dao_users ->updateData($data,array('u_id'=>$user_data['data']['0']['u_id']));
-            $u_img = $this ->web_config['u_img_url'].$user_data['data']['0']['u_id'].$this->head_format;
+            $u_img = $this-> getHeadById($user_data['data']['0']['u_id']);
             if($res){
                 $token = $this->createToken($user_data['data']['0']['u_name'],$user_data['data']['0']['u_pass']);
                 $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id']),1);
@@ -205,7 +205,7 @@ class Users extends \CLASSES\WebBase
         $res['area'] = $ext_info;
         $res['u_info'] = $ext_info['uei_info'];
         $u_img_url = $this ->web_config['u_img_url'];
-        $res['u_img'] = $this ->web_config['u_img_url'].$res['u_id'].$this->head_format;
+        $res['u_img'] = $this-> getHeadById($res['u_id']);
         $funds_arr = array();
         $funds_arr['data'] = $res;
         $this->exportData( $funds_arr,1);
@@ -215,16 +215,18 @@ class Users extends \CLASSES\WebBase
     public function usersInfoEdit()
     {
         $data_users = array();
-        if (!empty(intval($_REQUEST['u_id']))) $u_id= intval($_REQUEST['u_id']);
-            if(empty($u_id)) $this->exportData( array('msg'=>'请输入用户id'),0);
+        if (empty($_POST['u_id']) || intval($_POST['u_id']) == 0){
+             $this->exportData( array('msg'=>'请输入用户id'),0);
+        }
+        $u_id= intval($_POST['u_id']);
         /*users表*/
-        if (isset($_REQUEST['u_phone'])) $data_users['u_phone'] = trim($_REQUEST['u_phone']);
-        if (isset($_REQUEST['u_fax'])) $data_users['u_fax'] = trim($_REQUEST['u_fax']);
-        if (isset($_REQUEST['u_sex'])) $data_users['u_sex'] = intval($_REQUEST['u_sex']);
-        if (isset($_REQUEST['u_online'])) $data_users['u_online'] = intval($_REQUEST['u_online']);
-        if (isset($_REQUEST['u_true_name'])) $data_users['u_true_name'] = trim($_REQUEST['u_true_name']);
-        if (isset($_REQUEST['u_idcard'])) $data_users['u_idcard'] = trim($_REQUEST['u_idcard']);
-        if (isset($_REQUEST['u_skills'])) $data_users['u_skills'] = trim($_REQUEST['u_skills']);
+        if (isset($_POST['u_phone'])) $data_users['u_phone'] = trim($_POST['u_phone']);
+        if (isset($_POST['u_fax'])) $data_users['u_fax'] = trim($_POST['u_fax']);
+        if (isset($_POST['u_sex'])) $data_users['u_sex'] = intval($_POST['u_sex']);
+        if (isset($_POST['u_online'])) $data_users['u_online'] = intval($_POST['u_online']);
+        if (isset($_POST['u_true_name'])) $data_users['u_true_name'] = trim($_POST['u_true_name']);
+        if (isset($_POST['u_idcard'])) $data_users['u_idcard'] = trim($_POST['u_idcard']);
+        if (isset($_POST['u_skills'])) $data_users['u_skills'] = trim(','.$_POST['u_skills'].',');
         /*修改users表内容*/
         $res = 0;
         if(!empty($data_users)){
@@ -237,13 +239,15 @@ class Users extends \CLASSES\WebBase
 
         /*users_ext_info*/
         $data_ext = array();
-        if (isset($_REQUEST['uei_info'])) $data_ext['uei_info'] = deepAddslashes(trim($_REQUEST['uei_info']));
-        if (isset($_REQUEST['uei_address'])) $data_ext['uei_address'] = deepAddslashes(trim($_REQUEST['uei_address']));
-        if (isset($_REQUEST['uei_zip'])) $data_ext['uei_zip'] = trim($_REQUEST['uei_zip']);
-        if (isset($_REQUEST['uei_province'])) $data_ext['uei_province'] = intval($_REQUEST['uei_province']);
-        if (isset($_REQUEST['uei_city'])) $data_ext['uei_city'] = intval($_REQUEST['uei_city']);
-        if (isset($_REQUEST['uei_area'])) $data_ext['uei_area'] = intval($_REQUEST['uei_area']);
-        if(strlen($data_ext['uei_zip']) > 6) $this->exportData( array('msg'=>'邮编的最大字符长度为6'),0);
+        if (isset($_POST['uei_info'])) $data_ext['uei_info'] = deepAddslashes(trim($_POST['uei_info']));
+        if (isset($_POST['uei_address'])) $data_ext['uei_address'] = deepAddslashes(trim($_POST['uei_address']));
+        if (isset($_POST['uei_zip'])) $data_ext['uei_zip'] = trim($_POST['uei_zip']);
+        if (isset($_POST['uei_province'])) $data_ext['uei_province'] = intval($_POST['uei_province']);
+        if (isset($_POST['uei_city'])) $data_ext['uei_city'] = intval($_POST['uei_city']);
+        if (isset($_POST['uei_area'])) $data_ext['uei_area'] = intval($_POST['uei_area']);
+        if(isset($data_ext['uei_zip']) && strlen($data_ext['uei_zip']) > 6) $this->exportData( array('msg'=>'邮编的最大字符长度为6'),0);
+        if(isset($data_ext['uei_info']) && mb_strlen($data_ext['uei_info'],'utf8') > 250) $this->exportData( array('msg'=>'个人简介的最大字符长度为250'),0);
+        if(isset($data_ext['uei_address']) && mb_strlen($data_ext['uei_address'],'utf8') > 75) $this->exportData( array('msg'=>'个人简介的最大字符长度为75'),0);
 
         if(!empty($data_ext)){
             $dao_users_ext = new \WDAO\Users(array('table'=>'users_ext_info'));
@@ -251,7 +255,7 @@ class Users extends \CLASSES\WebBase
             if(!empty($ext_u_id)){
                 $res_ext = $dao_users_ext ->updateData($data_ext,array('u_id'=>$u_id));
             }else{
-                $data_ext['u_id']= intval($_REQUEST['u_id']);
+                $data_ext['u_id']= intval($_POST['u_id']);
                 $res_ext = $dao_users_ext ->addData($data_ext);
             }
 
@@ -266,8 +270,99 @@ class Users extends \CLASSES\WebBase
             $this->exportData( array('msg'=>'用户信息修改成功'),1);
         }
 
+    }
+
+    /*工种id查工人接口*/
+    public function getUsersBySkills()
+    {
+        if(empty($_GET['s_id']) || empty(intval($_GET['s_id']))){
+            $this->exportData( array('msg'=>'技能id不能为空'),0);
+        }
+        $s_id = '%,'.intval($_GET['s_id']).',%';
+
+        $m_users = model('Users');
+        $param = array();
+        $m_users ->select = 'users.u_id,u_skills,users_ext_info.uei_info,u_task_status';
+        $param['walk']['where']['like'] = array('u_skills', $s_id);
+        $param['u_online'] = 1;
+        $param['leftjoin'] = array('users_ext_info','users.u_id=users_ext_info.u_id');
+        $users_list = $m_users ->getDatas($param);
+
+        /*用户u_id数组*/
+        $u_id_arr = array();
+        /*获取用户id,和用户头像*/
+        foreach ($users_list['data'] as  &$v) {
+            $u_id_arr[] = $v['u_id'];
+            $v['u_img'] = $this-> getHeadById($v['u_id']);
+        }
+
+        /*获取用户位置坐标*/
+        $u_id_str = implode(',',$u_id_arr);
+
+        $users_position = $m_users ->db->query("SELECT u_id,ucp_posit_x,ucp_posit_y,ucp_last_edit_time  FROM users_cur_position WHERE u_id IN ($u_id_str) AND ucp_last_edit_time IN (SELECT max(ucp_last_edit_time) FROM users_cur_position GROUP BY u_id) ORDER BY ucp_last_edit_time DESC ") ->fetchall();
+
+        foreach ($users_list['data'] as  &$val) {
+            foreach ($users_position as  $value) {
+                if($val['u_id'] == $value['u_id']){
+                    $val['ucp_posit_x'] = $value['ucp_posit_x'];
+                    $val['ucp_posit_y'] = $value['ucp_posit_y'];
+                }
+            }
+        }
+        $this->exportData( $users_list,1);
+
 
     }
+
+    /*获取用户头像信息*/
+    private function getHeadById($u_id = 0)
+    {
+        if(file_exists($this ->web_config['u_img_path'].$u_id.$this->head_format)){
+            return $this ->web_config['u_img_url'].$u_id.$this->head_format;
+        }else{
+            return $this ->web_config['u_img_url'].'0'.$this->head_format;
+        }
+    }
+
+    /*获取用户资金日志*/
+    public function getUsersFundsLog()
+    {
+        if(empty($_GET['u_id']) || empty($u_id = intval($_GET['u_id']))){
+            $this->exportData( array('msg'=>'用户id不能为空'),0);
+        }
+        $page = !empty($_GET['page']) && !empty(intval($_GET['page'])) ? intval($_GET['page']) :1;
+        $category = isset($_GET['category'])  ? trim($_GET['category']) : 'all';
+        /*充值*/
+        $recharge_list['data'] = '';
+        $withdraw_list['data'] = '';
+        if($category=='all' || $category=='recharge'){
+        $dao_recharge_log = new \WDAO\Users(array('table'=>'user_recharge_log'));
+        $recharge_list = $dao_recharge_log ->listData(array('u_id'=>$u_id,'page'=>$page, 'fields'=>'url_amount,url_id,p_id,url_in_time,url_status,url_solut_time,url_card'));
+        }
+
+        /*提现*/
+        if($category=='all' || $category=='withdraw'){
+        $dao_withdraw_log = new \WDAO\Users(array('table'=>'user_withdraw_log'));
+        $withdraw_list = $dao_withdraw_log ->listData(array('u_id'=>$u_id,'page'=>$page, 'fields'=>'uwl_id,uwl_amount,uwl_in_time,uwl_status,uwl_solut_time,uwl_card,p_id'));
+        }
+
+
+        $this->exportData( array('recharge_list'=>$recharge_list['data'],'withdraw_list'=>$withdraw_list['data']),1);
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
 
