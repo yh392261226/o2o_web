@@ -10,8 +10,6 @@ class Tasks extends \CLASSES\WebBase
     {
         parent::__construct($swoole);
         $this->tasks_dao = new \WDAO\Tasks();
-        $this->task_ext_info_dao = new \WDAO\Task_ext_info();
-        $this->task_ext_worker_dao = new \WDAO\Task_ext_worker();
         //$this->db->debug = 1;
     }
 
@@ -21,6 +19,46 @@ class Tasks extends \CLASSES\WebBase
         if ('' != trim($action))
         {
             $this->$action();
+        }
+    }
+
+    private function worked()
+    {
+        $list = $data = array();
+        $data['o_worker'] = intval($_REQUEST['o_worker']);
+        if ($data['o_worker'] > 0)
+        {
+            $this->orders_dao = new \WDAO\Orders();
+            if (isset($_REQUEST['o_id'])) $data['o_id'] = array('type' => 'in', 'value' => $_REQUEST['o_id']);
+            if (isset($_REQUEST['t_id'])) $data['t_id'] = intval($_REQUEST['t_id']);
+            if (isset($_REQUEST['u_id'])) $data['u_id'] = intval($_REQUEST['u_id']);
+
+            if (isset($_REQUEST['o_status'])) $data['o_status'] = intval($_REQUEST['o_status']);
+            if (isset($_REQUEST['s_id'])) $data['s_id'] = intval($_REQUEST['s_id']);
+            if (isset($_REQUEST['tew_id'])) $data['tew_id'] = intval($_REQUEST['tew_id']);
+            //区间值
+            if (isset($_REQUEST['ge_amount']) && floatval($_REQUEST['ge_amount']) > 0) $data['o_amount'][0] = array('type' => 'ge', 'ge_value' => floatval($_REQUEST['ge_amount']));
+            if (isset($_REQUEST['le_amount']) && floatval($_REQUEST['le_amount']) > 0) $data['o_amount'][1] = array('type' => 'le', 'le_value' => floatval($_REQUEST['le_amount']));
+            if (isset($_REQUEST['ge_in_time']) && intval($_REQUEST['ge_in_time']) > 0) $data['o_in_time'][0] = array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['ge_in_time']));
+            if (isset($_REQUEST['le_in_time']) && intval($_REQUEST['le_in_time']) > 0) $data['o_in_time'][1] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['le_in_time']));
+            if (isset($_REQUEST['ge_in_time']) && intval($_REQUEST['ge_in_time']) > 0) $data['o_last_edit_time'][0] = array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['ge_in_time']));
+            if (isset($_REQUEST['le_in_time']) && intval($_REQUEST['le_in_time']) > 0) $data['o_last_edit_time'][1] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['le_in_time']));
+
+            $data['leftjoin'] = array('tasks', ' orders.t_id = tasks.t_id ');
+            $data['fields'] = 'orders.o_id, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_last_edit_time, orders.o_status, orders.tew_id, orders.s_id,
+            tasks.t_id, tasks.t_title, tasks.t_status, tasks.t_author, tasks.t_phone, tasks.t_phone_status, tasks.t_amount, tasks.t_edit_amount, tasks.t_duration, tasks.t_amount_edit_times, tasks.t_posit_x, tasks.t_posit_y, tasks.t_in_time';
+            //$data['where'] = ' orders.o_worker = "' . intval($_REQUEST['o_worker']) . '"';
+            $data['pager'] = 0;
+            $data['order'] = 'orders.o_id desc';
+            $list = $this->orders_dao->listData($data);
+        }
+        if (!empty($list))
+        {
+            $this->exportData($list['data']);
+        }
+        else
+        {
+            $this->exportData();
         }
     }
 
@@ -65,6 +103,31 @@ class Tasks extends \CLASSES\WebBase
 
         if (!empty($list))
         {
+            if (isset($_REQUEST['u_id']) && intval($_REQUEST['u_id']) > 0)
+            {
+                $this->users_favorate_dao = new \WDAO\Users_favorate(array('table' => 'Users_favorate'));
+                $favorates = $marked = array();
+                $favorates = $this->users_favorate_dao->listData(array('f_type' => 0, 'u_id' => intval($_REQUEST['u_id']), 'pager' => 0));
+                if (!empty($favorates['data']))
+                {
+                    foreach ($favorates['data'] as $key => $val)
+                    {
+                        $marked[] = $val['f_type_id'];
+                    }
+                    unset($key, $val);
+                    if (!empty($marked))
+                    {
+                        foreach ($list['data'] as $key => $val)
+                        {
+                            if (in_array($val['t_id'], $marked))
+                            {
+                                $list['data'][$key]['favorate'] = 1;
+                            }
+                        }
+                        unset($marked, $favorates);
+                    }
+                }
+            }
             $this->exportData($list['data']);
         }
         else
@@ -79,6 +142,8 @@ class Tasks extends \CLASSES\WebBase
         $info = array();
         if (isset($_REQUEST['t_id']) || isset($_REQUEST['key']))
         {
+            $this->task_ext_info_dao = new \WDAO\Task_ext_info();
+            $this->task_ext_worker_dao = new \WDAO\Task_ext_worker();
             if (isset($_REQUEST['t_id']))
             {
                 $info = $this->tasks_dao->infoData(intval($_REQUEST['t_id']));
