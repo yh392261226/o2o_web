@@ -13,6 +13,7 @@ class WebBase extends Swoole\Controller
     {
         parent::__construct($swoole);
 
+        //echo $this->showTrace();
         //$this->db->debug = 1;
         $web_config = array();
         if (file_exists(WEBPATH . '/configs/web_config.php')){

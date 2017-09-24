@@ -27,4 +27,13 @@ class Index extends \CLASSES\WebBase
             }
         }
     }
+
+    public function sms()
+    {
+        $phone = '18846449055';
+        $content = '【钢建网】用户您好，我想联系你一下';
+        $sms = new \MLIB\Sms();
+        $result = $sms->send($phone, $content);
+        print_r($result);
+    }
 }

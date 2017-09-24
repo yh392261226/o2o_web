@@ -499,3 +499,9 @@ function searchKeyFromRegions($key, $data = array())
     }
     return array();
 }
+
+function sendSms($phone, $content)
+{
+    $sms = new \MLIB\Sms();
+    return $sms->send($phone, $content);
+}
