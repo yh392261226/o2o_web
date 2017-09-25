@@ -4,6 +4,7 @@ $sms = array(
     'serialNumber' => '8SDK-EMY-6699-RKZLM',
     'password' => '123456',
     'sessionKey' => '011826',
+    'prefixStr' => '【新用工】',
 );
 
 return $sms;

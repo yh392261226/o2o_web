@@ -26,19 +26,19 @@ class Sms {
         /**
          * 网关地址
          */
-        $gwUrl = 'http://hprpt2.eucp.b2m.cn:8080/sdk/SDKService';
+        $gwUrl = \Swoole::$php->config['sms']['gwUrl'];
         /**
          * 序列号,请通过亿美销售人员获取
          */
-        $serialNumber = '8SDK-EMY-6699-RKZLM';
+        $serialNumber = \Swoole::$php->config['sms']['serialNumber'];
         /**
          * 密码,请通过亿美销售人员获取
          */
-        $password = '123456';
+        $password = \Swoole::$php->config['sms']['password'];
         /**
          * 登录后所持有的SESSION KEY，即可通过login方法时创建
          */
-        $sessionKey = '011826';
+        $sessionKey = \Swoole::$php->config['sms']['sessionKey'];
         /**
          * 连接超时时间，单位为秒
          */
@@ -69,7 +69,7 @@ class Sms {
 //            //登录失败处理
 //            //echo "登录失败,返回:".$statusCode;exit;
 //        }
-        $statusCode = $client->sendSMS(array($mobile),$content);
+        $statusCode = $client->sendSMS(array($mobile),\Swoole::$php->config['sms']['prefixStr'] . $content);
         if ($statusCode!=null && $statusCode=="0") {
             return true;
         } else {

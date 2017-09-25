@@ -32,7 +32,7 @@ class Index extends \CLASSES\WebBase
     {
         //$phone = array('18846449055', '13163675676');
         $phone = '13163675676';
-        $content = '【钢建网】用户您好，我想联系你一下1';
+        $content = '用户您好，你看到一个美女没';
         $message = '';
         $result = sendSms($phone, $content);
         if (!$result)
