@@ -40,7 +40,8 @@
                                 <th data-field="state" data-checkbox="true"></th>
                                 <th data-field="id" data-sortable="true">ID</th>
                                 <th data-field="name" data-sortable="true">类型</th>
-                                <th data-field="total" data-sortable="true">总数</th>
+                                <th data-field="total" data-sortable="true">实际总数</th>
+                                <th data-field="offset" data-sortable="true">偏移量总数</th>
                                 <th data-field="price" data-sortable="true">价值</th>
                                 <th data-field="status" data-sortable="true">状态</th>
                                 <th data-field="type" data-sortable="true">发放方式</th>
@@ -57,6 +58,7 @@
                                 <td>{{$value.b_id}}</td>
                                 <td>{{$value.bt_name}}</td>
                                 <td>{{$value.b_total}}</td>
+                                <td>{{$value.b_offset}}</td>
                                 <td>{{$value.b_amount}}</td>
                                 <td>
                                     {{if $value.b_status == -1}}已删除{{/if}}
