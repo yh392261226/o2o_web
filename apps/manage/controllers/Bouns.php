@@ -171,12 +171,12 @@ class Bouns extends \CLASSES\ManageBase
         {
             $curtime = time();
             $data   = array(
-                'bt_id'       => isset($_POST['bt_id']) ? trim($_POST['bt_id']) : '0',
+                'bt_id'        => isset($_POST['bt_id']) ? trim($_POST['bt_id']) : '0',
                 'b_start_time' => (isset($_POST['b_start_time']) && $_POST['b_start_time'] > 0) ? strtotime($_POST['b_start_time']) : 0,
                 'b_end_time'   => (isset($_POST['b_end_time']) && $_POST['b_end_time'] > 0) ? strtotime($_POST['b_end_time']) : 0,
-                'b_total'     => isset($_POST['b_total']) ? intval($_POST['b_total']) : 1,
+                'b_offset'     => isset($_POST['b_offset']) ? intval($_POST['b_offset']) : 0,
                 'b_status'     => isset($_POST['b_status']) ? intval($_POST['b_status']) : 0,
-                'b_type'     => isset($_POST['b_type']) ? intval($_POST['b_type']) : 0,
+                'b_type'       => isset($_POST['b_type']) ? intval($_POST['b_type']) : 0,
                 'b_amount'     => isset($_POST['b_amount']) ? floatval($_POST['b_amount']) : 0,
                 'b_author'     => parent::$manager_status,
                 'b_in_time'    => $curtime,
@@ -186,7 +186,6 @@ class Bouns extends \CLASSES\ManageBase
             );
 
             if (intval($data['bt_id']) < 1) msg('请选择类型', 0);
-            if ('' == $data['b_total']) msg('请添加数量', 0);
             if (isset($_POST['b_start_time']) && isset($_POST['b_end_time']) && $_POST['b_start_time'] != 0 && $_POST['b_end_time'] != 0 && strtotime($_POST['b_end_time']) < strtotime($_POST['b_start_time']))
             {
                 //结束时间不能小于开始时间
@@ -198,7 +197,14 @@ class Bouns extends \CLASSES\ManageBase
                 //FAILED
                 msg('操作失败', 0);
             }
-            $this->addData($result, $data['b_total'], $data['bt_id']);
+            if ($data['b_offset'] > 0)
+            {
+                $total = $this->addData($result, $data['b_offset'], $data['bt_id']);
+                if ($total)
+                {
+                    $this->bouns_dao->updateData(array('b_total' => $total), array('b_id' => $result));
+                }
+            }
             //SUCCESSFUL
             msg('操作成功', 1, '/Bouns/list');
         }
@@ -217,7 +223,7 @@ class Bouns extends \CLASSES\ManageBase
                 'bt_id'        => isset($_POST['bt_id']) ? trim($_POST['bt_id']) : '0',
                 'b_start_time' => (isset($_POST['b_start_time']) && $_POST['b_start_time'] > 0) ? strtotime($_POST['b_start_time']) : 0,
                 'b_end_time'   => (isset($_POST['b_end_time']) && $_POST['b_end_time'] > 0) ? strtotime($_POST['b_end_time']) : 0,
-                'b_total'      => isset($_POST['b_total']) ? intval($_POST['b_total']) : 1,
+                'b_offset'     => isset($_POST['b_offset']) ? intval($_POST['b_offset']) : 0,
                 'b_status'     => isset($_POST['b_status']) ? intval($_POST['b_status']) : 0,
                 'b_type'       => isset($_POST['b_type']) ? intval($_POST['b_type']) : 0,
                 'b_amount'     => isset($_POST['b_amount']) ? floatval($_POST['b_amount']) : 0,
@@ -227,7 +233,6 @@ class Bouns extends \CLASSES\ManageBase
             );
 
             if (intval($data['bt_id']) < 1) msg('请选择类型', 0);
-            if ('' == $data['b_total']) msg('请添加数量', 0);
             if (isset($_POST['b_start_time']) && isset($_POST['b_end_time']) && $_POST['b_start_time'] != 0 && $_POST['b_end_time'] != 0 && strtotime($_POST['b_end_time']) < strtotime($_POST['b_start_time']))
             {
                 //结束时间不能小于开始时间
@@ -258,16 +263,25 @@ class Bouns extends \CLASSES\ManageBase
                 }
             }
 
-            $used = $this->bouns_data_dao->countData(array('b_id' => $param['b_id'], 'bd_author' => array('type'=>'notin', 'value'=>0)));
-            if ($used > 0)
+            if ($data['b_offset'] != 0)
             {
-                $data['b_total'] = $data['b_total'] - $used;
-                if ($data['b_total'] < 1)
+                $used = $this->bouns_data_dao->countData(array('b_id' => $param['b_id'], 'bd_author' => array('type'=>'notin', 'value'=>0)));
+                if ($used > 0)
                 {
-                    msg('操作成功', 1, '/Bouns/list');
+                    $data['b_offset'] = $data['b_offset'] - $used;
+                    if ($data['b_offset'] < 1)
+                    {
+                        msg('操作成功', 1, '/Bouns/list');
+                    }
+                }
+
+                $total = $this->addData($param['b_id'], $data['b_offset'], $data['bt_id']);
+                if ($total)
+                {
+                    $true_num = $this->bouns_data_dao->countData($param);
+                    $this->bouns_dao->updateData(array('b_total' => $true_num), $param);
                 }
             }
-            $this->addData($param['b_id'], $data['b_total'], $data['bt_id']);
             //SUCCESSFUL
             msg('操作成功', 1, '/Bouns/list');
         }
@@ -374,8 +388,8 @@ class Bouns extends \CLASSES\ManageBase
      */
     public function addData($bid, $total, $bt_id)
     {
-        if (intval($bid) < 1) return false;
-        if (intval($total) < 1) $total = 1;
+        if (intval($bid) < 1) return 0;
+        if (intval($total) < 1) return 0;
         $data = array();
         for ($i = 0; $i < $total; $i++)
         {
@@ -384,7 +398,11 @@ class Bouns extends \CLASSES\ManageBase
             $data[$i][] = $bt_id;
         }
         $result = $this->bouns_data_dao->addData($data, array('b_id', 'bd_serial', 'bt_id'));
-        return false;
+        if (!$result)
+        {
+            return 0;
+        }
+        return $total;
     }
 
     public function delData()
