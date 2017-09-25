@@ -3,13 +3,13 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-23 17:13:09
+ * @Last Modified time: 2017-09-25 16:49:42
  */
 namespace App\Controller;
 
 class Users extends \CLASSES\WebBase
 {
-    private $head_format = '.png';/*头像格式*/
+    private $head_format = '.jpg';/*头像格式*/
     public function __construct($swoole)
     {
         parent::__construct($swoole);
@@ -98,7 +98,7 @@ class Users extends \CLASSES\WebBase
         if(!empty($phone_number))
         {
             $code = mt_rand(99999,999999);
-            echo $code;
+
             /*发送验证码接口*/
             /*存库*/;
             $dao_verify_code = new \WDAO\Verifies(array('table'=>'verifies'));
@@ -108,7 +108,7 @@ class Users extends \CLASSES\WebBase
             $data['v_in_time'] = time();
             $res = $dao_verify_code->addData($data);
             if($res){
-                $this->exportData(array('msg'=>'短信发送成功'),1);
+                $this->exportData(array('msg'=>'短信发送成功'.$code),1);
             }else{
                 $this->exportData(array('msg'=>'短信发送失败'),0);
             }
@@ -273,20 +273,66 @@ class Users extends \CLASSES\WebBase
     }
 
     /*工种id查工人接口*/
+    /**
+     * [getUsersBySkills description] 工种id查工人接口
+     * @author zhaoyu
+     * @e-mail zhaoyu8292@qq.com
+     * @date   2017-09-25
+     * @return [type]   工人信息         [description]
+     */
     public function getUsersBySkills()
     {
         if(empty($_GET['s_id']) || empty(intval($_GET['s_id']))){
             $this->exportData( array('msg'=>'技能id不能为空'),0);
         }
-        $s_id = '%,'.intval($_GET['s_id']).',%';
+        /*判断是否传入地区id 如果传入加入条件中*/
+        $province_id = 0;
+        $area_id = 0;
+        $city_id = 0;
+        $u_id_area = '';
+        if((isset($_GET['uei_area']) && !empty($area_id = intval($_GET['uei_area']))) || (isset($_GET['uei_city']) && !empty($city_id = intval($_GET['uei_city']))) || (isset($_GET['uei_province']) && !empty($province_id = intval($_GET['uei_province']))))
+        {
 
+            $dao_users_ext = new \WDAO\Users(array('table'=>'users_ext_info'));
+            $where = array('pager'=>false,'fields'=>'u_id');
+            if($area_id > 0){
+                $where['uei_area'] = $area_id;
+            }elseif($city_id > 0){
+                $where['uei_city'] = $city_id;
+            }elseif($province_id > 0){
+                $where['uei_province'] = $province_id;
+            }
+
+            $u_id_area_arr = $dao_users_ext -> listData($where);
+
+            foreach ($u_id_area_arr['data'] as $key => $value) {
+                $u_id_area .= $value['u_id'].',';
+            }
+            if(empty($u_id_area)){
+                $users_list = array();
+                $this->exportData( $users_list,1);
+            }else{
+                $u_id_area = rtrim($u_id_area,',');
+            }
+
+        }
+
+
+
+        $s_id = '%,'.intval($_GET['s_id']).',%';
         $m_users = model('Users');
         $param = array();
-        $m_users ->select = 'users.u_id,u_skills,users_ext_info.uei_info,u_task_status';
+
+        /*判断u_id_area是否为空*/
+        if(!empty($u_id_area)){
+            $param['where'] = 'users.`u_id` IN ('.$u_id_area.')';
+        }
+        $m_users ->select = 'users.u_id,u_skills,users_ext_info.uei_info,u_task_status,u_true_name';
+        $param['leftjoin'] = array('users_ext_info','users.u_id=users_ext_info.u_id');
         $param['walk']['where']['like'] = array('u_skills', $s_id);
         $param['u_online'] = 1;
-        $param['leftjoin'] = array('users_ext_info','users.u_id=users_ext_info.u_id');
         $users_list = $m_users ->getDatas($param);
+
 
         /*用户u_id数组*/
         $u_id_arr = array();
@@ -296,19 +342,29 @@ class Users extends \CLASSES\WebBase
             $v['u_img'] = $this-> getHeadById($v['u_id']);
         }
 
+        /*获取用户距离start*/
+        if(!empty($_GET['users_posit_x']) && !empty($users_posit_x = floatval($_GET['users_posit_x'])) && !empty($_GET['users_posit_y']) && !empty($users_posit_y = floatval($_GET['users_posit_y']))){
         /*获取用户位置坐标*/
         $u_id_str = implode(',',$u_id_arr);
+        $dao_users_position= new \WDAO\Users(array('table'=>'users_cur_position'));
+        $users_position = $dao_users_position ->listData(array('pager' => false,'fields'=>'ucp_posit_x,u_id,ucp_posit_y','u_id'=>array('type'=>'in','value'=>$u_id_str)));
+            /*获取用户位置坐标*/
+            // $u_id_str = implode(',',$u_id_arr);
+            // $users_position = $m_users ->db->query("SELECT u_id,ucp_posit_x,ucp_posit_y,ucp_last_edit_time  FROM users_cur_position WHERE u_id IN ($u_id_str) AND ucp_last_edit_time IN (SELECT max(ucp_last_edit_time) FROM users_cur_position GROUP BY u_id) ORDER BY ucp_last_edit_time DESC ") ->fetchall();
 
-        $users_position = $m_users ->db->query("SELECT u_id,ucp_posit_x,ucp_posit_y,ucp_last_edit_time  FROM users_cur_position WHERE u_id IN ($u_id_str) AND ucp_last_edit_time IN (SELECT max(ucp_last_edit_time) FROM users_cur_position GROUP BY u_id) ORDER BY ucp_last_edit_time DESC ") ->fetchall();
+            foreach ($users_list['data'] as  &$val) {
+                foreach ($users_position['data'] as  $value) {
+                    if($val['u_id'] == $value['u_id']){
+                        /*获取当前两点之间距离*/
+                        if($value['ucp_posit_x'] && $value['ucp_posit_y']){
+                            $val['distance'] = $this -> GetDistance($value['ucp_posit_x'],$value['ucp_posit_y'],$users_posit_x,$users_posit_y);
+                        }
 
-        foreach ($users_list['data'] as  &$val) {
-            foreach ($users_position as  $value) {
-                if($val['u_id'] == $value['u_id']){
-                    $val['ucp_posit_x'] = $value['ucp_posit_x'];
-                    $val['ucp_posit_y'] = $value['ucp_posit_y'];
+                    }
                 }
             }
         }
+        /*获取用户距离end*/
         $this->exportData( $users_list,1);
 
 
@@ -351,6 +407,66 @@ class Users extends \CLASSES\WebBase
 
     }
 
+    /*获取2点之间的距离*/
+    public function GetDistance($lat1, $lng1, $lat2, $lng2)
+    {
+        $radLat1 = $lat1 * (PI / 180);
+        $radLat2 = $lat2 * (PI / 180);
+        $a = $radLat1 - $radLat2;
+        $b = ($lng1 * (PI / 180)) - ($lng2 * (PI / 180));
+        $s = 2 * asin(sqrt(pow(sin($a/2),2) + cos($radLat1)*cos($radLat2)*pow(sin($b/2),2)));
+        $s = $s * EARTH_RADIUS;
+        $s = round($s * 10000) / 10000;
+        return $s;
+    }
+
+
+    /*头像修改类*/
+    public function usersHeadEidt()
+    {
+
+        $filename = uniqid();/*临时文件名*/
+        $content = file_get_contents("php://input");/*接收app传过来的文件*/
+        if(empty($_GET['u_id']) || empty($u_id = intval($_GET['u_id']))){
+            $this->exportData( array('msg'=>'用户id不能为空'),0);
+        }
+        if( !isset($_GET['img_name']) || empty($img_name = trim($_GET['img_name']))){
+            $this->exportData( array('msg'=>'用户头像图片名不能为空'),0);
+        }
+        $ext = strrchr($img_name,'.');
+
+        $img_type = array('.jpg','.jpeg','.png','.gif');
+        if( !in_array($ext,$img_type)){
+            $this->exportData( array('msg'=>'只支持图像格式为jpg,png,git,jpeg格式的图像'),0);
+        }
+
+        /*如果文件写入成功*/
+        if(!empty($content)){
+            if (file_put_contents($this ->web_config['u_img_path'].$filename, $content))
+            {
+                $imageInfo = getimagesize ($this ->web_config['u_img_path'].$filename);/*验证图片*/
+                if ($imageInfo == false) {
+                    unlink($this ->web_config['u_img_path'].$filename);
+                    $this->exportData( array('msg'=>'非法上传'),0);
+                }
+                \Swoole\Image::thumbnail($this ->web_config['u_img_path'].$filename,
+                            $this ->web_config['u_img_path'].$u_id.'.jpg',
+                            $this->web_config['u_img_w'],
+                            $this->web_config['u_img_h'],
+                            1000);
+                unlink($this ->web_config['u_img_path'].$filename);
+                $this->exportData( array('msg'=>'头像修改成功'),1);
+
+            }else{
+                $this->exportData( array('msg'=>'头像写入失败'),0);
+            }
+        }else{
+
+            $this->exportData( array('msg'=>'您没有上传图片'),0);
+        }
+
+
+    }
 
 
 
