@@ -414,7 +414,7 @@ class nusoap_base {
 		$this->appendDebug('value=' . $this->varDump($val));
 		$this->appendDebug('attributes=' . $this->varDump($attributes));
 
-    	if (is_object($val) && get_class($val) == 'soapval' && (! $soapval)) {
+    	if ((is_object($val) && (! $soapval)) && (get_class($val) == 'soapval' || get_class($val) == 'MLIB\EMAY\soapval')) {
     		$this->debug("serialize_val: serialize soapval");
         	$xml = $val->serialize($use);
 			$this->appendDebug($val->getDebug());
@@ -535,7 +535,7 @@ class nusoap_base {
 				break;
 			case is_object($val):
 		   		$this->debug("serialize_val: serialize object");
-		    	if (get_class($val) == 'soapval') {
+		    	if (get_class($val) == 'soapval' || get_class($val) == 'MLIB\EMAY\soapval') {
 		    		$this->debug("serialize_val: serialize soapval object");
 		        	$pXml = $val->serialize($use);
 					$this->appendDebug($val->getDebug());
@@ -7356,7 +7356,7 @@ class nusoap_client extends \MLIB\EMAY\nusoap_base  {
 	* @return	mixed	response from SOAP call, normally an associative array mirroring the structure of the XML response, false for certain fatal errors
 	* @access   public
 	*/
-	function call($operation,$params=array(),$namespace='http://tempuri.org',$soapAction='',$headers=false,$rpcParams=null,$style='rpc',$use='encoded', $mydata=''){
+	function call($operation,$params=array(),$namespace='http://tempuri.org',$soapAction='',$headers=false,$rpcParams=null,$style='rpc',$use='encoded'){
 		$this->operation = $operation;
 		$this->fault = false;
 		$this->setError('');
@@ -7491,14 +7491,8 @@ class nusoap_client extends \MLIB\EMAY\nusoap_base  {
 		$this->debug("endpoint=$this->endpoint, soapAction=$soapAction, namespace=$namespace, style=$style, use=$use, encodingStyle=$encodingStyle");
 		$this->debug('SOAP message length=' . strlen($soapmsg) . ' contents (max 1000 bytes)=' . substr($soapmsg, 0, 1000));
 		// send
-		if ('' != trim($mydata))
-		{
-            $return = $this->send($this->getHTTPBody($mydata),$soapAction,$this->timeout,$this->response_timeout);
-		}
-		else
-		{
-            $return = $this->send($this->getHTTPBody($soapmsg),$soapAction,$this->timeout,$this->response_timeout);
-		}
+		$return = $this->send($this->getHTTPBody($soapmsg),$soapAction,$this->timeout,$this->response_timeout);
+
 		if($errstr = $this->getError()){
 			$this->debug('Error: '.$errstr);
 			return false;

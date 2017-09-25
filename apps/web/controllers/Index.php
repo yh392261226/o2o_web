@@ -30,10 +30,19 @@ class Index extends \CLASSES\WebBase
 
     public function sms()
     {
-        $phone = '18846449055';
-        $content = '【钢建网】用户您好，我想联系你一下';
-        $sms = new \MLIB\Sms();
-        $result = $sms->send($phone, $content);
-        print_r($result);
+        //$phone = array('18846449055', '13163675676');
+        $phone = '13163675676';
+        $content = '【钢建网】用户您好，我想联系你一下1';
+        $message = '';
+        $result = sendSms($phone, $content);
+        if (!$result)
+        {
+            $message = '发送失败';
+        }
+        else
+        {
+            $message = '发送成功';
+        }
+        echo $message;exit;
     }
 }

@@ -239,27 +239,12 @@ class Client{
 		 * 所以需要下面的单独处理
 		 * 
 		 */
-		//foreach($mobiles as $mobile)
-        //{
-        //	array_push($params,new soapval("arg3",false,$mobile));
-        //}
+		foreach($mobiles as $mobile)
+        {
+        	array_push($params,new soapval("arg3",false,$mobile));
+        }
 
-		if (count($mobiles) > 1)
-		{
-            $mobile_xml = '<arg3 xsi:type="SOAP-ENC:Array" SOAP-ENC:arrayType="xsd:string['.count($mobiles).']">';
-				foreach ($mobiles as $key => $val)
-				{
-                    $mobile_xml .= '<item xsi:type="xsd:string">'.$val.'</item>';
-				}
-        	$mobile_xml .= '</arg3>';
-		}
-		else
-		{
-			$mobile_xml = '<arg3 xsi:type="xsd:string">'.$mobiles[0].'</arg3>';
-		}
-		//$mobiles[0]='13163675676, 18846449055';
-		$mydata = '<?xml version="1.0" encoding="UTF-8"?><SOAP-ENV:Envelope SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns7435:sendSMS xmlns:ns7435="http://sdkhttp.eucp.b2m.cn/"><arg0 xsi:type="xsd:string">'.$params['arg0'].'</arg0><arg1 xsi:type="xsd:string">'.$params['arg1'].'</arg1><arg2 xsi:type="xsd:string"></arg2><arg4 xsi:type="xsd:string">'.$params['arg4'].'</arg4><arg5 xsi:type="xsd:string">'.$params['arg5'].'</arg5><arg6 xsi:type="xsd:string">'.$params['arg6'].'</arg6><arg7 xsi:type="xsd:int">'.$params['arg7'].'</arg7><arg8 xsi:type="xsd:int">'.$params['arg8'].'</arg8>'.$mobile_xml.'</ns7435:sendSMS></SOAP-ENV:Body></SOAP-ENV:Envelope>';
-		$result = $this->soap->call("sendSMS",$params,$this->namespace,'',false,null,'rpc','encoded', $mydata);
+		$result = $this->soap->call("sendSMS",$params,$this->namespace,'',false,null,'rpc','encoded');
 		return $result;
 		
 	}
