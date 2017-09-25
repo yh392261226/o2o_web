@@ -27,4 +27,22 @@ class Index extends \CLASSES\WebBase
             }
         }
     }
+
+    public function sms()
+    {
+        //$phone = array('18846449055', '13163675676');
+        $phone = '13163675676';
+        $content = '用户您好，你看到一个美女没';
+        $message = '';
+        $result = sendSms($phone, $content);
+        if (!$result)
+        {
+            $message = '发送失败';
+        }
+        else
+        {
+            $message = '发送成功';
+        }
+        echo $message;exit;
+    }
 }

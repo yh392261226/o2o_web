@@ -499,3 +499,10 @@ function searchKeyFromRegions($key, $data = array())
     }
     return array();
 }
+
+function sendSms($phone, $content)
+{
+    //手机号只能是单个
+    $sms = new \MLIB\Sms();
+    return $sms->send($phone, $content);
+}
