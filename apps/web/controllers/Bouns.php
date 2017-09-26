@@ -12,7 +12,6 @@ class Bouns extends \CLASSES\WebBase
         $this->bouns_dao = new \WDAO\Bouns();
         $this->bouns_type_dao = new \WDAO\Bouns_type();
         $this->bouns_data_dao = new \WDAO\Bouns_data();
-        $this->db->debug =1;
     }
 
     public function index()
