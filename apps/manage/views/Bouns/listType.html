@@ -41,9 +41,8 @@
                                 <th data-field="id" data-sortable="true">ID</th>
                                 <th data-field="name" data-sortable="true">名称</th>
                                 <th data-field="withdraw" data-sortable="true">是否可提现</th>
-                                <th data-field="status" data-sortable="true">状态</th>
-                                <th data-field="start_time" data-sortable="true">开始时间</th>
-                                <th data-field="end_time" data-sortable="true">结束时间</th>
+                                <th data-field="start_time" data-sortable="true">添加时间</th>
+                                <th data-field="end_time" data-sortable="true">最后一次修改时间</th>
                                 <th data-field="action" data-sortable="">操作</th>
                             </tr>
                         </thead>
@@ -55,12 +54,8 @@
                                 <td>{{$value.bt_id}}</td>
                                 <td>{{$value.bt_name}}</td>
                                 <td>{{if $value.bt_withdraw == 0}}否{{else}}是{{/if}}</td>
-                                <td>
-                                    {{if $value.bt_status == 0}}无效{{/if}}
-                                    {{if $value.bt_status == 1}}有效{{/if}}
-                                </td>
-                                <td>{{if $value.bt_start_time != 0}}{{$value.bt_start_time|date_format:"%y-%m-%d %H:%M:%S"}}{{else}}无限制{{/if}}</td>
-                                <td>{{if $value.bt_end_time != 0}}{{$value.bt_end_time|date_format:"%y-%m-%d %H:%M:%S"}}{{else}}无限制{{/if}}</td>
+                                <td>{{$value.bt_in_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
+                                <td>{{$value.bt_last_edit_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
                                 <td><a href="/Bouns/editType?bt_id={{$value.bt_id}}">修改</a> |  <a href="/Bouns/delType?bt_id={{$value.bt_id}}">删除</a></td>
                             </tr>
                             {{/foreach}}
