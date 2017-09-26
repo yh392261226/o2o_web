@@ -24,11 +24,8 @@ class Bouns extends \CLASSES\ManageBase
                 'bt_name'       => isset($_POST['bt_name']) ? trim($_POST['bt_name']) : '',
                 'bt_in_time'    => $curtime,
                 'bt_author'     => parent::$manager_status,
-                'bt_start_time' => (isset($_POST['bt_start_time']) && intval($_POST['bt_start_time']) > 0)  ? strtotime($_POST['bt_start_time']) : 0,
-                'bt_end_time'   => (isset($_POST['bt_end_time']) && intval($_POST['bt_end_time']) > 0) ? strtotime($_POST['bt_end_time']) : 0,
                 'bt_last_editor'=> parent::$manager_status,
                 'bt_last_edit_time' => $curtime,
-                'bt_status'     => isset($_POST['bt_status']) ? trim($_POST['bt_status']) : 0,
                 'bt_withdraw'   => isset($_POST['bt_withdraw']) ? trim($_POST['bt_withdraw']) : 0,
                 'bt_info'       => isset($_POST['bt_info']) ? trim($_POST['bt_info']) : '',
 
@@ -59,11 +56,8 @@ class Bouns extends \CLASSES\ManageBase
             $curtime = time();
             $data   = array(
                 'bt_name'       => isset($_POST['bt_name']) ? trim($_POST['bt_name']) : '',
-                'bt_start_time' => (isset($_POST['bt_start_time']) && intval($_POST['bt_start_time']) > 0) ? strtotime($_POST['bt_start_time']) : 0,
-                'bt_end_time'   => (isset($_POST['bt_end_time']) && intval($_POST['bt_end_time']) > 0) ? strtotime($_POST['bt_end_time']) : 0,
                 'bt_last_editor'=> parent::$manager_status,
                 'bt_last_edit_time' => $curtime,
-                'bt_status'     => isset($_POST['bt_status']) ? trim($_POST['bt_status']) : 0,
                 'bt_withdraw'   => isset($_POST['bt_withdraw']) ? trim($_POST['bt_withdraw']) : 0,
                 'bt_info'       => isset($_POST['bt_info']) ? trim($_POST['bt_info']) : '',
             );
