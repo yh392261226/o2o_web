@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-25 16:49:42
+ * @Last Modified time: 2017-09-26 17:29:43
  */
 namespace App\Controller;
 
@@ -100,6 +100,12 @@ class Users extends \CLASSES\WebBase
             $code = mt_rand(99999,999999);
 
             /*发送验证码接口*/
+            $content = '用户您好,您的登录验证码为'.$code.'。';
+            $result = sendSms($phone_number, $content);
+            if(!$result)
+            {
+                $this->exportData(array('msg'=>'短信发送失败'),0);
+            }
             /*存库*/;
             $dao_verify_code = new \WDAO\Verifies(array('table'=>'verifies'));
             $data = array();
@@ -108,7 +114,7 @@ class Users extends \CLASSES\WebBase
             $data['v_in_time'] = time();
             $res = $dao_verify_code->addData($data);
             if($res){
-                $this->exportData(array('msg'=>'短信发送成功'.$code),1);
+                $this->exportData(array('msg'=>'短信发送成功'),1);
             }else{
                 $this->exportData(array('msg'=>'短信发送失败'),0);
             }
@@ -351,28 +357,46 @@ class Users extends \CLASSES\WebBase
             /*获取用户位置坐标*/
             // $u_id_str = implode(',',$u_id_arr);
             // $users_position = $m_users ->db->query("SELECT u_id,ucp_posit_x,ucp_posit_y,ucp_last_edit_time  FROM users_cur_position WHERE u_id IN ($u_id_str) AND ucp_last_edit_time IN (SELECT max(ucp_last_edit_time) FROM users_cur_position GROUP BY u_id) ORDER BY ucp_last_edit_time DESC ") ->fetchall();
+        /*获取用户距离start*/
+
 
             foreach ($users_list['data'] as  &$val) {
                 foreach ($users_position['data'] as  $value) {
                     if($val['u_id'] == $value['u_id']){
-                        /*获取当前两点之间距离*/
-                        if($value['ucp_posit_x'] && $value['ucp_posit_y']){
-                            $val['distance'] = $this -> GetDistance($value['ucp_posit_x'],$value['ucp_posit_y'],$users_posit_x,$users_posit_y);
+
+                        if(!empty($_GET['users_posit_x']) && !empty($users_posit_x = floatval($_GET['users_posit_x'])) && !empty($_GET['users_posit_y']) && !empty($users_posit_y = floatval($_GET['users_posit_y']))){
+                            /*获取当前两点之间距离*/
+                            if($value['ucp_posit_x'] && $value['ucp_posit_y']){
+                                $val['distance'] = $this -> GetDistance($value['ucp_posit_x'],$value['ucp_posit_y'],$users_posit_x,$users_posit_y);
+                            }
+                            /*获取用户距离end*/
+
+                            if($value['ucp_posit_x'] && $value['ucp_posit_y']){
+                                $val['ucp_posit_x'] = $value['ucp_posit_x'];
+                                $val['ucp_posit_y'] = $value['ucp_posit_y'];
+                            }
                         }
 
                     }
                 }
             }
-        }
-        /*获取用户距离end*/
+
+
         $this->exportData( $users_list,1);
 
-
+        }
     }
+
 
     /*获取用户头像信息*/
     private function getHeadById($u_id = 0)
     {
+        if(!is_dir($this ->web_config['u_img_path'])){
+            $res = mkdir($this ->web_config['u_img_path'],0777);
+            if(!$res){
+                return '';
+            }
+        }
         if(file_exists($this ->web_config['u_img_path'].$u_id.$this->head_format)){
             return $this ->web_config['u_img_url'].$u_id.$this->head_format;
         }else{
@@ -441,6 +465,9 @@ class Users extends \CLASSES\WebBase
         }
 
         /*如果文件写入成功*/
+        if(!is_dir($this ->web_config['u_img_path'])){
+            mkdir($this ->web_config['u_img_path'],0777);
+        }
         if(!empty($content)){
             if (file_put_contents($this ->web_config['u_img_path'].$filename, $content))
             {
@@ -466,8 +493,60 @@ class Users extends \CLASSES\WebBase
         }
 
 
+
     }
 
+    /*用户站内标题信息*/
+    public function msgList($value='')
+    {
+        if(empty($_GET['u_id']) || empty($u_id = intval($_GET['u_id']))){
+            $this->exportData( array('msg'=>'用户id不能为空'),0);
+        }
+
+        $page = isset($_GET['page']) && !empty(intval($_GET['page'])) ? intval($_GET['page']) : 1;
+
+        $dao_user_msg = new \WDAO\Users(array('table'=>'user_msg'));
+        $msg_list = $dao_user_msg ->listData(array(
+            'u_id' => $u_id,
+            'pager' => true,
+            'page' => $page,
+            'web_msg.wm_status' => 1,
+            'where' => 'um_status != -1',
+            'fields' => 'wm_title,wm_in_time,wm_type,user_msg.wm_id,um_id',
+            'join' => array('web_msg','web_msg.wm_id=user_msg.wm_id '),
+            ));
+        unset($msg_list['pager']);
+        $this->exportData( $msg_list,1);
+    }
+
+    /*删除站内信息*/
+    public function msgDel()
+    {
+
+        if(empty($_GET['um_id']) || empty($um_id = intval($_GET['um_id']))){
+            $this->exportData( array('msg'=>'用户站内信关系ID为空'),0);
+        }
+
+        $dao_user_msg = new \WDAO\Users(array('table'=>'user_msg'));
+        $msg_list = $dao_user_msg ->updateData(array(
+            'um_status' => '-1',
+            ),array('um_id'=>$um_id));
+
+        $this->exportData( array('msg'=>'信息删除成功'),1);
+
+    }
+
+    /*站内信详细信息*/
+    public function msgInfo()
+    {
+        if(empty($_GET['wm_id']) || empty($um_id = intval($_GET['wm_id']))){
+            $this->exportData( array('msg'=>'站内信ID为空'),0);
+        }
+        $dao_user_msg = new \WDAO\Users(array('table'=>'web_msg'));
+        $info = $dao_user_msg -> infoData(array('key'=>'wm_id','val' => ''));
+
+
+    }
 
 
 
