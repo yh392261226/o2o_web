@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-26 17:29:43
+ * @Last Modified time: 2017-09-27 10:07:06
  */
 namespace App\Controller;
 
@@ -392,7 +392,7 @@ class Users extends \CLASSES\WebBase
     private function getHeadById($u_id = 0)
     {
         if(!is_dir($this ->web_config['u_img_path'])){
-            $res = mkdir($this ->web_config['u_img_path'],0777);
+            $res = mkdir($this ->web_config['u_img_path'],0777,true);
             if(!$res){
                 return '';
             }
@@ -448,7 +448,6 @@ class Users extends \CLASSES\WebBase
     /*头像修改类*/
     public function usersHeadEidt()
     {
-
         $filename = uniqid();/*临时文件名*/
         $content = file_get_contents("php://input");/*接收app传过来的文件*/
         if(empty($_GET['u_id']) || empty($u_id = intval($_GET['u_id']))){
@@ -466,7 +465,10 @@ class Users extends \CLASSES\WebBase
 
         /*如果文件写入成功*/
         if(!is_dir($this ->web_config['u_img_path'])){
-            mkdir($this ->web_config['u_img_path'],0777);
+            $res = mkdir($this ->web_config['u_img_path'],0777,true);
+            if(!$res){
+               $this->exportData( array('msg'=>'图片目录创建失败'),0);
+            }
         }
         if(!empty($content)){
             if (file_put_contents($this ->web_config['u_img_path'].$filename, $content))
@@ -528,24 +530,54 @@ class Users extends \CLASSES\WebBase
         }
 
         $dao_user_msg = new \WDAO\Users(array('table'=>'user_msg'));
-        $msg_list = $dao_user_msg ->updateData(array(
+        $res = $dao_user_msg ->updateData(array(
             'um_status' => '-1',
             ),array('um_id'=>$um_id));
+        if($res){
+            $this->exportData( array('msg'=>'信息删除成功'),1);
+        }else{
+            $this->exportData( array('msg'=>'信息删除失败'),0);
+        }
 
-        $this->exportData( array('msg'=>'信息删除成功'),1);
 
     }
 
     /*站内信详细信息*/
     public function msgInfo()
     {
-        if(empty($_GET['wm_id']) || empty($um_id = intval($_GET['wm_id']))){
-            $this->exportData( array('msg'=>'站内信ID为空'),0);
+        // if(empty($_GET['wm_id']) || empty($wm_id = intval($_GET['wm_id']))){
+        //     $this->exportData( array('msg'=>'站内信ID为空'),0);
+        // }
+
+        if(empty($_GET['um_id']) || empty($um_id = intval($_GET['um_id']))){
+            $this->exportData( array('msg'=>'用户站内信关系ID为空'),0);
         }
-        $dao_user_msg = new \WDAO\Users(array('table'=>'web_msg'));
-        $info = $dao_user_msg -> infoData(array('key'=>'wm_id','val' => ''));
+        /*修改状态*/
+        $dao_user_msg = new \WDAO\Users(array('table'=>'user_msg'));
+        $msg_list = $dao_user_msg ->updateData(array(
+            'um_status' => '1',
+            ),array('um_id'=>$um_id));
+        $wm_id = 0;
+        $wm_id_arr = $dao_user_msg ->infoData(array('key'=>'um_id','val'=>$um_id,'fields'=>'wm_id,um_id'));
+        if($wm_id_arr['wm_id']){
+            $wm_id = $wm_id_arr['wm_id'];
+        }
 
+        /*获取内容*/
+        $info = array();
+        if(!empty($wm_id)){
+            $dao_web_msg = new \WDAO\Users(array('table'=>'web_msg'));
 
+            $info = $dao_web_msg -> listData(array(
+                'where' => 'web_msg.wm_id='.$wm_id,
+                'wm_status' => 1,
+                'fields'=>'wm_title,wm_in_time,wm_desc,web_msg_ext.wm_id',
+                'join' => array('web_msg_ext','web_msg.wm_id=web_msg_ext.wm_id '),
+                ));
+            unset($info['pager']);
+
+        }
+        $this->exportData( $info,1);
     }
 
 
