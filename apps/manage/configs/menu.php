@@ -178,7 +178,7 @@ $menu = array(
     ),
 
     /*配置管理*/
-    7 => array(
+    8 => array(
         'name' => '系统配置', 'icon' => '', 'link' => '', 'sub_menu' => array(
             0 => array(
                 "name" => '系统配置', 'icon' => 'fa fa fa-bar-chart-o', 'link' => '', 'sub_menu' => array(

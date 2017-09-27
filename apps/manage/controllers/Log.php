@@ -200,7 +200,35 @@ class Log extends \CLASSES\ManageBase
         $this->tpl->display("Log/userRecharge.html");
     }
 
-
+    public function userWithdrawProof()
+    {
+        if (isset($_REQUEST['uwl_id']) && intval($_REQUEST['uwl_id']) > 0 && isset($_REQUEST['uwl_proof']) && intval($_REQUEST['uwl_proof']) > 0)
+        {
+            $dao_log_ext = new \MDAO\Log(array('table'=>'user_withdraw_log_ext'));
+            $result = $dao_log_ext->updateData(array('uwl_proof' => trim($_REQUEST['uwl_proof'])), array('uwl_id' => intval($_REQUEST['uwl_id'])));
+            if ($result)
+            {
+                $dao_log = new \MDAO\Log(array('table'=>'user_withdraw_log'));
+                $dao_log->updateData(array('uwl_status' => 2), array('uwl_id' => intval($_REQUEST['uwl_id'])));
+            }
+            if (isset($_REQUEST['is_ajax']) && $_REQUEST['is_ajax'])
+            {
+                if (!$result)
+                {
+                    echo json_encode(array('msg' => '操作失败', 'status' => 0));exit;
+                }
+                echo json_encode(array('msg' => '操作成功', 'status' => 1));exit;
+            }
+            else
+            {
+                if (!$result)
+                {
+                    msg('操作失败', 0);
+                }
+                msg('操作成功', 1);
+            }
+        }
+    }
 
     public function userWithdraw()
     {
@@ -231,7 +259,7 @@ class Log extends \CLASSES\ManageBase
 
         $data['page'] = (isset($_REQUEST['page']) && !empty($_REQUEST['page'])) ? intval($_REQUEST['page']) : 1;
         $data['leftjoin'] = array('user_withdraw_log_ext',"user_withdraw_log.uwl_id = user_withdraw_log_ext.uwl_id");
-        $data['fields'] = 'user_withdraw_log.uwl_id as uwl_id,u_id,uwl_in_time,uwl_solut_time,uwl_solut_author,uwl_status,uwl_amount,p_id,uwl_truename,uwl_card,uwl_remark';
+        $data['fields'] = 'user_withdraw_log.uwl_id as uwl_id,u_id,uwl_in_time,uwl_solut_time,uwl_solut_author,uwl_status,uwl_amount,p_id,uwl_truename,uwl_card,uwl_proof,uwl_remark';
 
 
 
