@@ -259,7 +259,7 @@ class Log extends \CLASSES\ManageBase
 
         $data['page'] = (isset($_REQUEST['page']) && !empty($_REQUEST['page'])) ? intval($_REQUEST['page']) : 1;
         $data['leftjoin'] = array('user_withdraw_log_ext',"user_withdraw_log.uwl_id = user_withdraw_log_ext.uwl_id");
-        $data['fields'] = 'user_withdraw_log.uwl_id as uwl_id,u_id,uwl_in_time,uwl_solut_time,uwl_solut_author,uwl_status,uwl_amount,p_id,uwl_truename,uwl_card,uwl_proof,uwl_remark';
+        $data['fields'] = 'user_withdraw_log.uwl_id as uwl_id,u_id,uwl_in_time,uwl_solut_time,uwl_solut_author,uwl_status,uwl_amount,p_id,uwl_truename,uwl_card,uwl_proof,uwl_remark,uwl_openarea';
 
 
 
