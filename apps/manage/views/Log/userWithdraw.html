@@ -97,12 +97,11 @@
                                 <th data-field="uwl_status" data-sortable="true">状态</th>
                                 <th data-field="uwl_amount" data-sortable="true">资金数额</th>
                                 <th data-field="p_id" data-sortable="true">支付方式</th>
-                                <th data-field="uwl_truename" data-sortable="true">卡号真实姓名</th>
+                                <th data-field="uwl_truename" data-sortable="false">卡号真实姓名</th>
                                 <th data-field="uwl_card" data-sortable="true">卡号</th>
-                                <th data-field="uwl_remark" data-sortable="true">备注</th>
-
-
-
+                                <th data-field="uwl_openarea" data-sortable="true">开户行</th>
+                                <th data-field="uwl_remark" data-sortable="false">备注</th>
+                                <th data-field="proof" data-sortable="true">回执单号</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -120,7 +119,10 @@
                                 <td>{{$info.p_id}}</td>
                                 <td>{{$info.uwl_truename}}</td>
                                 <td>{{$info.uwl_card}}</td>
+                                <td>{{$info.uwl_openarea}}</td>
                                 <td>{{$info.uwl_remark}}</td>
+                                <td id="proof_td_{{$info.uwl_id}}">{{if $info.uwl_proof != ''}}{{$info.uwl_proof}}{{else}}<input placeholder="回执编号" id="proof_input_{{$info.uwl_id}}" name="uwl_proof" value="" size="8" type="text">
+                                    <input class="proof_btn btn" value="提交" uwl_id="{{$info.uwl_id}}" type="button">{{/if}}</td>
                             </tr>
                             {{/foreach}}
                             {{/if}}
@@ -199,7 +201,29 @@
             $('form').submit();
     }
 
+    $(function(){
+        $('.proof_btn').click(function(i){
+            var uwl_id = $(this).attr('uwl_id');
+            var proof_input = $.trim($('#proof_input_' + uwl_id).val());
+            if (proof_input > 0) {
+                //ajax
+                $.ajax({
+                    url: "/Log/userWithdrawProof?is_ajax=1",
+                    type: 'get',
+                    data:{'uwl_id':uwl_id, 'uwl_proof':proof_input},
+                    dataType: 'json',
+                    success: function(result) {
+                        if (result.status == 1) {
+                            $('#proof_td_' + uwl_id).text(proof_input);
+                        } else {
+                            swal(result.msg);
+                        }
+                    }
+                });
 
+            }
+        });
+    });
     </script>
 
 

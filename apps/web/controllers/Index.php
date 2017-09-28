@@ -17,6 +17,9 @@ class Index extends \CLASSES\WebBase
             'Advertising',
             'articles',
             'Tasks',
+            'Bouns',
+            'Tools',
+            'Application_config',
         );
 
         if (!empty($api_list))
