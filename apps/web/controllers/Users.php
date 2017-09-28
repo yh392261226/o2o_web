@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-27 10:07:06
+ * @Last Modified time: 2017-09-28 15:54:52
  */
 namespace App\Controller;
 
@@ -203,11 +203,11 @@ class Users extends \CLASSES\WebBase
         $dao_funds = new \WDAO\Users(array('table'=>'users'));
         $res = $dao_funds -> infoData(array('fields'=>'u_id,
         u_name,u_mobile,u_phone,u_fax,u_sex,u_in_time,u_online,u_status,u_type,u_task_status,u_skills,u_start,u_credit,u_top,u_recommend,u_jobs_num,u_worked_num,u_high_opinions,u_low_opinions,u_middle_opinions,u_dissensions,u_true_name,u_idcard','key'=>'u_id','val' => $u_id,'pager'=>false));
-        $skills_id = array();
-        if($res['u_skills'] != 0){
-            $skills_id = explode(',',$res['u_skills']);
-        }
-        $res['u_skills'] = $skills_id;
+        // $skills_id = array();
+        // if($res['u_skills'] != 0){
+        //     $skills_id = explode(',',$res['u_skills']);
+        // }
+        // $res['u_skills'] = $skills_id;
         $res['area'] = $ext_info;
         $res['u_info'] = $ext_info['uei_info'];
         $u_img_url = $this ->web_config['u_img_url'];
@@ -411,7 +411,7 @@ class Users extends \CLASSES\WebBase
             $this->exportData( array('msg'=>'用户id不能为空'),0);
         }
         $page = !empty($_GET['page']) && !empty(intval($_GET['page'])) ? intval($_GET['page']) :1;
-        $category = isset($_GET['category'])  ? trim($_GET['category']) : 'all';
+        $category = !empty($_GET['category'])  ? trim($_GET['category']) : 'all';
         /*充值*/
         $recharge_list['data'] = '';
         $withdraw_list['data'] = '';
@@ -448,8 +448,20 @@ class Users extends \CLASSES\WebBase
     /*头像修改类*/
     public function usersHeadEidt()
     {
-        $filename = uniqid();/*临时文件名*/
+        $filename = uniqid().'.jpg';/*临时文件名*/
         $content = file_get_contents("php://input");/*接收app传过来的文件*/
+
+        /*截掉post过来的key*/
+        $param1 = substr($content, 7);
+        /*这里是转码 Unicode转Native*/
+        $param2 = str_replace(" ","+",$param1);
+        $param2 = str_replace("%2F","/",$param2);
+        $param2 = str_replace("%2B","+",$param2);
+        $param2 = str_replace("%0A","",$param2);
+
+        $content = base64_decode($param2); // 将格式为base64的字符串解码
+
+
         if(empty($_GET['u_id']) || empty($u_id = intval($_GET['u_id']))){
             $this->exportData( array('msg'=>'用户id不能为空'),0);
         }
@@ -475,7 +487,7 @@ class Users extends \CLASSES\WebBase
             {
                 $imageInfo = getimagesize ($this ->web_config['u_img_path'].$filename);/*验证图片*/
                 if ($imageInfo == false) {
-                    unlink($this ->web_config['u_img_path'].$filename);
+                    // unlink($this ->web_config['u_img_path'].$filename);
                     $this->exportData( array('msg'=>'非法上传'),0);
                 }
                 \Swoole\Image::thumbnail($this ->web_config['u_img_path'].$filename,
@@ -483,7 +495,7 @@ class Users extends \CLASSES\WebBase
                             $this->web_config['u_img_w'],
                             $this->web_config['u_img_h'],
                             1000);
-                unlink($this ->web_config['u_img_path'].$filename);
+                // unlink($this ->web_config['u_img_path'].$filename);
                 $this->exportData( array('msg'=>'头像修改成功'),1);
 
             }else{
@@ -493,7 +505,6 @@ class Users extends \CLASSES\WebBase
 
             $this->exportData( array('msg'=>'您没有上传图片'),0);
         }
-
 
 
     }
@@ -545,9 +556,6 @@ class Users extends \CLASSES\WebBase
     /*站内信详细信息*/
     public function msgInfo()
     {
-        // if(empty($_GET['wm_id']) || empty($wm_id = intval($_GET['wm_id']))){
-        //     $this->exportData( array('msg'=>'站内信ID为空'),0);
-        // }
 
         if(empty($_GET['um_id']) || empty($um_id = intval($_GET['um_id']))){
             $this->exportData( array('msg'=>'用户站内信关系ID为空'),0);
@@ -580,6 +588,31 @@ class Users extends \CLASSES\WebBase
         $this->exportData( $info,1);
     }
 
+
+    /*前台配置文件接口*/
+    public function getAppConfig()
+    {
+        $application_config = array();
+        if (file_exists(WEBPATH . '/configs/application_config.php')){
+            require WEBPATH . '/configs/application_config.php';
+        }else{
+            $dao_application_config = new \WDAO\Users(array('table'=>'application_config'));
+            $data = $dao_application_config ->listData(array('pager'=>false,'fields'=>'ac_name,ac_value','ac_status'=>1));
+
+            $res = array();
+            foreach ($data['data'] as  $v) {
+                $res["{$v['ac_name']}"] = $v['ac_value'];
+            }
+            file_put_contents(WEBPATH . '/configs/application_config.php','<?php $application_config='.var_export($res,true).'?>');
+            if (file_exists(WEBPATH . '/configs/application_config.php')){
+                require WEBPATH . '/configs/application_config.php';
+            }else{
+                $this->exportData(0,array('msg'=>'系统错误请联系管理员'));
+            }
+        }
+        $this->exportData( array('data' => $application_config),1);
+
+    }
 
 
 
