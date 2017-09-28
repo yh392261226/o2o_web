@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-12 15:53:36
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-16 13:28:52
+ * @Last Modified time: 2017-09-28 15:46:33
  */
 
 namespace App\Controller;
@@ -132,7 +132,7 @@ class Application_config extends \CLASSES\ManageBase
             $res["{$v['ac_name']}"] = $v['ac_value'];
         }
 
-        return  file_put_contents('../web/configs/application_config.php','<?php $app_config='.var_export($res,true).'?>');
+        return  file_put_contents('../web/configs/application_config.php','<?php $application_config='.var_export($res,true).'?>');
 
     }
 }

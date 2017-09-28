@@ -14,7 +14,7 @@ class WebBase extends Swoole\Controller
         parent::__construct($swoole);
 
         //echo $this->showTrace();
-        //$this->db->debug = 1;
+        $this->db->debug = 1;
         $web_config = array();
         if (file_exists(WEBPATH . '/configs/web_config.php')){
             require WEBPATH . '/configs/web_config.php';
@@ -33,7 +33,7 @@ class WebBase extends Swoole\Controller
                 $this->exportData(0,array('msg'=>'系统错误请联系管理员'));
             }
         }
-        $this->web_config = $web_config;
+        $this->web_config = isset($web_config) ? $web_config : array();
 
 
 
