@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-28 15:54:52
+ * @Last Modified time: 2017-09-30 15:45:08
  */
 namespace App\Controller;
 
@@ -48,7 +48,7 @@ class Users extends \CLASSES\WebBase
         $user_data = $dao_users->listData(array(
             'u_mobile' => $phone_number,
             'pager' => false,
-            'fields'=>'u_id,u_name,u_pass,u_status,u_online,u_id,u_sex',
+            'fields'=>'ucp_posit_x,u_name,u_pass,u_status,u_online,u_id,u_sex',
                 ));
 
 
@@ -487,7 +487,7 @@ class Users extends \CLASSES\WebBase
             {
                 $imageInfo = getimagesize ($this ->web_config['u_img_path'].$filename);/*验证图片*/
                 if ($imageInfo == false) {
-                    // unlink($this ->web_config['u_img_path'].$filename);
+                    unlink($this ->web_config['u_img_path'].$filename);
                     $this->exportData( array('msg'=>'非法上传'),0);
                 }
                 \Swoole\Image::thumbnail($this ->web_config['u_img_path'].$filename,
@@ -495,7 +495,7 @@ class Users extends \CLASSES\WebBase
                             $this->web_config['u_img_w'],
                             $this->web_config['u_img_h'],
                             1000);
-                // unlink($this ->web_config['u_img_path'].$filename);
+                unlink($this ->web_config['u_img_path'].$filename);
                 $this->exportData( array('msg'=>'头像修改成功'),1);
 
             }else{
@@ -613,6 +613,153 @@ class Users extends \CLASSES\WebBase
         $this->exportData( array('data' => $application_config),1);
 
     }
+
+    /*用户位置信息修改*/
+    public function updatePosition()
+    {
+        if(empty($_GET['u_id']) || empty($u_id = intval($_GET['u_id']))){
+            $this->exportData( array('msg'=>'用户ID为空'),0);
+        }
+        if(empty($_GET['ucp_posit_x']) || empty($ucp_posit_x = floatval($_GET['ucp_posit_x']))){
+            $this->exportData( array('msg'=>'用户x轴信息为空'),0);
+        }
+        if(empty($_GET['ucp_posit_y']) || empty($ucp_posit_y = floatval($_GET['ucp_posit_y']))){
+            $this->exportData( array('msg'=>'用户y轴信息为空'),0);
+        }
+
+        $users_info = array();
+        $users_info['ucp_posit_x'] = $ucp_posit_x;
+        $users_info['ucp_posit_y'] = $ucp_posit_y;
+        $users_info['ucp_last_edit_time'] = time();
+
+        $dao_cur_position = new \WDAO\Users(array('table'=>'users_cur_position'));
+        $u_id_arr = $dao_cur_position ->infoData(array('key'=>'u_id','val'=>$u_id,'fields'=>'u_id'));
+
+        $res = false;
+        if(!empty($u_id_arr['u_id'])){
+            $res = $dao_cur_position ->updateData($users_info,array('u_id'=>$u_id));
+        }else{
+            $users_info['u_id'] = $u_id;
+            $res = $dao_cur_position ->addData($users_info);
+        }
+
+        if($res){
+            $this->exportData( array('msg'=>'位置信息修改成功'),1);
+        }else{
+            $this->exportData( array('msg'=>'位置信息修改失败'),0);
+        }
+    }
+
+    /*用户投诉信息*/
+    public function complaintsType()
+    {
+        $ct_type = isset($_GET['ct_type']) && (!empty(intval($_GET['ct_type'])) || $_GET['ct_type'] === '0') ?  intval($_GET['ct_type']) : -1;
+        $condition = array();
+        $condition['ct_status'] = 1;
+        if($ct_type !== -1){
+            $condition['ct_type'] = $ct_type;
+        }
+
+        $complaints_type = new \WDAO\Users(array('table'=>'complaints_type'));
+        $complaints_type_arr = $complaints_type -> listData($condition);
+        unset($complaints_type_arr['pager']);
+        $this->exportData( array($complaints_type_arr),1);
+    }
+
+
+    /*添加投诉信息*/
+    public function complaintsAdd()
+    {
+
+        if(empty($_POST['c_id']) || empty(intval($_POST['c_id']))){
+            if(empty($_POST['c_author']) || empty($c_author = intval($_POST['c_author']))){
+                $this->exportData( array('msg'=>'用户ID为空'),0);
+            }
+            if(empty($_POST['c_against']) || empty($c_against = intval($_POST['c_against']))){
+                $this->exportData( array('msg'=>'针对投诉人不能为空'),0);
+            }
+            if(empty($_POST['ct_id']) || empty($ct_id = intval($_POST['ct_id']))){
+                $this->exportData( array('msg'=>'投诉类型不能为空'),0);
+            }
+            $data = array();
+            !empty($_POST['c_title']) ? $array['c_title'] = trim($_POST['c_title']) : false;
+            $data['c_author'] = $c_author;
+            $data['c_against'] = $c_against;
+            $data['ct_id'] = $ct_id;
+            $data['c_in_time'] = time();
+            $dao_complaints = new \WDAO\Users(array('table'=>'complaints'));
+
+            $c_id = 0;
+            $c_id = $dao_complaints ->addData($data);
+
+            if($c_id <= 0) {
+                $this->exportData( array('msg'=>'投诉信息写入失败'),0);
+            }
+
+
+            if(!empty($c_id)){
+                $ext_data = array();
+                $ext_data['c_id'] = $c_id;
+                $ext_data['c_replay'] = '';
+                $ext_data['c_mark'] = '';
+                $ext_data['c_desc'] = isset($_POST['c_desc']) ? trim($_POST['c_desc']) : ' ';
+                if(!empty($_POST['c_img'])){
+                    $ext_data['c_img'] = $dao_complaints ->uploadComplaintImg($_POST['c_img'],'../uploads/images/'.date('Y/m/d'));
+                }
+                $dao_complaints_ext = new \WDAO\Users(array('table'=>'complaints_ext'));
+                $dao_complaints_ext -> addData($ext_data);
+            }
+        }else{
+            if(isset($_POST['c_id']) && !empty(intval($_POST['c_id'])) && !empty($_POST['c_img'])){
+                $dao_complaints_ext = new \WDAO\Users(array('table'=>'complaints_ext'));
+                $complaints_ext_info = $dao_complaints_ext -> infoData(array(
+                    'fields' => 'c_img,c_id',
+                    'key' => 'c_id',
+                    'val' => $_POST['c_id'],
+                    ));
+                $ext_data = '';
+                $img_path = $dao_complaints_ext ->uploadComplaintImg($_POST['c_img'],'../uploads/images/'.date('Y/m/d'));
+
+                if(!empty($img_path)){
+                    if(!empty($complaints_ext_info['c_img'])){
+                        $ext_data = array('c_img'=>$complaints_ext_info['c_img'].','.$img_path);
+                    }else{
+                        $ext_data = array('c_img'=>$img_path);
+                    }
+                    $res = $dao_complaints_ext ->updateData($ext_data,array('c_id'=>$_POST['c_id']));
+                    if($res){
+                        $this->exportData( array('msg'=>'图片信息修改成功'),1);
+                    }else{
+                        $this->exportData( array('msg'=>'图片信息修改失败'),0);
+                    }
+                }else{
+                    $this->exportData( array('msg'=>'图片信息写入失败'),0);
+                }
+
+            }
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
