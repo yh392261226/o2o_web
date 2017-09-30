@@ -109,4 +109,26 @@ class Users extends \CLASSES\ManageBase
         $this->mydisplay();
     }
 
+    public function sendMessage()
+    {
+        $data = array();
+        if (isset($_REQUEST['u_id'])) $data['u_id'] = intval($_REQUEST['u_id']);
+        if (isset($data['u_id']) && 0 < $data['u_id'])
+        {
+            if (isset($_REQUEST['content'])) $data['content'] = trim($_REQUEST['content']);
+            if (isset($_REQUEST['u_mobile'])) $data['u_mobile'] = trim($_REQUEST['u_mobile']);
+            if (!isset($data['content']) || '' == trim($_REQUEST['content']) || !isset($data['u_mobile']) || 13000000000 > intval($_REQUEST['u_mobile']))
+            {
+                echo 0;exit;
+            }
+            $result = sendSms(intval($_REQUEST['u_mobile']), trim($data['content']));
+            if ($result)
+            {
+                echo 1;exit;
+            }
+
+        }
+        echo 0;exit;
+    }
+
 }
