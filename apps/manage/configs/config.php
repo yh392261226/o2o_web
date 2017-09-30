@@ -12,6 +12,7 @@ if (!defined('WEBPATH')) {
 
 define('CONFIGPATH', WEBPATH . '/configs');
 define('FRAMEWORKPATH', WEBPATH . '/../../framework');
+define('LIBRARIESPATH', WEBPATH . '/../../libraries');
 define('APPPATH', WEBPATH . '/..');
 define('STATICPATH','/views/static/');
 define('STATICURL', '');

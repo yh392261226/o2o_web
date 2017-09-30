@@ -82,6 +82,8 @@
                                 <th data-field="last_time" data-sortable="true">上一次修改时间</th>
                                 <th data-field="manager_id" data-sortable="true">管理员id</th>
                                 <th data-field="status" data-sortable="">状态</th>
+                                <th data-field="img" data-sortable="">凭证</th>
+                                <th data-field="oprate" data-sortable="">操作</th>
 
                             </tr>
                         </thead>
@@ -89,9 +91,9 @@
                             {{if $complaints_list_arr.data}}
                             {{foreach from=$complaints_list_arr.data item=info}}
                             <tr>
-                                <td><input type="checkbox" name="a_id" value="{{$info.a_id}}"></td>
+                                <td><input type="checkbox" name="a_id" value="{{$info.c_id}}"></td>
                                 <td>{{$info.c_id}}</td>
-                                <td>{{$info.c_title}}</td>
+                                <td>{{if $info.c_title}}{{$info.c_title}}{{else}}无标题{{/if}}</td>
                                 <td>{{$info.c_author}}</td>
                                 <td>{{$info.c_against}}</td>
                                 <td>{{$info.c_in_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
@@ -105,6 +107,20 @@
                                             <option value="2" {{if $info.c_status eq 2}} selected {{/if}} >已回复</option>
                                             <option value="3" {{if $info.c_status eq 3}} selected {{/if}} >放弃治疗</option>
                                     </select>
+                                </td>
+                                <td>
+                                    {{if $info.c_imgs}}
+                                        {{foreach from=$info.c_imgs item=img}}
+                                            {{$img}}
+                                        {{/foreach}}
+                                    {{else}}
+                                        无凭证
+                                    {{/if}}
+                                </td>
+                                <td>
+                                    <a onclick="javascript:showTr(this, {{$info.c_id}});">回复&nbsp;/ &nbsp;备注</a>
+                                    <input type="hidden" id="c_mark_{{$info.c_id}}" value="{{$info.c_mark}}">
+                                    <input type="hidden" id="c_replay_{{$info.c_id}}" value="{{$info.c_replay}}">
                                 </td>
                             </tr>
                             {{/foreach}}
@@ -162,6 +178,49 @@
         })
 
     }
+
+    function hideTr(id) {
+        if (id) {
+            $("#replay_" + id).remove();
+        }
+    }
+
+    function showTr(obj, id) {
+        if (id) {
+            hideTr(id);
+            var mark=$('#c_mark_' + id).val();
+            var replay=$('#c_replay_' + id).val();
+            var html='<tr id="replay_'+id+'"><td colspan="5">回复：<textarea class="form-control" id="replay_input_'+id+'" placeholder="回复内容">'+replay+'</textarea></td><td colspan="4">备注：<textarea class="form-control" id="mark_input_'+id+'" placeholder="备注内容">'+mark+'</textarea></td><td><input type="button" name="submit" onclick="javascript:extData('+id+');" value="提交">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" name="reset" onclick="javascript:hideTr('+id+');" value="关闭"></td></tr>';
+            $(obj).parent().parent().after(html);
+        }
+    }
+
+    function extData(id) {
+        if (id) {
+            var mark=$('#mark_input_'+id).val();
+            var replay=$('#replay_input_'+id).val();
+            if ($.trim(mark) != '' || $.trim(replay) != '') {
+                $.ajax({
+                    url: '/Complaints/extData',
+                    type: 'POST',
+                    data: {'c_replay':replay, 'c_mark':mark, 'c_id':id},
+                    success : function(result) {
+                        if(result==1){
+                            $('#c_mark_'+id).val(mark);
+                            $('#c_replay_'+id).val(replay);
+                            alert('操作成功');
+                        }else{
+                            alert('操作失败');
+                        }
+                    },
+                    error:function() {
+                        alert('操作失败');
+                    }
+                })
+            }
+        }
+    }
+
     </script>
 
 
