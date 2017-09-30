@@ -81,7 +81,11 @@
                         <td>{{$value.u_worked_num}}</td>
                         <td>{{$value.u_dissensions}}</td>
                         <td>{{$value.u_in_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
-                        <td><a href="/Users/info?u_id={{$value.u_id}}">详情</a></td>
+                        <td>
+                            <a href="/Users/info?u_id={{$value.u_id}}">详情</a> &nbsp;&nbsp;/&nbsp;&nbsp;
+                            <a onclick="javascript:showTr(this, {{$value.u_id}});">发短信</a>
+                            <input type="hidden" id="u_mobile_{{$value.u_id}}" value="{{$value.u_mobile}}">
+                        </td>
                     </tr>
                     {{/foreach}}
                     {{/if}}
@@ -111,7 +115,45 @@
 
 <!-- Peity -->
 <script src="{{$manageurl}}js/demo/bootstrap-table-demo.js"></script>
+<script>
+    function hideTr(id) {
+        if (id) {
+            $("#content_" + id).remove();
+        }
+    }
 
+    function showTr(obj, id) {
+        if (id) {
+            hideTr(id);
+            var html='<tr id="content_'+id+'"><td colspan="5"><textarea class="form-control" id="content_input_'+id+'" placeholder="短信内容"></textarea></td><td><input type="button" name="submit" onclick="javascript:sendMessage('+id+');" value="发送">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" name="reset" onclick="javascript:hideTr('+id+');" value="关闭"></td></tr>';
+            $(obj).parent().parent().after(html);
+        }
+    }
+
+    function sendMessage(uid) {
+        if (uid) {
+            var mobile=$('#u_mobile_'+uid).val();
+            var content=$('#content_input_'+uid).val();
+            if ($.trim(mobile) != '' || $.trim(content) != '') {
+                $.ajax({
+                    url: '/Users/sendMessage',
+                    type: 'POST',
+                    data: {'u_mobile':mobile, 'content':content, 'u_id':uid},
+                    success : function(result) {
+                        if(result==1){
+                            alert('发送成功');
+                        }else{
+                            alert('发送失败');
+                        }
+                    },
+                    error:function() {
+                        alert('发送失败');
+                    }
+                })
+            }
+        }
+    }
+</script>
 
 
 

@@ -46,6 +46,7 @@
                                 <th data-field="id" data-sortable="true">ID</th>
                                 <th data-field="name" data-sortable="true">类型名称</th>
                                 <th data-field="status" data-sortable="true">是否启用</th>
+                                <th data-field="type" data-sortable="true">类型</th>
                                 <th data-field="action" data-sortable="">操作</th>
                             </tr>
                         </thead>
@@ -57,6 +58,11 @@
                                 <td>{{$info.ct_id}}</td>
                                 <td>{{$info.ct_name}}</td>
                                 <td>{{if $info.ct_status eq 1}}启用{{else}}禁用{{/if}}</td>
+                                <td>
+                                    {{if $info.ct_type eq 0}}对平台意见/建议{{/if}}
+                                    {{if $info.ct_type eq 1}}对雇主的投诉{{/if}}
+                                    {{if $info.ct_type eq 2}}对工人的投诉{{/if}}
+                                </td>
                                 <td><a href="/Complaints/categoryEdit?ct_id={{$info.ct_id}}">修改</a></td>
                             </tr>
                             {{/foreach}}
