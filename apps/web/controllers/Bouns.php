@@ -122,7 +122,47 @@ class Bouns extends \CLASSES\WebBase
             $result = 0;
             if (!empty($info) && isset($_REQUEST['uid']) && intval($_REQUEST['uid']) > 0)
             {
-                $result = $this->bouns_data_dao->updateData(array('bd_author' => intval($_REQUEST['uid']), 'bd_use_time' => time()), array('bd_id' => $info['bd_id']));
+                $info['bouns'] = $this->bouns_dao->infoData($info['b_id']);
+                //print_r($info);exit;
+                if (!empty($info['bouns']))
+                {
+                    if ($info['bouns']['b_start_time'] != 0 && $info['bouns']['b_start_time'] > time())
+                    {
+                        $this->exportData('此次领取未开始');exit;
+                    }
+
+                    if ($info['bouns']['b_end_time'] != 0 && $info['bouns']['b_end_time'] < time())
+                    {
+                        $this->exportData('此次领取已结束');exit;
+                    }
+                    $info = $info + $info['bouns'];
+                    unset($info['bouns']);
+                }
+                else
+                {
+                    $this->exportData('数据异常');exit;
+                }
+
+                $info['type'] = $this->bouns_type_dao->infoData($info['bt_id']);
+                if (!empty($info['type']))
+                {
+                    $info = $info + $info['type'];
+                    unset($info['type']);
+                }
+
+                $update_data = array();
+                if ($info['bt_withdraw'] == 0) //抵扣券
+                {
+                    $result = $this->bouns_data_dao->updateData(array('bd_author' => intval($_REQUEST['uid'])), array('bd_id' => $info['bd_id']));
+                }
+                else //红包
+                {
+                    $result = $this->bouns_data_dao->updateData(array('bd_author' => intval($_REQUEST['uid']), 'bd_use_time' => time()), array('bd_id' => $info['bd_id']));
+                    if ($result)
+                    {
+                        
+                    }
+                }
             }
 
             if ($result)
