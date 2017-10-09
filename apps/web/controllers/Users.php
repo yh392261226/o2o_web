@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-09 10:27:46
+ * @Last Modified time: 2017-10-09 16:32:37
  */
 namespace App\Controller;
 
@@ -208,12 +208,15 @@ class Users extends \CLASSES\WebBase
         //     $skills_id = explode(',',$res['u_skills']);
         // }
         // $res['u_skills'] = $skills_id;
+
+        $res['u_info'] = isset($ext_info['uei_info']) ? $ext_info['uei_info'] : '';
+        unset($ext_info['uei_info']);
         $res['area'] = $ext_info;
-        $res['u_info'] = $ext_info['uei_info'];
         $u_img_url = $this ->web_config['u_img_url'];
         $res['u_img'] = $this-> getHeadById($res['u_id']);
         $funds_arr = array();
         $funds_arr['data'] = $res;
+        var_dump($res);die;
         $this->exportData( $funds_arr,1);
     }
 
