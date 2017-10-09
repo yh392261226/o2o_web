@@ -103,5 +103,49 @@ class WebBase extends Swoole\Controller
         }
     }
 
+    /**
+     * 修改用户资金表数据
+     * $type  类型
+     * overage | ticket | envelope
+     *      钱 |  代金券 | 红包
+     */
+    public function changeUserFunds($uid, $amount, $type = 'envelope')
+    {
+        if (0 < intval($uid) && '' != trim($type))
+        {
+            switch ($type)
+            {
+                case 'overage':
+                    $sets = ' uef_overage = uef_overage + ' . $amount;
+                    break;
+                case 'ticket':
+                    $sets = ' uef_ticket = uef_ticket + ' . $amount;
+                break;
+                case 'envelope':
+                    $sets = ' uef_envelope = uef_envelope + ' . $amount;
+                break;
+            }
+            $sql = 'update users_ext_funds set ' . $sets . ' where u_id = ' . $uid;
+            //echo $sql;exit;
+            $model = new \WDAO\Users_ext_funds(array('table' => 'users_ext_funds'));
+            $result = $model->queryData($sql);
+            if (!$result)
+            {
+                return false;
+            }
+            $funds_model = new \MDAOBASE\DaoBase(array('table' => 'users_funds_log'));
+            $log_data = array(
+                'u_id' => $uid,
+                'pay_id' => 0,
+                'ufl_amount' => $amount,
+                'ulf_reason' => $type,
+                'ufl_in_time' => time(),
+                'ufl_status' => 2,
+            );
+            $funds_model->addData($log_data);
+            return true;
+        }
+    }
+
 
 }

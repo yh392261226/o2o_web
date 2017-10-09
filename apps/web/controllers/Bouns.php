@@ -160,7 +160,8 @@ class Bouns extends \CLASSES\WebBase
                     $result = $this->bouns_data_dao->updateData(array('bd_author' => intval($_REQUEST['uid']), 'bd_use_time' => time()), array('bd_id' => $info['bd_id']));
                     if ($result)
                     {
-                        
+                        //向用户资金表中增加金额
+                        $this->changeUserFunds(intval($_REQUEST['uid']), $info['b_amount']);
                     }
                 }
             }

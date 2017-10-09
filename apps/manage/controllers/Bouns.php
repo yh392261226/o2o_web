@@ -360,14 +360,17 @@ class Bouns extends \CLASSES\ManageBase
             $types = $this->bouns_type_dao->listData(array('pager' => 0));
             if (!empty($types['data']))
             {
-                foreach ($types['data'] as $key => $value)
+                $types = $this->bouns_type_dao->listData(array('pager' => 0));
+                if (!empty($types['data']))
                 {
+                    foreach ($types['data'] as $key => $value)
+                    {
+                        $types['data'][$value['bt_id']] = $value;
+                    }
+
                     foreach ($list['data'] as $k => $val)
                     {
-                        if ($val['bt_id'] == $value['bt_id'])
-                        {
-                            $list['data'][$key]['bt_name'] = $value['bt_name'];
-                        }
+                        $list['data'][$k]['bt_name'] = $types['data'][$val['bt_id']]['bt_name'];
                     }
                 }
                 unset($key, $value, $k, $val);
@@ -452,14 +455,13 @@ class Bouns extends \CLASSES\ManageBase
             {
                 foreach ($types['data'] as $key => $value)
                 {
-                    foreach ($list['data'] as $key => $val)
-                    {
-                        if ($val['bt_id'] == $value['bt_id'])
-                        {
-                            $list['data'][$key]['bt_name'] = $value['bt_name'];
-                        }
-                    }
+                    $types['data'][$value['bt_id']] = $value;
                 }
+                foreach ($list['data'] as $k => $val)
+                {
+                    $list['data'][$k]['bt_name'] = $types['data'][$val['bt_id']]['bt_name'];
+                }
+                unset($key, $value, $k, $val);
             }
         }
         $this->tpl->assign('list', $list);
