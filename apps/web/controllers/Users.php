@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-30 15:45:08
+ * @Last Modified time: 2017-10-09 10:27:46
  */
 namespace App\Controller;
 
@@ -650,12 +650,13 @@ class Users extends \CLASSES\WebBase
         }
     }
 
-    /*用户投诉信息*/
+    /*用户投诉信息问题提示信息*/
     public function complaintsType()
     {
         $ct_type = isset($_GET['ct_type']) && (!empty(intval($_GET['ct_type'])) || $_GET['ct_type'] === '0') ?  intval($_GET['ct_type']) : -1;
         $condition = array();
         $condition['ct_status'] = 1;
+        $condition['fields'] = 'ct_id,ct_name';
         if($ct_type !== -1){
             $condition['ct_type'] = $ct_type;
         }
@@ -707,7 +708,11 @@ class Users extends \CLASSES\WebBase
                     $ext_data['c_img'] = $dao_complaints ->uploadComplaintImg($_POST['c_img'],'../uploads/images/'.date('Y/m/d'));
                 }
                 $dao_complaints_ext = new \WDAO\Users(array('table'=>'complaints_ext'));
-                $dao_complaints_ext -> addData($ext_data);
+                $res_ext_add = $dao_complaints_ext -> addData($ext_data);
+                if($res_ext_add){
+                    $this->exportData( array('msg'=>'投诉信息写入成功','c_id'=>$c_id),1);
+                }
+
             }
         }else{
             if(isset($_POST['c_id']) && !empty(intval($_POST['c_id'])) && !empty($_POST['c_img'])){
