@@ -59,42 +59,79 @@ class Bouns extends \CLASSES\WebBase
     private function info()
     {
         $info = array();
-            if (isset($_REQUEST['bd_id']) || isset($_REQUEST['key']))
+        if (isset($_REQUEST['bd_id']) || isset($_REQUEST['key']))
+        {
+            if (isset($_REQUEST['bd_id']))
             {
-                if (isset($_REQUEST['bd_id']))
-                {
-                    $info = $this->bouns_data_dao->infoData(intval($_REQUEST['bd_id']));
-                }
-                elseif (isset($_REQUEST['key']))
-                {
-                    $info = $this->bouns_data_dao->infoData(array('key' => trim($_REQUEST['key']), 'val' =>  $_REQUEST['val']));
-                }
+                $info = $this->bouns_data_dao->infoData(intval($_REQUEST['bd_id']));
+            }
+            elseif (isset($_REQUEST['key']))
+            {
+                $info = $this->bouns_data_dao->infoData(array('key' => trim($_REQUEST['key']), 'val' =>  $_REQUEST['val']));
+            }
+        }
+
+        if (!empty($info))
+        {
+            $param = array();
+            $param['bt'] = $info['bt_id'];
+            $param['b'] = $info['b_id'];
+            $info['type'] = $this->bouns_type_dao->infoData($param['bt']);
+            if (!empty($info['type']))
+            {
+                $info = $info + $info['type'];
+                unset($info['type']);
+            }
+            $info['bouns'] = $this->bouns_dao->infoData($param['b']);
+            if (!empty($info['bouns']))
+            {
+                $info = $info + $info['bouns'];
+                unset($info['bouns']);
             }
 
-            if (!empty($info))
-            {
-                $param = array();
-                $param['bt'] = $info['bt_id'];
-                $param['b'] = $info['b_id'];
-                $info['type'] = $this->bouns_type_dao->infoData($param['bt']);
-                if (!empty($info['type']))
-                {
-                    $info = $info + $info['type'];
-                    unset($info['type']);
-                }
-                $info['bouns'] = $this->bouns_dao->infoData($param['b']);
-                if (!empty($info['bouns']))
-                {
-                    $info = $info + $info['bouns'];
-                    unset($info['bouns']);
-                }
+            $this->exportData($info);
+        }
+        else
+        {
+            $this->exportData();
+        }
+    }
 
-                $this->exportData($info);
-            }
-            else
+    private function using()
+    {
+        $info = array();
+        if (isset($_REQUEST['bd_id']) || isset($_REQUEST['serial']))
+        {
+            if (isset($_REQUEST['bd_id']) && intval($_REQUEST['bd_id']) > 0)
             {
-                $this->exportData();
+                $info = $this->bouns_data_dao->infoData(intval($_REQUEST['bd_id']));
             }
+            elseif (isset($_REQUEST['serial']) && trim($_REQUEST['serial']) != '')
+            {
+                $info = $this->bouns_data_dao->infoData(array('key' => 'bd_serial', 'val' =>  trim($_REQUEST['serial'])));
+            }
+        }
+
+        if (!empty($info))
+        {
+            if ($info['bd_author'] != 0)
+            {
+                $info = array();
+            }
+
+            $result = 0;
+            if (!empty($info) && isset($_REQUEST['uid']) && intval($_REQUEST['uid']) > 0)
+            {
+                $result = $this->bouns_data_dao->updateData(array('bd_author' => intval($_REQUEST['uid']), 'bd_use_time' => time()), array('bd_id' => $info['bd_id']));
+            }
+
+            if ($result)
+            {
+                $this->exportData('success');
+            }
+        }
+        $this->exportData('failure');
+
     }
     //
     ////列表及搜索

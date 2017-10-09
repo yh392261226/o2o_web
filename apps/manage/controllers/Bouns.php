@@ -362,7 +362,7 @@ class Bouns extends \CLASSES\ManageBase
             {
                 foreach ($types['data'] as $key => $value)
                 {
-                    foreach ($list['data'] as $key => $val)
+                    foreach ($list['data'] as $k => $val)
                     {
                         if ($val['bt_id'] == $value['bt_id'])
                         {
@@ -370,7 +370,14 @@ class Bouns extends \CLASSES\ManageBase
                         }
                     }
                 }
+                unset($key, $value, $k, $val);
+
+                foreach ($list['data']  as $key => $val)
+                {
+                    $list['data'][$key]['used'] = $this->bouns_data_dao->countData(array('b_id' => $val['b_id'], 'where' => 'bd_author != 0'));
+                }
             }
+            //print_r($list['data']);
         }
         $this->tpl->assign('list', $list);
         $this->myPager($list['pager']);
