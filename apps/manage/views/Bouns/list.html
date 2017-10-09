@@ -42,11 +42,14 @@
                                 <th data-field="name" data-sortable="true">类型</th>
                                 <th data-field="total" data-sortable="true">实际总数</th>
                                 <th data-field="offset" data-sortable="true">偏移量总数</th>
+                                <th data-field="used" data-sortable="true">已用数</th>
                                 <th data-field="price" data-sortable="true">价值</th>
                                 <th data-field="status" data-sortable="true">状态</th>
                                 <th data-field="type" data-sortable="true">发放方式</th>
                                 <th data-field="start_time" data-sortable="true">开始时间</th>
                                 <th data-field="end_time" data-sortable="true">结束时间</th>
+                                <th data-field="in_time" data-sortable="true">首次生成时间</th>
+                                <th data-field="last_time" data-sortable="true">上次生成时间</th>
                                 <th data-field="action" data-sortable="">操作</th>
                             </tr>
                         </thead>
@@ -59,6 +62,7 @@
                                 <td>{{$value.bt_name}}</td>
                                 <td>{{$value.b_total}}</td>
                                 <td>{{$value.b_offset}}</td>
+                                <td>{{$value.used}}</td>
                                 <td>{{$value.b_amount}}</td>
                                 <td>
                                     {{if $value.b_status == -1}}已删除{{/if}}
@@ -73,6 +77,8 @@
                                 </td>
                                 <td>{{if $value.b_start_time != 0}}{{$value.b_start_time|date_format:"%y-%m-%d %H:%M:%S"}}{{else}}无限制{{/if}}</td>
                                 <td>{{if $value.b_end_time != 0}}{{$value.b_end_time|date_format:"%y-%m-%d %H:%M:%S"}}{{else}}无限制{{/if}}</td>
+                                <td>{{$value.b_in_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
+                                <td>{{if $value.b_last_edit_time != 0}}{{$value.b_last_edit_time|date_format:"%y-%m-%d %H:%M:%S"}}{{/if}}</td>
                                 <td>
                                     <a href="/Bouns/edit?b_id={{$value.b_id}}">修改</a>
                                     {{if $value.b_type == 0 || $value.b_type == 1}}
