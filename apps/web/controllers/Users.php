@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-10 11:02:36
+ * @Last Modified time: 2017-10-10 15:23:42
  */
 namespace App\Controller;
 
@@ -216,7 +216,6 @@ class Users extends \CLASSES\WebBase
         $res['u_img'] = $this-> getHeadById($res['u_id']);
         $funds_arr = array();
         $funds_arr['data'] = $res;
-        var_dump($res);die;
         $this->exportData( $funds_arr,1);
     }
 
