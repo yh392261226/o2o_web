@@ -81,7 +81,7 @@ class Log extends \CLASSES\ManageBase
 
         $data['page'] = (isset($_REQUEST['page']) && !empty($_REQUEST['page'])) ? intval($_REQUEST['page']) : 1;
         $data['leftjoin'] = array('managers',"managers.m_id = platform_funds_log.pfl_last_editor");
-        $data['fields'] = 'pfl_id,t_id,o_id,pfl_amount,pfl_in_time,pfl_reason,pfl_status,pfl_last_edit_time,managers.m_name as pfl_last_editor';
+        $data['fields'] = 'pfl_id,pfl_type,pfl_type_id,pfl_amount,pfl_in_time,pfl_reason,pfl_status,pfl_last_edit_time,managers.m_name as pfl_last_editor';
 
 
         /*获取技能数组*/
