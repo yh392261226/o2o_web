@@ -368,6 +368,140 @@ class Log extends \CLASSES\ManageBase
         $this->tpl->display("Log/userCurPosition.html");
     }
 
+    public function withdrawAudit()
+    {
+        $uwl_id = isset($_REQUEST['uwl_id']) && intval($_REQUEST['uwl_id']) > 0 ? intval($_REQUEST['uwl_id']) : 0;
+        $is_ajax = isset($_REQUEST['is_ajax']) ? intval($_REQUEST['is_ajax']) : 0;
+        $uwl_status = isset($_REQUEST['uwl_status']) && in_array($_REQUEST['uwl_status'], array('-1', '1')) ? trim($_REQUEST['uwl_status']) : '';
+        //print_r($_REQUEST);exit;
+        if (!$uwl_id || '' == $uwl_status)
+        {
+            if (!$is_ajax)
+            {
+                return 0;
+            }
+            echo 0;exit;
+        }
+        $dao_log = new \MDAO\Log(array('table'=>'user_withdraw_log'));
+        $result = $dao_log->updateData(array('uwl_status' => $uwl_status), array('uwl_id' => $uwl_id));
+        if (!$result)
+        {
+            if (!$is_ajax)
+            {
+                return 0;
+            }
+            echo 0;exit;
+        }
+        $this->sendWithdrawMessage();
+        if (!$is_ajax)
+        {
+            return 1;
+        }
+        echo 1;exit;
+    }
+
+    public function withdrawRecord()
+    {
+        $uwl_id = isset($_REQUEST['uwl_id']) && intval($_REQUEST['uwl_id']) > 0 ? intval($_REQUEST['uwl_id']) : 0;
+        $is_ajax = isset($_REQUEST['is_ajax']) ? intval($_REQUEST['is_ajax']) : 0;
+        $uwl_remark = isset($_REQUEST['uwl_remark']) ? trim($_REQUEST['uwl_remark']) : '';
+        $uwl_proof = isset($_REQUEST['uwl_proof']) ? trim($_REQUEST['uwl_proof']) : '';
+        if (!$uwl_id)
+        {
+            if (!$is_ajax)
+            {
+                return 0;
+            }
+            echo 0;exit;
+        }
+        $dao_log_ext = new \MDAO\Log(array('table'=>'user_withdraw_log_ext'));
+        $result = $dao_log_ext->updateData(array('uwl_remark' => $uwl_remark, 'uwl_proof' => $uwl_proof), array('uwl_id' => $uwl_id));
+        if (!$result)
+        {
+            if (!$is_ajax)
+            {
+                return 0;
+            }
+            echo 0;exit;
+        }
+        $dao_log = new \MDAO\Log(array('table'=>'user_withdraw_log'));
+        $dao_log->updateData(array('uwl_status' => 2), array('uwl_id' => $uwl_id));
+        $this->sendWithdrawMessage();
+        if (!$is_ajax)
+        {
+            return 1;
+        }
+        echo 1;exit;
+    }
+
+    public function sendWithdrawMessage()
+    {
+        $uwl_id = isset($_REQUEST['uwl_id']) && intval($_REQUEST['uwl_id']) > 0 ? intval($_REQUEST['uwl_id']) : 0;
+        $is_ajax = isset($_REQUEST['is_ajax']) ? intval($_REQUEST['is_ajax']) : 0;
+        if (!$uwl_id)
+        {
+            if (!$is_ajax)
+            {
+                return 0;
+            }
+            echo 0;exit;
+        }
+        $dao_log = new \MDAO\Log(array('table'=>'user_withdraw_log'));
+        $info = $dao_log->infoData($uwl_id);
+        if (!empty($info) && isset($info['u_id']) && $info['u_id'] > 0)
+        {
+            if (isset($info['uwl_status']))
+            {
+                $message = '尊敬的用户您好，您提交于' . date('Y-m-d H:i:s', $info['uwl_in_time']) . '的提现申请结果：';
+                if ($info['uwl_status'] == -1)
+                {
+                    $message .= '失败';
+                }
+                elseif ($info['uwl_status'] == 1)
+                {
+                    $message .= '审核通过，正在处理';
+                }
+                elseif ($info['uwl_status'] == 2)
+                {
+                    $message .= '已成功';
+                }
+                else
+                {
+                    if (!$is_ajax)
+                    {
+                        return 0;
+                    }
+                    echo 0;exit;
+                }
+                $user_dao = new \MDAO\Users();
+                $user_info = $user_dao->infoData($info['u_id']);
+                $result = 0;
+                if (isset($user_info['u_mobile']) && intval($user_info['u_mobile']) > 0)
+                {
+                    $result = sendSms($user_info['u_mobile'],$message);
+                }
+                if (!$result)
+                {
+                    if (!$is_ajax)
+                    {
+                        return 0;
+                    }
+                    echo 0;exit;
+                }
+                if (!$is_ajax)
+                {
+                    return 1;
+                }
+                echo 1;exit;
+            }
+        }
+        if (!$is_ajax)
+        {
+            return 0;
+        }
+        echo 0;exit;
+    }
+
 
 
 
