@@ -38,6 +38,7 @@
                                     <th>配置名称</th>
                                     <th>配置值</th>
                                     <th>app_id</th>
+                                    <th>备注</th>
                                     <th>配置状态</th>
                                     <th>操作</th>
                                 </tr>
@@ -51,6 +52,7 @@
                                     <td><input type="text" name="key_{{$info.ac_id}}" value="{{$info.ac_name}}"></td>
                                     <td><input type="text" name="val_{{$info.ac_id}}" value="{{$info.ac_value}}"></td>
                                     <td><input type="text" name="app_{{$info.ac_id}}" value="{{$info.app_id}}"></td>
+                                    <td><input type="text" name="desc_{{$info.ac_id}}" value="{{$info.ac_desc}}"></td>
                                     <td>
                                         <select class="input-sm form-control input-s-sm inline" name="status_{{$info.ac_id}}" id="" onchange="">
                                             <option value="0" {{if $info.ac_status eq 0}} selected {{/if}} >未开启</option>
@@ -67,6 +69,7 @@
                                     <td><input type="text" name="ac_name" value=""></td>
                                     <td><input type="text" name="ac_value" value=""></td>
                                     <td><input type="text" name="app_id" value=""></td>
+                                    <td><input type="text" name="ac_desc" value=""></td>
                                     <td>
                                         <select class="input-sm form-control input-s-sm inline" name="ac_status" id="" onchange="">
                                             <option value="0" selected >未开启</option>

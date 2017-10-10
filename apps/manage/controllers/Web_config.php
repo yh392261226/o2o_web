@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-12 15:53:36
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-20 17:00:44
+ * @Last Modified time: 2017-10-10 14:29:35
  */
 
 namespace App\Controller;
@@ -18,6 +18,8 @@ class Web_config extends \CLASSES\ManageBase
     {
         $dao_web_config = new \MDAO\Web_config(array('table'=>'web_config'));
         $condition['page'] = (isset($_REQUEST['page']) && !empty($_REQUEST['page'])) ? intval($_REQUEST['page']) : 1;
+        $condition['fields'] = 'web_config.wc_id as wc_id,wc_name,wc_value,wc_status,web_id,web_config_ext.wc_desc as wc_desc';
+        $condition['leftjoin'] = array('web_config_ext','web_config.wc_id=web_config_ext.wc_id');
 
         /*获取配置数组*/
         $arr_config = $dao_web_config ->listData($condition);
@@ -63,6 +65,13 @@ class Web_config extends \CLASSES\ManageBase
             $data['wc_value'] = isset($_POST['val_'.$value])?trim($_POST['val_'.$value]):'';
             $data['web_id'] = isset($_POST['web_'.$value])?intval($_POST['web_'.$value]):0;
 
+            $data_ext['wc_desc'] = isset($_POST['desc_'.$value])?trim($_POST['desc_'.$value]):'';
+            if(!empty($data_ext['wc_desc'])){
+                $dao_web_config_ext = new \MDAO\Web_config(array('table'=>'web_config_ext'));
+                $res = $dao_web_config_ext -> updateData($data_ext,array('wc_id' => $value));
+            }
+
+
 
             $res = $dao_web_config -> updateData($data,array('wc_id' => $value));
         }
@@ -84,7 +93,17 @@ class Web_config extends \CLASSES\ManageBase
             $data['web_id'] = isset($_POST['web_id'])?intval($_POST['web_id']):0;
             $data['wc_status'] = isset($_POST['wc_status'])?intval($_POST['wc_status']):0;
 
-            $res = $dao_Web_config ->addData($data);
+
+            $wc_id = $dao_Web_config ->addData($data);
+            /*插入备注内容*/
+            if($wc_id){
+                $data_ext['wc_desc'] = isset($_POST['wc_desc'])?trim($_POST['wc_desc']):'';
+                $data_ext['wc_id'] = $wc_id;
+                $dao_web_config_ext = new \MDAO\Web_config(array('table'=>'web_config_ext'));
+                $dao_web_config_ext ->addData($data_ext);
+            }
+
+
         }
         $res = $this->createFile();
         if($res){
@@ -104,10 +123,13 @@ class Web_config extends \CLASSES\ManageBase
             msg("参数错误,删除失败!", $status = 0, $jump);
         }else{
                 $dao_Web_config = new \MDAO\Web_config(array('table'=>'web_config'));
+                $dao_web_config_ext = new \MDAO\Web_config(array('table'=>'web_config_ext'));
+
 
                     $res = $dao_Web_config->delData($wc_id);
                     if($res)
                     {
+                        $dao_web_config_ext ->delData($wc_id);
                         $this->createFile();
                         msg("分类删除成功!", $status = 1, $jump);
                     }else{
@@ -117,7 +139,12 @@ class Web_config extends \CLASSES\ManageBase
 
     }
 
-    /*生成配置文件*/
+    /**
+     * 生成配置文件
+     * 1 前台配置
+     * 0 后台配置文件
+     */
+
     private function createFile()
     {
         $dao_Web_config = new \MDAO\Web_config(array('table'=>'web_config'));
