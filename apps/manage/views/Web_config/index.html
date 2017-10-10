@@ -38,6 +38,7 @@
                                     <th>配置名称</th>
                                     <th>配置值</th>
                                     <th>web_id</th>
+                                    <th>备注</th>
                                     <th>配置状态</th>
                                     <th>操作</th>
                                 </tr>
@@ -51,6 +52,7 @@
                                     <td><input type="text" name="key_{{$info.wc_id}}" value="{{$info.wc_name}}"></td>
                                     <td><input type="text" name="val_{{$info.wc_id}}" value="{{$info.wc_value}}"></td>
                                     <td><input type="text" name="web_{{$info.wc_id}}" value="{{$info.web_id}}"></td>
+                                    <td><input type="text" name="desc_{{$info.wc_id}}" value="{{$info.wc_desc}}"></td>
                                     <td>
                                         <select class="input-sm form-control input-s-sm inline" name="status_{{$info.wc_id}}" id="" onchange="">
                                             <option value="0" {{if $info.wc_status eq 0}} selected {{/if}} >未开启</option>
@@ -67,6 +69,7 @@
                                     <td><input type="text" name="wc_name" value=""></td>
                                     <td><input type="text" name="wc_value" value=""></td>
                                     <td><input type="text" name="web_id" value=""></td>
+                                    <td><input type="text" name="wc_desc" value=""></td>
                                     <td>
                                         <select class="input-sm form-control input-s-sm inline" name="wc_status" id="" onchange="">
                                             <option value="0" selected >未开启</option>
