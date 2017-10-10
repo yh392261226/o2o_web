@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-10 10:43:20
+ * @Last Modified time: 2017-10-10 11:02:36
  */
 namespace App\Controller;
 
@@ -356,7 +356,7 @@ class Users extends \CLASSES\WebBase
         /*获取用户位置坐标*/
         $u_id_str = implode(',',$u_id_arr);
         $dao_users_position= new \WDAO\Users(array('table'=>'users_cur_position'));
-        $users_position = $dao_users_position ->listData(array('pager' => false,'fields'=>'u_id,ucp_posit_y','u_id'=>array('type'=>'in','value'=>$u_id_str)));
+        $users_position = $dao_users_position ->listData(array('pager' => false,'fields'=>'ucp_posit_x,u_id,ucp_posit_y','u_id'=>array('type'=>'in','value'=>$u_id_str)));
             /*获取用户位置坐标*/
             // $u_id_str = implode(',',$u_id_arr);
             // $users_position = $m_users ->db->query("SELECT u_id,ucp_posit_x,ucp_posit_y,ucp_last_edit_time  FROM users_cur_position WHERE u_id IN ($u_id_str) AND ucp_last_edit_time IN (SELECT max(ucp_last_edit_time) FROM users_cur_position GROUP BY u_id) ORDER BY ucp_last_edit_time DESC ") ->fetchall();
@@ -369,7 +369,7 @@ class Users extends \CLASSES\WebBase
 
                         if(!empty($_GET['users_posit_x']) && !empty($users_posit_x = floatval($_GET['users_posit_x'])) && !empty($_GET['users_posit_y']) && !empty($users_posit_y = floatval($_GET['users_posit_y']))){
                             /*获取当前两点之间距离*/
-                            if($value['ucp_posit_x'] && $value['ucp_posit_y']){
+                            if(!empty($value['ucp_posit_x']) && !empty($value['ucp_posit_y'])){
                                 $val['distance'] = $this -> GetDistance($value['ucp_posit_x'],$value['ucp_posit_y'],$users_posit_x,$users_posit_y);
                             }
                             /*获取用户距离end*/
