@@ -109,7 +109,7 @@ class WebBase extends Swoole\Controller
      * overage | ticket | envelope
      *      钱 |  代金券 | 红包
      */
-    public function changeUserFunds($uid, $amount, $type = 'envelope')
+    public function usersFunds($uid, $amount, $type = 'envelope')
     {
         if (0 < intval($uid) && '' != trim($type))
         {
@@ -133,18 +133,66 @@ class WebBase extends Swoole\Controller
             {
                 return false;
             }
-            $funds_model = new \MDAOBASE\DaoBase(array('table' => 'users_funds_log'));
-            $log_data = array(
-                'u_id' => $uid,
-                'pay_id' => 0,
-                'ufl_amount' => $amount,
-                'ulf_reason' => $type,
-                'ufl_in_time' => time(),
-                'ufl_status' => 2,
-            );
-            $funds_model->addData($log_data);
+            $this->usersFundsLog($uid, $amount, $type);
             return true;
         }
+    }
+
+    /**
+     * 用户资金变动日志记录
+     * @param $uid 用户id
+     * @param $amount 金额
+     * @param $type 类型
+     * @param int $status 状态值
+     * @param int $payid 支付方式id
+     * @return bool
+     */
+    public function usersFundsLog($uid, $amount, $type, $status = 2, $payid = 0)
+    {
+        if (intval($uid) <= 0 || !is_float($amount) || trim($type) == '' || !is_int($status) || intval($payid) < 0)
+        {
+            return false;
+        }
+
+        $funds_model = new \MDAOBASE\DaoBase(array('table' => 'users_funds_log'));
+        $log_data = array(
+            'u_id' => $uid,
+            'pay_id' => $payid,
+            'ufl_amount' => $amount,
+            'ulf_reason' => $type,
+            'ufl_in_time' => time(),
+            'ufl_status' => $status,
+        );
+        return $funds_model->addData($log_data);
+    }
+
+    /**
+     * 用户充值日志记录
+     * @param $uid
+     * @param $amount
+     * @param $name
+     * @param $card
+     * @param int $status
+     * @param int $payid
+     * @return bool
+     */
+    public function usersWithdrawLog($uid, $amount, $name, $card, $status = 0, $payid = 0)
+    {
+        if (intval($uid) <= 0 || !is_float($amount) || floatval($amount) <= 0 || trim($name) == '' || '' != trim($card) || !is_int($status) || intval($payid) < 0)
+        {
+            return false;
+        }
+        $withdraw_model = new \MDAOBASE\DaoBase(array('table' => 'user_withdraw_log'));
+        $log_data = array(
+            'u_id' => $uid,
+            'p_id' => $payid,
+            'uwl_amount' => $amount,
+            'uwl_truename' => $name,
+            'uwl_card' => $card,
+            'uwl_in_time' => time(),
+            'uwl_status' => $status,
+        );
+        return $withdraw_model->addData($log_data);
     }
 
 
