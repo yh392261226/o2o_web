@@ -109,7 +109,7 @@ class WebBase extends Swoole\Controller
      * overage | ticket | envelope
      *      钱 |  代金券 | 红包
      */
-    public function usersFunds($uid, $amount, $type = 'envelope')
+    public function userFunds($uid, $amount, $type = 'envelope')
     {
         if (0 < intval($uid) && '' != trim($type))
         {

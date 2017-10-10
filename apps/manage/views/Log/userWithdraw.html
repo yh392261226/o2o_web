@@ -102,6 +102,7 @@
                                 <th data-field="uwl_openarea" data-sortable="true">开户行</th>
                                 <th data-field="uwl_remark" data-sortable="false">备注</th>
                                 <th data-field="proof" data-sortable="true">回执单号</th>
+                                <th data-field="operate" data-sortable="false">操作</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -120,9 +121,19 @@
                                 <td>{{$info.uwl_truename}}</td>
                                 <td>{{$info.uwl_card}}</td>
                                 <td>{{$info.uwl_openarea}}</td>
-                                <td>{{$info.uwl_remark}}</td>
-                                <td id="proof_td_{{$info.uwl_id}}">{{if $info.uwl_proof != ''}}{{$info.uwl_proof}}{{else}}<input placeholder="回执编号" id="proof_input_{{$info.uwl_id}}" name="uwl_proof" value="" size="8" type="text">
-                                    <input class="proof_btn btn" value="提交" uwl_id="{{$info.uwl_id}}" type="button">{{/if}}</td>
+                                <td id="remark_td_{{$info.uwl_id}}">
+                                    {{$info.uwl_remark}}
+                                </td>
+                                <td id="proof_td_{{$info.uwl_id}}">
+                                    {{$info.uwl_proof}}
+                                </td>
+                                <td>
+                                    <a onclick="javascript:showTr(this, {{$info.uwl_id}});" status="{{$info.uwl_status}}">审核 /
+                                        回执填写</a>
+                                    {{if $info.uwl_status > 0}}
+                                    /  <a onclick="javascript:sendMessage(this, {{$info.uwl_id}});">信息通知</a>
+                                    {{/if}}
+                                </td>
                             </tr>
                             {{/foreach}}
                             {{/if}}
@@ -200,32 +211,95 @@
 
             $('form').submit();
     }
-
-    $(function(){
-        $('.proof_btn').click(function(i){
-            var uwl_id = $(this).attr('uwl_id');
-            var proof_input = $.trim($('#proof_input_' + uwl_id).val());
-            if (proof_input > 0) {
-                //ajax
-                $.ajax({
-                    url: "/Log/userWithdrawProof?is_ajax=1",
-                    type: 'get',
-                    data:{'uwl_id':uwl_id, 'uwl_proof':proof_input},
-                    dataType: 'json',
-                    success: function(result) {
-                        if (result.status == 1) {
-                            $('#proof_td_' + uwl_id).text(proof_input);
-                        } else {
-                            swal(result.msg);
-                        }
-                    }
-                });
-
-            }
-        });
-    });
     </script>
+    <script>
+        function hideTr(id) {
+            if (id) {
+                $("#content_" + id).remove();
+            }
+        }
 
+        function showTr(obj, id) {
+            if (id) {
+                hideTr(id);
+                var status=$(obj).attr('status');
+//                alert(status);
+                if (status < 1) {
+                    var html='<tr id="content_'+id+'"><td colspan="6"><input type="button" name="submit" onclick="javascript:audit('+id+', -1);" value="不通过">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" name="submit" onclick="javascript:audit('+id+', 1);" value="通过">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" name="reset" onclick="javascript:hideTr('+id+');" value="关闭此窗口"></td></tr>';
+                } else {
+                    var html = '<tr id="content_' + id + '"><td colspan="3"><input type="text" class="form-control" id="content_input_' + id + '" placeholder="回执单号"></td><td colspan="3"><textarea class="form-control" id="content_mark_' + id + '" placeholder="备注"></textarea></td><td><input type="button" name="submit" onclick="javascript:record(' + id + ');" value="发送">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" name="reset" onclick="javascript:hideTr(' + id + ');" value="关闭"></td></tr>';
+                }
+                $(obj).parent().parent().after(html);
+            }
+        }
+
+        function sendMessage(uwlid) {
+            if (uwlid) {
+                $.ajax({
+                    url    : '/Log/sendWithdrawMessage',
+                    type   : 'POST',
+                    data   : {'uwl_id': uwlid, 'is_ajax':1},
+                    success: function (result) {
+                        if (result == 1) {
+                            alert('发送成功');
+                        } else {
+                            alert('发送失败');
+                        }
+                    },
+                    error  : function () {
+                        alert('发送失败');
+                    }
+                })
+            }
+        }
+
+        function record(id) {
+            if (id) {
+                var proof = $("#content_input_" + id).val();
+                var remark = $("#content_mark_" + id).val();
+                if ($.trim(proof) != '') {
+                    $.ajax({
+                        url    : '/Log/withdrawRecord',
+                        type   : 'POST',
+                        data   : {'uwl_id': id, 'uwl_proof': proof, 'uwl_remark':remark, 'is_ajax':1},
+                        success: function (result) {
+                            if (result == 1) {
+                                $('#remark_td_'+id).html(remark);
+                                $('#proof_td_'+id).html(proof);
+                                alert('记录成功');
+                            } else {
+                                alert('记录失败');
+                            }
+                        },
+                        error  : function () {
+                            alert('记录失败');
+                        }
+                    })
+                }
+                alter('回执单号不能为空');return false;
+            }
+        }
+
+        function audit(id, status) {
+            if (id) {
+                $.ajax({
+                    url    : '/Log/withdrawAudit',
+                    type   : 'POST',
+                    data   : {'uwl_id': id, 'uwl_status': status, 'is_ajax':1},
+                    success: function (result) {
+                        if (result == 1) {
+                            alert('审核成功');
+                        } else {
+                            alert('审核失败');
+                        }
+                    },
+                    error  : function () {
+                        alert('审核失败');
+                    }
+                })
+            }
+        }
+    </script>
 
 
 

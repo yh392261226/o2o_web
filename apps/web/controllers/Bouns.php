@@ -161,7 +161,7 @@ class Bouns extends \CLASSES\WebBase
                     if ($result)
                     {
                         //向用户资金表中增加金额
-                        $this->usersFunds(intval($_REQUEST['uid']), $info['b_amount']);
+                        $this->userFunds(intval($_REQUEST['uid']), $info['b_amount']);
                     }
                 }
             }
