@@ -116,6 +116,8 @@ class WebBase extends Swoole\Controller
             switch ($type)
             {
                 case 'overage':
+                case 'withdraw':
+                case 'recharge':
                     $sets = ' uef_overage = uef_overage + ' . $amount;
                     break;
                 case 'ticket':
@@ -133,41 +135,12 @@ class WebBase extends Swoole\Controller
             {
                 return false;
             }
-            $this->usersFundsLog($uid, $amount, $type);
             return true;
         }
     }
 
     /**
-     * 用户资金变动日志记录
-     * @param $uid 用户id
-     * @param $amount 金额
-     * @param $type 类型
-     * @param int $status 状态值
-     * @param int $payid 支付方式id
-     * @return bool
-     */
-    public function usersFundsLog($uid, $amount, $type, $status = 2, $payid = 0)
-    {
-        if (intval($uid) <= 0 || !is_float($amount) || trim($type) == '' || !is_int($status) || intval($payid) < 0)
-        {
-            return false;
-        }
-
-        $funds_model = new \MDAOBASE\DaoBase(array('table' => 'users_funds_log'));
-        $log_data = array(
-            'u_id' => $uid,
-            'pay_id' => $payid,
-            'ufl_amount' => $amount,
-            'ulf_reason' => $type,
-            'ufl_in_time' => time(),
-            'ufl_status' => $status,
-        );
-        return $funds_model->addData($log_data);
-    }
-
-    /**
-     * 用户充值日志记录
+     * 充值日志记录
      * @param $uid
      * @param $amount
      * @param $name
@@ -176,9 +149,39 @@ class WebBase extends Swoole\Controller
      * @param int $payid
      * @return bool
      */
-    public function usersWithdrawLog($uid, $amount, $name, $card, $status = 0, $payid = 0)
+    public function usersRechargeLog($uid, $amount, $name = '', $card = '', $status = 0, $payid = 0)
     {
-        if (intval($uid) <= 0 || !is_float($amount) || floatval($amount) <= 0 || trim($name) == '' || '' != trim($card) || !is_int($status) || intval($payid) < 0)
+        if (intval($uid) <= 0 || !is_float($amount) || !is_int($status) || intval($payid) < 0)
+        {
+            return false;
+        }
+
+        $recharge_model = new \MDAOBASE\DaoBase(array('table' => 'user_recharge_log'));
+        $log_data = array(
+            'u_id' => $uid,
+            'p_id' => $payid,
+            'url_amount' => $amount,
+            'url_truename' => $name,
+            'url_card' => $card,
+            'url_in_time' => time(),
+            'url_status' => $status,
+        );
+        return $recharge_model->addData($log_data);
+    }
+
+    /**
+     * 用户提现日志记录
+     * @param $uid
+     * @param $amount
+     * @param $name
+     * @param $card
+     * @param int $status
+     * @param int $payid
+     * @return bool
+     */
+    public function usersWithdrawLog($uid, $amount, $name = '', $card = '', $status = 0, $payid = 0)
+    {
+        if (intval($uid) <= 0 || !is_float($amount) || !is_int($status) || intval($payid) < 0)
         {
             return false;
         }
