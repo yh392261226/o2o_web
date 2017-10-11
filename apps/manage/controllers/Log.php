@@ -412,7 +412,8 @@ class Log extends \CLASSES\ManageBase
                 if ($pf_result)
                 {
                     $user_funds = new \MDAO\Users_ext_funds();
-                    $user_funds->queryData('update users_ext_funds set uef_overage=uef_overage+'.$info['uwl_amount']. ' where u_id='.$info['u_id']);
+                    $sql = 'insert into users_ext_funds (u_id, uef_overage) values (' . $info['u_id'] . ', ' . $info['uwl_amount'] . ') ON DUPLICATE KEY update users_ext_funds set uef_overage=uef_overage+' . $info['uwl_amount'] . ' where u_id=' . $info['u_id'];
+                    $user_funds->queryData($sql);
                 }
             }
         }
@@ -467,6 +468,7 @@ class Log extends \CLASSES\ManageBase
                 'pfl_last_edit_time' => $curtime,
             ));
             //$user_funds = new \MDAO\Users_ext_funds();
+            //$sql = 'insert into users_ext_funds (u_id, uef_overage) values (' . $info['u_id'] . ', ' . $info['uwl_amount'] . ') ON DUPLICATE KEY update users_ext_funds set uef_overage=uef_overage-' . $info['uwl_amount'] . ' where u_id=' . $info['u_id'];
             //$user_funds->queryData('update users_ext_funds set uef_overage = uef_overage-' . $info['uwl_amount'] . ' where u_id = '. $info['u_id']);
         }
         if (!$is_ajax)
