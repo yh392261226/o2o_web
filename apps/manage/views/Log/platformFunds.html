@@ -52,7 +52,7 @@
                                         <option value="" {{if $pfl_status eq -100}} selected {{/if}} >请选择</option>
                                         <option value="0" {{if $pfl_status eq 0}} selected {{/if}} >未锁定</option>
                                         <option value="1" {{if $pfl_status eq 1}} selected {{/if}} >卡单锁定</option>
-                                        <option value="2" {{if $pfl_status eq 2}} selected {{/if}} >订单已送达到工人</option>
+                                        <option value="2" {{if $pfl_status eq 2}} selected {{/if}} >完成</option>
                                     </select>
                                 </div>
                             </div>
@@ -81,8 +81,8 @@
                             <tr>
                                 <th data-field="state" data-checkbox="true"></th>
                                 <th data-field="pfl_id" data-sortable="true">ID</th>
-                                <th data-field="o_id" data-sortable="true">订单id</th>
-                                <th data-field="t_id" data-sortable="true">任务id</th>
+                                <th data-field="type" data-sortable="true">类型</th>
+                                <th data-field="typeid" data-sortable="true">关联id</th>
                                 <th data-field="pfl_amount" data-sortable="true">资金数额</th>
                                 <th data-field="pfl_reason" data-sortable="true">原因</th>
                                 <th data-field="pfl_in_time" data-sortable="true">入库时间</th>
@@ -98,8 +98,16 @@
                             <tr>
                                 <td><input type="checkbox" name="a_id" value="{{$info.a_id}}"></td>
                                 <td>{{$info.pfl_id}}</td>
-                                <td>{{$info.o_id}}</td>
-                                <td>{{$info.t_id}}</td>
+                                <td>
+                                    {{if $info.pfl_type eq 0}}
+                                    订单
+                                    {{elseif $info.pfl_type eq 1}}
+                                    用户提现
+                                    {{elseif $info.pfl_type eq 2}}
+                                    用户充值
+                                    {{/if}}
+                                </td>
+                                <td>{{$info.pfl_type_id}}</td>
                                 <td>{{$info.pfl_amount}}</td>
                                 <td>{{$info.pfl_reason}}</td>
                                 <td>{{$info.pfl_in_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>

@@ -81,7 +81,7 @@ class Log extends \CLASSES\ManageBase
 
         $data['page'] = (isset($_REQUEST['page']) && !empty($_REQUEST['page'])) ? intval($_REQUEST['page']) : 1;
         $data['leftjoin'] = array('managers',"managers.m_id = platform_funds_log.pfl_last_editor");
-        $data['fields'] = 'pfl_id,t_id,o_id,pfl_amount,pfl_in_time,pfl_reason,pfl_status,pfl_last_edit_time,managers.m_name as pfl_last_editor';
+        $data['fields'] = 'pfl_id,pfl_type,pfl_type_id,pfl_amount,pfl_in_time,pfl_reason,pfl_status,pfl_last_edit_time,managers.m_name as pfl_last_editor';
 
 
         /*获取技能数组*/
@@ -373,7 +373,6 @@ class Log extends \CLASSES\ManageBase
         $uwl_id = isset($_REQUEST['uwl_id']) && intval($_REQUEST['uwl_id']) > 0 ? intval($_REQUEST['uwl_id']) : 0;
         $is_ajax = isset($_REQUEST['is_ajax']) ? intval($_REQUEST['is_ajax']) : 0;
         $uwl_status = isset($_REQUEST['uwl_status']) && in_array($_REQUEST['uwl_status'], array('-1', '1')) ? trim($_REQUEST['uwl_status']) : '';
-        //print_r($_REQUEST);exit;
         if (!$uwl_id || '' == $uwl_status)
         {
             if (!$is_ajax)
@@ -392,7 +391,32 @@ class Log extends \CLASSES\ManageBase
             }
             echo 0;exit;
         }
-        $this->sendWithdrawMessage();
+        //$this->sendWithdrawMessage();
+        if ($uwl_status == -1)
+        {
+            $info = $dao_log->infoData($uwl_id);
+            if (!empty($info))
+            {
+                $platform_funds = new \MDAO\Platform_funds_log();
+                $curtime = time();
+                $pf_result = $platform_funds->addData(array(
+                    'pfl_type'    => 1,
+                    'pfl_type_id' => $uwl_id,
+                    'pfl_amount'  => ($info['uwl_amount'] * -1),
+                    'pfl_in_time' => $curtime,
+                    'pfl_reason'  => 'withdraw',
+                    'pfl_status'  => 2,
+                    'pfl_last_editor' => parent::$manager_status,
+                    'pfl_last_edit_time' => $curtime,
+                ));
+                if ($pf_result)
+                {
+                    $user_funds = new \MDAO\Users_ext_funds();
+                    $user_funds->queryData('update users_ext_funds set uef_overage=uef_overage+'.$info['uwl_amount']. ' where u_id='.$info['u_id']);
+                }
+            }
+        }
+
         if (!$is_ajax)
         {
             return 1;
@@ -426,7 +450,25 @@ class Log extends \CLASSES\ManageBase
         }
         $dao_log = new \MDAO\Log(array('table'=>'user_withdraw_log'));
         $dao_log->updateData(array('uwl_status' => 2), array('uwl_id' => $uwl_id));
-        $this->sendWithdrawMessage();
+        //$this->sendWithdrawMessage();
+        $info = $dao_log->infoData($uwl_id);
+        if (!empty($info))
+        {
+            $platform_funds = new \MDAO\Platform_funds_log();
+            $curtime = time();
+            $platform_funds->addData(array(
+                'pfl_type'    => 1,
+                'pfl_type_id' => $uwl_id,
+                'pfl_amount'  => ($info['uwl_amount'] * -1),
+                'pfl_in_time' => $curtime,
+                'pfl_reason'  => 'withdraw',
+                'pfl_status'  => 2,
+                'pfl_last_editor' => parent::$manager_status,
+                'pfl_last_edit_time' => $curtime,
+            ));
+            //$user_funds = new \MDAO\Users_ext_funds();
+            //$user_funds->queryData('update users_ext_funds set uef_overage = uef_overage-' . $info['uwl_amount'] . ' where u_id = '. $info['u_id']);
+        }
         if (!$is_ajax)
         {
             return 1;
