@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-10 15:23:42
+ * @Last Modified time: 2017-10-12 12:07:48
  */
 namespace App\Controller;
 
@@ -140,7 +140,7 @@ class Users extends \CLASSES\WebBase
         }
 
         $dao_favorate = new \WDAO\Users_favorate(array('table'=>'users_favorate'));
-        $favorate_arr = $dao_favorate -> listData(array('users_favorate.u_id'=>$u_id,'f_type'=>0,'join'=>array('tasks',"tasks.t_id = users_favorate.f_type_id"),'fields'=>'tasks.t_title,tasks.t_amount,tasks.t_duration,tasks.t_author,tasks.t_status','pager'=>false));
+        $favorate_arr = $dao_favorate -> listData(array('users_favorate.u_id'=>$u_id,'f_type'=>0,'join'=>array('tasks',"tasks.t_id = users_favorate.f_type_id"),'fields'=>'tasks.t_title,tasks.t_amount,tasks.t_duration,tasks.t_author,tasks.t_status,f_id','pager'=>false));
         $this->exportData( $favorate_arr,1);
     }
     /*收藏工人列表*/
@@ -150,11 +150,116 @@ class Users extends \CLASSES\WebBase
         if(empty($u_id)){
             $this->exportData( array('msg'=>'请输入用户id'),0);
         }
+        // if(empty($_GET['ucp_posit_x']) || empty($ucp_posit_x = floatval($_GET['ucp_posit_x']))){
+        //     $this->exportData( array('msg'=>'用户x坐标为空'),0);
+        // }
+        // if(empty($_GET['ucp_posit_y']) || empty($ucp_posit_y = floatval($_GET['ucp_posit_y']))){
+        //     $this->exportData( array('msg'=>'用户y坐标为空'),0);
+        // }
+
 
         $dao_favorate = new \WDAO\Users_favorate(array('table'=>'users_favorate'));
-        $favorate_arr = $dao_favorate -> listData(array('users_favorate.u_id'=>$u_id,'f_type'=>1,'join'=>array('users',"users.u_id = users_favorate.f_type_id"),'fields'=>'users.u_id,users.u_sex,users.u_online,users.u_start,users.u_worked_num,f_id','pager'=>false));
+        /*获取当前userid收藏的用户id*/
+        $favorate_id_arr = array();
+        $favorate_arr = $dao_favorate -> listData(array(
+            'users_favorate.u_id'=>$u_id,
+            'f_type'=>1,
+            'fields'=>'f_type_id,f_id','pager'=>false,
+            ));
+        if(empty($favorate_arr['data'])){
+            $this->exportData( $favorate_id_arr,1);
+        }
+        foreach ($favorate_arr['data'] as $key => $value) {
+            $favorate_id_arr[] = $value['f_type_id'];
+        }
+
+        /*获取用户的个人信息和用户自我介绍数组*/
+        $dao_users = new \WDAO\Users_favorate(array('table'=>'users'));
+        $users_arr = $dao_users -> listData(array(
+            'u_id' => array('type' => 'in', 'value' => $favorate_id_arr),
+            'fields'=>'u_id,u_task_status,u_name,u_sex','pager'=>false,
+            )
+        );
+        $dao_users_ext_info = new \WDAO\Users_favorate(array('table'=>'users_ext_info'));
+        $users_ext_arr = $dao_users_ext_info -> listData(array(
+            'u_id' => array('type' => 'in', 'value' => $favorate_id_arr),
+            'fields'=>'u_id,uei_info','pager'=>false,
+            )
+        );
+        $dao_users_cur_position = new \WDAO\Users_favorate(array('table'=>'users_cur_position'));
+        $users_position_arr = $dao_users_cur_position -> listData(array(
+            'u_id' => array('type' => 'in', 'value' => $favorate_id_arr),
+            'fields'=>'u_id,ucp_posit_x,ucp_posit_y','pager'=>false,
+            )
+        );
+        $res = array();
+        foreach ($favorate_id_arr as $key => $value) {
+            $res[$key]['u_id'] = $value;
+            $res[$key]['u_img'] = $this-> getHeadById($value);
+            foreach ($users_arr['data'] as $k_user => $v_user) {
+                if($value == $v_user['u_id']){
+                    $res[$key]['u_name'] = isset($v_user['u_name']) ? $v_user['u_name'] : '';
+                    $res[$key]['u_task_status'] = isset($v_user['u_task_status']) ? $v_user['u_task_status'] : '';
+                    $res[$key]['u_sex'] = isset($v_user['u_sex']) ? $v_user['u_sex'] : '';
+                }
+            }
+            foreach ($users_ext_arr['data'] as $k_ext => $v_ext) {
+                if($value == $v_ext['u_id']){
+                    $res[$key]['uei_info'] = isset($v_ext['uei_info']) ? $v_ext['uei_info'] : '';
+                }
+            }
+            foreach ($users_position_arr['data'] as $k_position => $v_position) {
+                if($value == $v_position['u_id']){
+                    if(!empty($v_position['ucp_posit_x']) && !empty($v_position['ucp_posit_y'])){
+                        // $res[$key]['distance'] = $this -> GetDistance($v_position['ucp_posit_x'],$v_position['ucp_posit_y'],$ucp_posit_x,$ucp_posit_y);
+                        $res[$key]['ucp_posit_x'] = $v_position['ucp_posit_x'];
+                        $res[$key]['ucp_posit_y'] = $v_position['ucp_posit_y'];
+                    }
+                }
+            }
+            foreach ($favorate_arr['data'] as $k => $v) {
+                if($value == $v['f_type_id']){
+                    $res[$key]['f_id'] = isset($v['f_id']) ? $v['f_id'] : '';
+                }
+            }
+        }
         /*获取分类数组*/
-        $this->exportData( $favorate_arr,1);
+        $this->exportData( array('data'=>$res),1);
+    }
+
+    /*收藏删除*/
+    public function favorateDel()
+    {
+        if (empty($_GET['f_id']) || empty($f_id = intval($_GET['f_id']))){
+             $this->exportData( array('msg'=>'请输入被收藏id'),0);
+        }
+        $dao_favorate = new \WDAO\Users_favorate(array('table'=>'users_favorate'));
+
+        $res = $dao_favorate ->delData(array('f_id'=>array('type'=>'in','value'=>$f_id)));
+        if($res){
+            $this->exportData( array('msg'=>'取消收藏成功'),1);
+        }
+
+
+    }
+    /*收藏添加*/
+    public function favorateAdd()
+    {
+        $data = array();
+        if (empty($_GET['u_id']) || empty($data['u_id'] = intval($_GET['u_id']))){
+             $this->exportData( array('msg'=>'请输入被收藏id'),0);
+        }
+        if (empty($_GET['f_type_id']) || empty($data['f_type_id'] = intval($_GET['f_type_id']))){
+             $this->exportData( array('msg'=>'请输入被收藏id'),0);
+        }
+        if (empty($_GET['f_type']) ||  empty($data['f_type'] = intval($_GET['f_type']))){
+             $this->exportData( array('msg'=>'请输入收藏类型'),0);
+        }
+        $dao_favorate = new \WDAO\Users_favorate(array('table'=>'users_favorate'));
+        $f_id = $dao_favorate ->addData($data);
+        if(intval($f_id) > 0){
+            $this->exportData(array('data'=>array('f_id'=>$f_id)),1);
+        }
     }
 
     /*用户余额接口*/
@@ -287,106 +392,117 @@ class Users extends \CLASSES\WebBase
      * @e-mail zhaoyu8292@qq.com
      * @date   2017-09-25
      * @return [type]   工人信息         [description]
+     *
      */
-    public function getUsersBySkills()
+    public function getUsers()
     {
-        if(empty($_GET['s_id']) || empty(intval($_GET['s_id']))){
-            $this->exportData( array('msg'=>'技能id不能为空'),0);
-        }
-        /*判断是否传入地区id 如果传入加入条件中*/
-        $province_id = 0;
-        $area_id = 0;
-        $city_id = 0;
-        $u_id_area = '';
-        if((isset($_GET['uei_area']) && !empty($area_id = intval($_GET['uei_area']))) || (isset($_GET['uei_city']) && !empty($city_id = intval($_GET['uei_city']))) || (isset($_GET['uei_province']) && !empty($province_id = intval($_GET['uei_province']))))
+
+        $data = array();
+        if (isset($_REQUEST['u_id']) && intval($_REQUEST['u_id']) > 0) $data['u_id'] = intval($_REQUEST['u_id']);
+        if(isset($_REQUEST['u_mobile']) && intval($_REQUEST['u_mobile']) > 0) $data['u_mobile'] = intval($_REQUEST['u_mobile']);
+        if(isset($_REQUEST['u_sex']) && intval($_REQUEST['u_sex']) > 0) $data['u_sex'] = intval($_REQUEST['u_sex']);
+        if(isset($_REQUEST['u_bind_mobile']) && intval($_REQUEST['u_bind_mobile']) > 0) $data['u_bind_mobile'] = intval($_REQUEST['u_bind_mobile']);
+        if(isset($_REQUEST['u_online']) && intval($_REQUEST['u_online']) > 0) $data['u_online'] = intval($_REQUEST['u_online']);
+        if(isset($_REQUEST['u_status']) && intval($_REQUEST['u_status']) > 0) $data['u_status'] = intval($_REQUEST['u_status']);
+        if(isset($_REQUEST['u_type']) && intval($_REQUEST['u_type']) > 0) $data['u_type'] = intval($_REQUEST['u_type']);
+        if(isset($_REQUEST['u_task_status']) && intval($_REQUEST['u_task_status']) >=0) $data['u_task_status'] = intval($_REQUEST['u_task_status']);
+        if(isset($_REQUEST['u_idcard']) && intval($_REQUEST['u_idcard']) > 0) $data['u_idcard'] = intval($_REQUEST['u_idcard']);
+        if(isset($_REQUEST['u_true_name']) && trim($_REQUEST['u_true_name'])) $data['u_true_name'] = trim($_REQUEST['u_true_name']);
+        if(isset($_REQUEST['u_skills']) && trim($_REQUEST['u_skills'])) $data['u_skills'] = trim($_REQUEST['u_skills']);
+        if(isset($_REQUEST['u_name']) && trim($_REQUEST['u_name'])) $data['u_name'] = trim($_REQUEST['u_name']);
+
+        /*区间值*/
+
+        if (isset($_REQUEST['start_time'])) $data['u_in_time'][0] = array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['start_time']));
+        if (isset($_REQUEST['end_time'])) $data['u_in_time'][1] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['end_time']));
+        if (isset($_REQUEST['start_credit'])) $data['u_credit'][0] = array('type' => 'ge', 'ge_value' => intval($_REQUEST['start_credit']));
+        if (isset($_REQUEST['end_credit'])) $data['u_credit'][1] = array('type' => 'le', 'le_value' => intval($_REQUEST['end_credit']));
+        if (isset($_REQUEST['start_jobs'])) $data['u_jobs_num'][0] = array('type' => 'ge', 'ge_value' => intval($_REQUEST['start_jobs']));
+        if (isset($_REQUEST['end_jobs'])) $data['u_jobs_num'][1] = array('type' => 'le', 'le_value' => intval($_REQUEST['end_jobs']));
+        if (isset($_REQUEST['start_worked'])) $data['u_worked_num'][0] = array('type' => 'ge', 'ge_value' => intval($_REQUEST['start_worked']));
+        if (isset($_REQUEST['end_worked'])) $data['u_worked_num'][1] = array('type' => 'le', 'le_value' => intval($_REQUEST['end_worked']));
+        if (isset($_REQUEST['start_high'])) $data['u_high_opinions'][0] = array('type' => 'ge', 'ge_value' => intval($_REQUEST['start_high']));
+        if (isset($_REQUEST['end_high'])) $data['u_high_opinions'][1] = array('type' => 'le', 'le_value' => intval($_REQUEST['end_high']));
+        if (isset($_REQUEST['start_low'])) $data['u_low_opinions'][0] = array('type' => 'ge', 'ge_value' => intval($_REQUEST['start_low']));
+        if (isset($_REQUEST['end_low'])) $data['u_low_opinions'][1] = array('type' => 'le', 'le_value' => intval($_REQUEST['end_low']));
+        if (isset($_REQUEST['start_middle'])) $data['u_middle_opinions'][0] = array('type' => 'ge', 'ge_value' => intval($_REQUEST['start_middle']));
+        if (isset($_REQUEST['end_middle'])) $data['u_middle_opinions'][1] = array('type' => 'le', 'le_value' => intval($_REQUEST['end_middle']));
+        if (isset($_REQUEST['start_dissensions'])) $data['u_dissensions'][0] = array('type' => 'ge', 'ge_value' => intval($_REQUEST['start_dissensions']));
+        if (isset($_REQUEST['end_dissensions'])) $data['u_dissensions'][1] = array('type' => 'le', 'le_value' => intval($_REQUEST['end_dissensions']));
+
+    /*users_ext_info*/
+        if(isset($_REQUEST['uei_province']) && intval($_REQUEST['uei_province']) > 0) $data2['uei_province'] = intval($_REQUEST['uei_province']);
+        if(isset($_REQUEST['uei_city']) && intval($_REQUEST['uei_city']) > 0) $data2['uei_city'] = intval($_REQUEST['uei_city']);
+        if(isset($_REQUEST['uei_area']) && intval($_REQUEST['uei_area']) > 0) $data2['uei_area'] = intval($_REQUEST['uei_area']);
+        if(isset($_REQUEST['page']) && intval($_REQUEST['page']) > 0) $data['page'] = intval($_REQUEST['page']);
+        $data2['pager'] = 0;
+        if (isset($data['page']) && intval($data['page']) > 0)
         {
-
-            $dao_users_ext = new \WDAO\Users(array('table'=>'users_ext_info'));
-            $where = array('pager'=>false,'fields'=>'u_id');
-            if($area_id > 0){
-                $where['uei_area'] = $area_id;
-            }elseif($city_id > 0){
-                $where['uei_city'] = $city_id;
-            }elseif($province_id > 0){
-                $where['uei_province'] = $province_id;
-            }
-
-            $u_id_area_arr = $dao_users_ext -> listData($where);
-
-            foreach ($u_id_area_arr['data'] as $key => $value) {
-                $u_id_area .= $value['u_id'].',';
-            }
-            if(empty($u_id_area)){
-                $users_list = array();
-                $this->exportData( $users_list,1);
-            }else{
-                $u_id_area = rtrim($u_id_area,',');
-            }
-
+            $data2['pager'] = 1;
         }
+        $dao_info = new \WDAO\Users_ext_info();
+        $data2['rightjoin'] = array('users', 'users_ext_info.u_id = users.u_id');
+        $data2['where'] = ' users.u_id > 0 ';
+        if (!empty($data))
+        {
+            foreach ($data as $key => $val)
+            {
+                if ($key == 'u_name')
+                {
+                    $data2['where'] .= ' and users.u_name like "%'.$val.'%"';
+                }
+                elseif($key == 'u_skills')
+                {
+                    $data2['where'] .= ' and FIND_IN_SET('.$val.', users.u_skills)';
+                }
+                elseif (in_array($key, array('u_in_time', 'u_credit', 'u_jobs_num', 'u_worked_num', 'u_high_opinions', 'u_low_opinions', 'u_middle_opinions', 'u_dissensions')))
+                {
+                    if (isset($data[$key][0]) && !empty($data[$key][0]))
+                    {
+                        $data2['where'] .= ' and ' . $key . ' <= ' . $val[0]['ge_value'];
+                    }
 
-
-
-        $s_id = '%,'.intval($_GET['s_id']).',%';
-        $m_users = model('Users');
-        $param = array();
-
-        /*判断u_id_area是否为空*/
-        if(!empty($u_id_area)){
-            $param['where'] = 'users.`u_id` IN ('.$u_id_area.')';
-        }
-        $m_users ->select = 'users.u_id,u_skills,users_ext_info.uei_info,u_task_status,u_true_name';
-        $param['leftjoin'] = array('users_ext_info','users.u_id=users_ext_info.u_id');
-        $param['walk']['where']['like'] = array('u_skills', $s_id);
-        $param['u_online'] = 1;
-        $users_list = $m_users ->getDatas($param);
-
-
-        /*用户u_id数组*/
-        $u_id_arr = array();
-        /*获取用户id,和用户头像*/
-        foreach ($users_list['data'] as  &$v) {
-            $u_id_arr[] = $v['u_id'];
-            $v['u_img'] = $this-> getHeadById($v['u_id']);
-        }
-
-        /*获取用户距离start*/
-        if(!empty($_GET['users_posit_x']) && !empty($users_posit_x = floatval($_GET['users_posit_x'])) && !empty($_GET['users_posit_y']) && !empty($users_posit_y = floatval($_GET['users_posit_y']))){
-        /*获取用户位置坐标*/
-        $u_id_str = implode(',',$u_id_arr);
-        $dao_users_position= new \WDAO\Users(array('table'=>'users_cur_position'));
-        $users_position = $dao_users_position ->listData(array('pager' => false,'fields'=>'ucp_posit_x,u_id,ucp_posit_y','u_id'=>array('type'=>'in','value'=>$u_id_str)));
-            /*获取用户位置坐标*/
-            // $u_id_str = implode(',',$u_id_arr);
-            // $users_position = $m_users ->db->query("SELECT u_id,ucp_posit_x,ucp_posit_y,ucp_last_edit_time  FROM users_cur_position WHERE u_id IN ($u_id_str) AND ucp_last_edit_time IN (SELECT max(ucp_last_edit_time) FROM users_cur_position GROUP BY u_id) ORDER BY ucp_last_edit_time DESC ") ->fetchall();
-        /*获取用户距离start*/
-
-
-            foreach ($users_list['data'] as  &$val) {
-                foreach ($users_position['data'] as  $value) {
-                    if($val['u_id'] == $value['u_id']){
-
-                        if(!empty($_GET['users_posit_x']) && !empty($users_posit_x = floatval($_GET['users_posit_x'])) && !empty($_GET['users_posit_y']) && !empty($users_posit_y = floatval($_GET['users_posit_y']))){
-                            /*获取当前两点之间距离*/
-                            if(!empty($value['ucp_posit_x']) && !empty($value['ucp_posit_y'])){
-                                $val['distance'] = $this -> GetDistance($value['ucp_posit_x'],$value['ucp_posit_y'],$users_posit_x,$users_posit_y);
-                            }
-                            /*获取用户距离end*/
-
-                            if($value['ucp_posit_x'] && $value['ucp_posit_y']){
-                                $val['ucp_posit_x'] = $value['ucp_posit_x'];
-                                $val['ucp_posit_y'] = $value['ucp_posit_y'];
-                            }
-                        }
-
+                    if (isset($data[$key][1]) && !empty($data[$key][1]))
+                    {
+                        $data2['where'] .= ' and ' . $key . ' >= ' . $val[1]['le_value'];
                     }
                 }
+                else
+                {
+                    $data2['where'] .= ' and users.' . $key . ' = ' . $val;
+                }
             }
-
-
-        $this->exportData( $users_list,1);
-
         }
+
+    /*users_cur_posit*/
+        if (isset($_REQUEST['start_x'])) $data3['ucp_posit_x'][0] = array('type' => 'ge', 'ge_value' => floatval($_REQUEST['start_x']));
+        if (isset($_REQUEST['end_x'])) $data3['ucp_posit_x'][1] = array('type' => 'le', 'le_value' => floatval($_REQUEST['end_x']));
+        if (isset($_REQUEST['start_y'])) $data3['ucp_posit_y'][0] = array('type' => 'ge', 'ge_value' => floatval($_REQUEST['start_y']));
+        if (isset($_REQUEST['end_y'])) $data3['ucp_posit_y'][1] = array('type' => 'le', 'le_value' => floatval($_REQUEST['end_y']));
+        if (isset($_REQUEST['distance'])) $data3['distance'] =  intval($_REQUEST['distance']);
+
+        $data2['leftjoin'] = array('users_cur_position', 'users_cur_position.u_id = users_ext_info.u_id');
+        if(isset($data3['ucp_posit_x']) || isset($data3['ucp_posit_y'])){
+            foreach ($data3 as $key => $val){
+                if (isset($data3[$key][0]) && !empty($data3[$key][0]))
+                {
+                    $data2['where'] .= ' and ' . $key . ' >= ' . $val[0]['ge_value'];
+                }
+                if (isset($data3[$key][1]) && !empty($data3[$key][1]))
+                {
+                    $data2['where'] .= ' and ' . $key . ' <= ' . $val[1]['le_value'];
+                }
+            }
+        }
+        $data2['fields'] = 'users.u_id,u_name,u_skills,users_ext_info.uei_info,u_task_status,u_true_name,ucp_posit_x,ucp_posit_y';
+
+        $list = $dao_info ->listData($data2);
+        foreach ($list['data'] as  &$v) {
+            if(isset($v['u_id'])){
+               $v['u_img'] = $this-> getHeadById($v['u_id']);
+            }
+        }
+        $this->exportData($list,1);
     }
 
 
@@ -745,10 +861,128 @@ class Users extends \CLASSES\WebBase
 
             }
         }
+    }
 
+    /*用户提现申请接口*/
+    public function applyWithdraw()
+    {
+        if(empty($_GET['u_id']) || empty($u_id = intval($_GET['u_id']))){
+            $this->exportData( array('msg'=>'用户ID为空'),0);
+        }
+        if(empty($_GET['uwl_amount']) || empty($uwl_amount = intval($_GET['uwl_amount']))){
+            $this->exportData( array('msg'=>'提现金额不能为空'),0);
+        }
+        if(empty($_GET['p_id']) || empty($p_id = intval($_GET['p_id']))){
+            $this->exportData( array('msg'=>'提现方式不能为空'),0);
+        }
+        if(empty($_GET['uwl_card']) || empty($uwl_card = intval($_GET['uwl_card']))){
+            $this->exportData( array('msg'=>'提现账号不能为空'),0);
+        }
+        if(empty($_GET['uwl_truename']) || empty($uwl_truename = trim($_GET['uwl_truename']))){
+            $this->exportData( array('msg'=>'提现账号姓名不能为空'),0);
+        }
+        $dao_user_withdraw_log = new \WDAO\Users(array('table'=>'user_withdraw_log'));
+        $dao_users_ext_funds = new \WDAO\Users(array('table'=>'users_ext_funds'));
+        /*判断用户余额是否大于提现余额*/
+        $uef_overage = $dao_users_ext_funds ->infoData(array('fields'=>'u_id,uef_overage','key'=>'u_id','val' => $u_id,'pager'=>false));
+        if(!empty($uef_overage['uef_overage'])){
+            if(intval($uef_overage['uef_overage']) >= $uwl_amount){
+                /*处理提现过程start*/
+
+                /*用户余额修改*/
+                $funds_res = $this ->userFunds($u_id, $uwl_amount*-1, $type = 'withdraw');
+                if(!$funds_res){
+                    $this->exportData( array('msg'=>'提现申请失败'),0);
+                }
+                /*用户提现申请日志*/
+                $WD_log_id = $this ->usersWithdrawLog($u_id, $uwl_amount, $uwl_truename, $uwl_card, $status = 0, $p_id);
+                /*平台资金流向修改*/
+                $dao_platform_funds_log = new \WDAO\Users(array('table'=>'platform_funds_log'));
+                $data = array();
+                $data['pfl_type'] = 1;
+                $data['pfl_type_id'] = $WD_log_id;
+                $data['pfl_amount'] = $uwl_amount;
+                $data['pfl_in_time'] = time();
+                $data['pfl_reason'] = 'withdraw';
+                $data['pfl_status'] = 1;
+                $dao_platform_funds_log -> addData($data);
+
+                /*处理提现过程end*/
+            }else{
+                $this->exportData( array('msg'=>'用户余额不足'),0);
+            }
+        }else{
+            $this->exportData( array('msg'=>'用户余额不足'),0);
+        }
+    }
+
+        /*充值记录接口*/
+        public function applyRechargeLog()
+    {
+        if(empty($_GET['u_id']) || empty($u_id = intval($_GET['u_id']))){
+            $this->exportData( array('msg'=>'用户ID为空'),0);
+        }
+        if(empty($_GET['uwl_amount']) || empty($uwl_amount = intval($_GET['uwl_amount']))){
+            $this->exportData( array('msg'=>'提现金额不能为空'),0);
+        }
+        if(empty($_GET['p_id']) || empty($p_id = intval($_GET['p_id']))){
+            $this->exportData( array('msg'=>'提现方式不能为空'),0);
+        }
+        if(empty($_GET['uwl_card']) || empty($uwl_card = intval($_GET['uwl_card']))){
+            $this->exportData( array('msg'=>'提现账号不能为空'),0);
+        }
+        if(empty($_GET['uwl_truename']) || empty($uwl_truename = trim($_GET['uwl_truename']))){
+            $this->exportData( array('msg'=>'提现账号姓名不能为空'),0);
+        }
+        $dao_user_withdraw_log = new \WDAO\Users(array('table'=>'user_withdraw_log'));
+        $dao_users_ext_funds = new \WDAO\Users(array('table'=>'users_ext_funds'));
+        /*判断用户余额是否大于提现余额*/
+        $uef_overage = $dao_users_ext_funds ->infoData(array('fields'=>'u_id,uef_overage','key'=>'u_id','val' => $u_id,'pager'=>false));
+        if(!empty($uef_overage['uef_overage'])){
+            if(intval($uef_overage['uef_overage']) >= $uwl_amount){
+                /*处理提现过程start*/
+
+                /*用户余额修改*/
+                $funds_res = $this ->userFunds($u_id, $uwl_amount*-1, $type = 'withdraw');
+                if(!$funds_res){
+                    $this->exportData( array('msg'=>'提现申请失败'),0);
+                }
+                /*用户提现申请日志*/
+                $WD_log_id = $this ->usersWithdrawLog($u_id, $uwl_amount, $uwl_truename, $uwl_card, $status = 0, $p_id);
+                /*平台资金流向修改*/
+                $dao_platform_funds_log = new \WDAO\Users(array('table'=>'platform_funds_log'));
+                $data = array();
+                $data['pfl_type'] = 1;
+                $data['pfl_type_id'] = $WD_log_id;
+                $data['pfl_amount'] = $uwl_amount;
+                $data['pfl_in_time'] = time();
+                $data['pfl_reason'] = 'withdraw';
+                $data['pfl_status'] = 1;
+                $dao_platform_funds_log -> addData($data);
+
+                /*处理提现过程end*/
+            }else{
+                $this->exportData( array('msg'=>'用户余额不足'),0);
+            }
+        }else{
+            $this->exportData( array('msg'=>'用户余额不足'),0);
+        }
 
 
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
