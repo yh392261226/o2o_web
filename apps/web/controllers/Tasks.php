@@ -184,8 +184,10 @@ class Tasks extends \CLASSES\WebBase
      */
     private function add()
     {
-        $data = $info = $worker = $fields = $message = $tmp = array();
-        $data['t_storage'] = 0;
+        $data = $info = $worker = $fields = $message = $tmp = $bouns_data_param = array();
+        $bouns_data_where = '';
+
+        $data['t_storage'] = $tmp['t_storage'] = 1;
         if (isset($_REQUEST['t_storage']) && is_numeric($_REQUEST['t_storage'])) $data['t_storage'] = intval($_REQUEST['t_storage']);
         if (isset($_REQUEST['t_title']) && '' != trim($_REQUEST['t_title'])) $data['t_title'] = trim($_REQUEST['t_title']);
         if (isset($_REQUEST['t_info']) && '' != trim($_REQUEST['t_info'])) $data['t_info'] = trim($_REQUEST['t_info']);
@@ -193,12 +195,11 @@ class Tasks extends \CLASSES\WebBase
         if (isset($_REQUEST['t_duration']) && 1 <= intval($_REQUEST['t_duration'])) $data['t_duration'] = intval($_REQUEST['t_duration']);
         if (isset($_REQUEST['t_posit_x'])) $data['t_posit_x'] = floatval($_REQUEST['t_posit_x']);
         if (isset($_REQUEST['t_posit_y'])) $data['t_posit_y'] = floatval($_REQUEST['t_posit_y']);
-        if (isset($_REQUEST['t_author']) && 0 < intval($_REQUEST['t_author'])) $data['t_author'] = $data['t_last_editor'] = intval($_REQUEST['t_author']);
+        if (isset($_REQUEST['t_author']) && 0 < intval($_REQUEST['t_author'])) $data['t_author'] = $bouns_data_param['t_author'] = $data['t_last_editor'] = intval($_REQUEST['t_author']);
         if ($data['t_storage'] == 0)
         {
             if (!isset($data['t_title'])) $message[] = '标题不能为空';
             if (!isset($data['t_info'])) $message[] = '简介不能为空';
-            if (!isset($data['t_amount'])) $message[] = '任务总价不能小于等于0';
             if (!isset($data['t_duration'])) $message[] = '任务时长不能小于1天';
             if (!isset($data['t_posit_x'])) $message[] = 'x轴坐标不正确';
             if (!isset($data['t_posit_y'])) $message[] = 'y轴坐标不正确';
@@ -218,9 +219,48 @@ class Tasks extends \CLASSES\WebBase
         $data['t_amount_edit_times'] = 0;
         $data['t_status'] = 0;
         if (isset($_REQUEST['t_status']) && is_numeric($_REQUEST['t_status'])) $data['t_status'] = intval($_REQUEST['t_status']);
+        if (isset($_REQUEST['bd_id']) && intval($_REQUEST['bd_id']) > 0) $bouns_data_param['bd_id'] = $bouns_data_where = intval($_REQUEST['bd_id']);
+        if (isset($_REQUEST['serial']) && '' != trim($_REQUEST['serial'])) $bouns_data_param['bd_serial'] = trim($_REQUEST['serial']);
+        if (isset($bouns_data_param['bd_serial'])) $bouns_data_where = array('key' => 'bd_serial', 'val' => $bouns_data_param['bd_serial']);
+        if (isset($_REQUEST['province']) && intval($_REQUEST['province']) > 0) $tmp['province'] = intval($_REQUEST['province']);
+        if (isset($_REQUEST['city']) && intval($_REQUEST['city']) > 0) $tmp['city'] = intval($_REQUEST['city']);
+        if (isset($_REQUEST['area']) && intval($_REQUEST['area']) > 0) $tmp['area'] = intval($_REQUEST['area']);
+        if (isset($_REQUEST['address']) && '' != trim($_REQUEST['address'])) $tmp['address'] = trim($_REQUEST['address']);
+        if (isset($_REQUEST['t_id']) && is_numeric($_REQUEST['t_id'])) $tmp['id'] = intval($_REQUEST['t_id']); //任务id
 
+        //删除之前的该任务 并重新写入
+        if (isset($tmp['id']) && intval($tmp['id']) > 0)
+        {
+            $del_old_result = $task_dao->delOldTask(array('t_id' => intval($tmp['id']), 't_author' => intval($data['t_author'])));
+            if (!$del_old_result)
+            {
+                $this->exportData('无法完成任务覆盖');
+            }
+            //归还已经扣除资金及抵扣券
+            $platform_funds_dao = new \WDAO\Platform_funds_log();
+            $back_platform_funds = $platform_funds_dao->rebackFundsToUser(array(
+                'pfl_type' => 3,
+                'pfl_type_id' => intval($tmp['id']),
+                'u_id' => intval($data['t_author']),
+            ));
+            if (!$back_platform_funds)
+            {
+                $this->exportData('返还用户资金失败，请联系客服人员');
+            }
+
+            if (!empty($bouns_data_param) && ($bouns_data_param['bd_id'] > 0 || '' != $bouns_data_param['bd_serial']))
+            {
+                $bouns_data_dao = new \WDAO\Bouns_data();
+                $reback_bouns_result = $bouns_data_dao->rebackBounsToUser($bouns_data_param);
+                if (!$reback_bouns_result)
+                {
+                    $this->exportData('还原抵扣券失败，请联系客服人员');
+                }
+            }
+        }
+
+        //写入任务
         $task_dao = new \WDAO\Tasks();
-        $result = 0;
         $result = $task_dao->addData($data);
         if (!$result)
         {
@@ -232,15 +272,14 @@ class Tasks extends \CLASSES\WebBase
         $info['t_desc'] = $data['t_info'];
         if (isset($_REQUEST['t_desc']) && '' != trim($_REQUEST['t_desc'])) $info['t_desc'] = trim($_REQUEST['t_desc']);
         $ext_info_dao = new \WDAO\Task_ext_info();
-        $ext_info_dao->addData($info);
+        $info_result = $ext_info_dao->addData($info);
+        if (!$info_result)
+        {
+            $tmp['t_storage'] = 0; //如果插入失败立马标注进草稿箱
+        }
 
         /*tasks_ext_worker*/
-        if (isset($_REQUEST['province']) && intval($_REQUEST['province']) > 0) $tmp['province'] = intval($_REQUEST['province']);
-        if (isset($_REQUEST['city']) && intval($_REQUEST['city']) > 0) $tmp['city'] = intval($_REQUEST['city']);
-        if (isset($_REQUEST['area']) && intval($_REQUEST['area']) > 0) $tmp['area'] = intval($_REQUEST['area']);
-        if (isset($_REQUEST['address']) && '' != trim($_REQUEST['address'])) $tmp['address'] = trim($_REQUEST['address']);
-
-        $tmp['total'] = 0;
+        $tmp['total'] = $tmp['total_edit'] = 0;
         if (isset($_REQUEST['worker']) && !empty($_REQUEST['worker']))
         {
             $fields = array('t_id', 'tew_skills', 'tew_worker_num', 'tew_price', 'tew_start_time', 'tew_end_time', 'r_province', 'r_city', 'r_area', 'tew_address', 'tew_lock');
@@ -257,30 +296,100 @@ class Tasks extends \CLASSES\WebBase
                 $worker[$key][] = isset($tmp['area']) ? $tmp['area'] : 0;
                 $worker[$key][] = isset($tmp['address']) ? $tmp['address'] : '';
                 $worker[$key][] = 0;
-                $tmp['total'] += $worker[$key][2] * $worker[$key][3];
+                $tmp['total'] = $tmp['total_edit'] += $worker[$key][2] * $worker[$key][3];
             }
         }
         else
-        {
+        { //预防机器人写入
             $worker['t_id'] = $tmp['t_id'];
             $worker['tew_skills'] = $worker['tew_worker_num'] = $worker['tew_price'] = $worker['tew_start_time'] = $worker['tew_end_time'] = $worker['tew_lock'] = 0;
             $worker['r_province'] = isset($tmp['province']) ? $tmp['province'] : 0;
             $worker['r_city'] = isset($tmp['city']) ? $tmp['city'] : 0;
             $worker['r_area'] = isset($tmp['area']) ? $tmp['area'] : 0;
             $worker['tew_address'] = isset($tmp['address']) ? $tmp['address'] : '';
-            $tmp['total'] += $worker['tew_worker_num'] * $worker['tew_price'];
+            $tmp['total'] = $tmp['total_edit'] += $worker['tew_worker_num'] * $worker['tew_price'];
         }
         $ext_worker_dao = new \WDAO\Task_ext_worker();
         $worker_result = $ext_worker_dao->addData($worker, $fields);
-
-        //判断抵扣券
-
-        if ($worker_result && $tmp['total'] != $data['t_amount'])
+        if (!$worker_result)
         {
-            $task_dao->updateData(array('t_amount' => $tmp['total']), array('t_id' => $result));
+            $tmp['t_storage'] = 0; //插入失败 立马标注进草稿箱
         }
 
-        $this->exportData('success');
+        $tmp['bd_id'] = 0;
+        //判断抵扣券
+        if ((isset($bouns_data_param['bd_id']) || isset($bouns_data_param['bd_serial'])) && !empty($bouns_data_where))
+        {
+            $bouns_data_dao = new \WDAO\Bouns_data();
+            $bouns_data = $bouns_data_dao->infoBounsData($bouns_data_where);
+
+            if (!empty($bouns_data) && $bouns_data['b_amount'] > 0)
+            {
+                if ($bouns_data['bd_author'] != intval($_REQUEST['t_author']) || $bouns_data['bd_use_time'] > 0)
+                {
+                    $this->exportData('该抵扣券不存在或已被使用');
+                }
+
+                $tmp['total_edit'] -= $bouns_data['b_amount'];
+                //$bouns_data_param['bd_author'] = intval($_REQUEST['t_author'])
+                //$bouns_data_dao->updateData(array('bd_use_time' => time()), $bouns_data_param); //抵扣券状态更改为已经使用
+                $tmp['bd_id'] = $bouns_data['bd_id'];
+            }
+            else
+            {
+                $this->exportData('该抵扣券不存在');
+            }
+        }
+
+        //获取用户资金
+        $users_ext_funds_dao = new \WDAO\Users_ext_funds(array('table'=>'users_ext_funds'));
+        $users_ext_funds_info = $users_ext_funds_dao->infoData(intval($_REQUEST['t_author']));
+        if (empty($users_ext_funds_info) || !isset($users_ext_funds_info['uef_overage']) || intval($users_ext_funds_info['uef_overage']) <= 0 || ($data['t_storage'] == 1 && $users_ext_funds_info['uef_overage'] < $tmp['total_edit']))
+        {
+            $this->exportData('用户资金不足');
+        }
+
+        //订单改价
+        if ($worker_result && $data['t_storage'] == 0 && $tmp['t_storage'] == 1)
+        {
+            $this->db->start();
+            $amount_result = $task_dao->updateData(array('t_edit_amount' => $tmp['total_edit'], 't_amount' => $tmp['total'], 'bd_id' => $tmp['bd_id'], 't_storage' => 0), array('t_id' => $result));
+            if ($amount_result)
+            {
+                //使用抵扣券
+                $bouns_data_result = true;
+                if (isset($bouns_data_dao) && !empty($bouns_data_param))
+                {
+                    $bouns_data_result = $bouns_data_dao->updateData(array('bd_use_time' => time()), $bouns_data_param); //抵扣券状态更改为已经使用
+                }
+
+                //扣除用户资金 并加入平台资金日志
+                $user_funds_result = $this->userFunds(intval($_REQUEST['t_author']), (-1 * $tmp['total_edit']), $type = 'pubtask'); //扣除用户资金
+                $platform_funds_result = $this->platformFundsLog($result, $tmp['total_edit'], 3, 'pubtask', 0);     //平台资金日志增加
+            }
+
+            //事物提交或回滚
+            if ($amount_result && $bouns_data_result && $user_funds_result && $platform_funds_result)
+            {
+                $this->db->commit();
+                $this->exportData('success');
+            }
+            else
+            {
+                $this->db->rollback();
+                $this->exportData('failure');
+            }
+        }
+
+        if ($tmp['t_storage'] == 1)
+        {
+            $this->exportData('成功加入草稿箱');
+        }
+        else
+        {
+            $this->exportData('存储出错，已存入草稿箱');
+        }
     }
+
 
 }
