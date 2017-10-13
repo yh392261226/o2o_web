@@ -180,9 +180,9 @@ class Tasks extends \CLASSES\WebBase
     }
 
     /**
-     * 任务添加
+     * 任务发布/草稿
      */
-    private function add()
+    private function pub()
     {
         $data = $info = $worker = $fields = $message = $tmp = $bouns_data_param = array();
         $bouns_data_where = '';
