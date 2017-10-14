@@ -116,6 +116,7 @@ class WebBase extends Swoole\Controller
             switch ($type)
             {
                 case 'overage':
+                case 'pubtask':
                 case 'withdraw':
                 case 'recharge':
                     $sets = ' uef_overage = uef_overage + ' . $amount;
@@ -156,7 +157,7 @@ class WebBase extends Swoole\Controller
             return false;
         }
 
-        $recharge_model = new \MDAOBASE\DaoBase(array('table' => 'user_recharge_log'));
+        $recharge_dao = new \MDAOBASE\DaoBase(array('table' => 'user_recharge_log'));
         $log_data = array(
             'u_id' => $uid,
             'p_id' => $payid,
@@ -166,7 +167,7 @@ class WebBase extends Swoole\Controller
             'url_in_time' => time(),
             'url_status' => $status,
         );
-        return $recharge_model->addData($log_data);
+        return $recharge_dao->addData($log_data);
     }
 
     /**
@@ -185,7 +186,7 @@ class WebBase extends Swoole\Controller
         {
             return false;
         }
-        $withdraw_model = new \MDAOBASE\DaoBase(array('table' => 'user_withdraw_log'));
+        $withdraw_dao = new \MDAOBASE\DaoBase(array('table' => 'user_withdraw_log'));
         $log_data = array(
             'u_id' => $uid,
             'p_id' => $payid,
@@ -195,8 +196,33 @@ class WebBase extends Swoole\Controller
             'uwl_in_time' => time(),
             'uwl_status' => $status,
         );
-        return $withdraw_model->addData($log_data);
+        return $withdraw_dao->addData($log_data);
     }
 
-
+    /**
+     * 平台资金流向日志
+     * @param $type_id
+     * @param $amount
+     * @param int $type
+     * @param string $reason
+     * @param int $status
+     * @return bool
+     */
+    public function platformFundsLog($type_id, $amount, $type = 0, $reason = '', $status = 0)
+    {
+        if (intval($type_id) < 1 || floatval($amount) <= 0)
+        {
+            return false;
+        }
+        $platform_funds_dao = new \WDAO\Platform_funds_log();
+        $log_data = array(
+            'pfl_type' => $type,
+            'pfl_type_id' => $type_id,
+            'pfl_amount' => $amount,
+            'pfl_in_time' => time(),
+            'pfl_reason' => $reason,
+            'pfl_status' => $status,
+        );
+        return $platform_funds_dao->addData($log_data);
+    }
 }
