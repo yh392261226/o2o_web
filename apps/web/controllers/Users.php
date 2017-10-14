@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-14 10:39:47
+ * @Last Modified time: 2017-10-14 16:17:40
  */
 namespace App\Controller;
 
@@ -1110,6 +1110,12 @@ class Users extends \CLASSES\WebBase
         }
         unset($list['pager']);
         $this->exportData( $list,1);
+    }
+
+    /*修改用户支付密码*/
+    public function setPassword()
+    {
+
     }
 
 
