@@ -36,6 +36,7 @@ class Bouns extends \CLASSES\WebBase
         if (isset($_REQUEST['b_start_time'])) $data['b_start_time'] = array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['b_start_time']));
         if (isset($_REQUEST['b_end_time'])) $data['b_end_time'] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['b_end_time']));
         if (isset($_REQUEST['bt_withdraw'])) $data['where'] .= ' and bouns_type.bt_withdraw = ' . intval($_REQUEST['bt_withdraw']);
+        if (isset($_REQUEST['b_use_amount']) && intval($_REQUEST['b_use_amount']) > 0) $data['where'] .= ' and bouns.b_use_amount >= ' . floatval($_REQUEST['b_use_amount']);
 
 
         //if (isset($_REQUEST['b_start_time']) && intval($_REQUEST['b_start_time']) > 0) $data['where'] .= ' and bouns.b_start_time >= ' . strtotime($_REQUEST['b_start_time']);
