@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-14 10:39:47
+ * @Last Modified time: 2017-10-14 17:22:14
  */
 namespace App\Controller;
 
@@ -317,7 +317,7 @@ class Users extends \CLASSES\WebBase
 
         /*获取用户users表内信息*/
         $dao_funds = new \WDAO\Users(array('table'=>'users'));
-        $res = $dao_funds -> infoData(array('fields'=>'u_id,
+        $res = $dao_funds -> infoData(array('fields'=>'u_id,u_pass
         u_name,u_mobile,u_phone,u_fax,u_sex,u_in_time,u_online,u_status,u_type,u_task_status,u_skills,u_start,u_credit,u_top,u_recommend,u_jobs_num,u_worked_num,u_high_opinions,u_low_opinions,u_middle_opinions,u_dissensions,u_true_name,u_idcard','key'=>'u_id','val' => $u_id,'pager'=>false));
         // $skills_id = array();
         // if($res['u_skills'] != 0){
@@ -834,7 +834,21 @@ class Users extends \CLASSES\WebBase
                 $ext_data['c_mark'] = '';
                 $ext_data['c_desc'] = isset($_POST['c_desc']) ? trim($_POST['c_desc']) : ' ';
                 if(!empty($_POST['c_img'])){
-                    $ext_data['c_img'] = $dao_complaints ->uploadComplaintImg($_POST['c_img'],'../uploads/images/'.date('Y/m/d'));
+                    $ext_data['c_img'] = '';
+                    $res = $dao_complaints ->uploadComplaintImg($_POST['c_img'],'../uploads/images/'.date('Y/m/d'));
+                    if(intval($res) < 0){
+                        switch (intval($res)) {
+                            case -1:
+                                $this->exportData( array('msg'=>'图片目录创建失败'),0);
+                                break;
+                            case -1:
+                                $this->exportData( array('msg'=>'图片写入失败'),0);
+                                break;
+                            default:
+                                $ext_data['c_img'] = $res;
+                                break;
+                        }
+                    }
                 }
                 $dao_complaints_ext = new \WDAO\Users(array('table'=>'complaints_ext'));
                 $res_ext_add = $dao_complaints_ext -> addData($ext_data);
@@ -852,7 +866,20 @@ class Users extends \CLASSES\WebBase
                     'val' => $_POST['c_id'],
                     ));
                 $ext_data = '';
-                $img_path = $dao_complaints_ext ->uploadComplaintImg($_POST['c_img'],'../uploads/images/'.date('Y/m/d'));
+                $res = $dao_complaints_ext ->uploadComplaintImg($_POST['c_img'],'../uploads/images/'.date('Y/m/d'));
+                if(intval($res) < 0){
+                    switch (intval($res)) {
+                        case -1:
+                            $this->exportData( array('msg'=>'图片目录创建失败'),0);
+                            break;
+                        case -1:
+                            $this->exportData( array('msg'=>'图片写入失败'),0);
+                            break;
+                        default:
+                            $img_path = $res;
+                            break;
+                    }
+                }
 
                 if(!empty($img_path)){
                     if(!empty($complaints_ext_info['c_img'])){
@@ -1110,6 +1137,38 @@ class Users extends \CLASSES\WebBase
         }
         unset($list['pager']);
         $this->exportData( $list,1);
+    }
+
+    /*设置用户支付密码*/
+    public function setPassword()
+    {
+        if(empty($_REQUEST['u_id']) || empty($u_id =  intval($_REQUEST['u_id']))){
+            $this->exportData( array('msg'=>'用户id为空'),0);
+        }
+        if(empty($_REQUEST['u_pass']) || empty($u_pass =  trim($_REQUEST['u_pass']))){
+            $this->exportData( array('msg'=>'用户密码为空'),0);
+        }
+        $dao_users = new \WDAO\Users(array('table'=>'users'));
+        $u_info = $dao_users -> infoData(array('key'=>'u_id','val'=>$u_id,'fields'=>'u_id,u_pass'));
+        if(!empty($u_info['u_pass'])){
+            $this ->exportData( array('msg'=>'修改密码失败'),0);
+        }else{
+            $data = array();
+            $data['u_pass'] = encyptPassword($u_pass);
+            $res = $dao_users ->updateData($data,array('u_id'=>$u_id));
+            if($res){
+                $this ->exportData( array('msg'=>'修改密码成功'),1);
+            }else{
+                $this ->exportData( array('msg'=>'修改密码失败'),0);
+            }
+
+        }
+
+    }
+
+    public function passwordEdit()
+    {
+        # code...
     }
 
 
