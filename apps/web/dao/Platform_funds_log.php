@@ -68,7 +68,10 @@ class Platform_funds_log extends \MDAOBASE\DaoBase
                     }
 
                 }
-
+            }
+            else
+            {//没有 自然返回成功
+                return 2;
             }
         }
         return false;
