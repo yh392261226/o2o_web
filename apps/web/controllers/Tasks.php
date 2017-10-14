@@ -288,7 +288,7 @@ class Tasks extends \CLASSES\WebBase
                 $worker[$key][] = isset($tmp['area']) ? $tmp['area'] : 0;
                 $worker[$key][] = isset($tmp['address']) ? $tmp['address'] : '';
                 $worker[$key][] = 0;
-                $tmp['total'] = $tmp['total_edit'] += $worker[$key][2] * $worker[$key][3] * (($worker[$key][6] - $worker[$key][5]) / 3600 / 24 + 1);
+                $tmp['total'] = $tmp['total_edit'] += $worker[$key][2] * $worker[$key][3] * (ceil($worker[$key][6] - $worker[$key][5]) / 3600 / 24 + 1);
             }
         }
         else
