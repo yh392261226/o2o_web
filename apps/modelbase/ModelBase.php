@@ -178,4 +178,13 @@ class ModelBase extends \Swoole\Model
         }
         $this->select = '*';
     }
+
+    public function queryData($sql = '')
+    {
+        if ('' != trim($sql))
+        {
+            return $this->db->query($sql);
+        }
+        return false;
+    }
 }

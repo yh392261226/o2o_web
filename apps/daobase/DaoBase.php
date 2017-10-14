@@ -275,6 +275,6 @@ class DaoBase
 
     public function queryData($sql = '')
     {
-        return $this->handler->db->query($sql);
+        return $this->handler->queryData($sql);
     }
 }

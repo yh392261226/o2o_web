@@ -182,8 +182,10 @@ class Tasks extends \CLASSES\WebBase
     /**
      * 任务发布/草稿
      */
-    private function pub()
+    private function publish()
     {
+        //$this->db->debug = 1;
+
         $data = $info = $worker = $fields = $message = $tmp = $bouns_data_param = array();
         $bouns_data_where = '';
 
@@ -200,7 +202,7 @@ class Tasks extends \CLASSES\WebBase
         {
             if (!isset($data['t_title'])) $message[] = '标题不能为空';
             if (!isset($data['t_info'])) $message[] = '简介不能为空';
-            if (!isset($data['t_duration'])) $message[] = '任务时长不能小于1天';
+            //if (!isset($data['t_duration'])) $message[] = '任务时长不能小于1天';
             if (!isset($data['t_posit_x'])) $message[] = 'x轴坐标不正确';
             if (!isset($data['t_posit_y'])) $message[] = 'y轴坐标不正确';
         }
@@ -209,8 +211,8 @@ class Tasks extends \CLASSES\WebBase
         {
             $this->exportData($message);
         }
-        $data['t_phone'] = 0;
-        if (isset($_REQUEST['t_phone']) && '' != trim($_REQUEST['t_phone'])) $data['t_phone'] = trim($_REQUEST['t_phone']);
+        //$data['t_phone'] = 0;
+        //if (isset($_REQUEST['t_phone']) && '' != trim($_REQUEST['t_phone'])) $data['t_phone'] = trim($_REQUEST['t_phone']);
         $data['t_type'] = 0;
         if (isset($_REQUEST['t_type']) && '' != trim($_REQUEST['t_type'])) $data['t_type'] = trim($_REQUEST['t_type']);
         $data['t_phone_status'] = 1;
@@ -228,18 +230,21 @@ class Tasks extends \CLASSES\WebBase
         if (isset($_REQUEST['address']) && '' != trim($_REQUEST['address'])) $tmp['address'] = trim($_REQUEST['address']);
         if (isset($_REQUEST['t_id']) && is_numeric($_REQUEST['t_id'])) $tmp['id'] = intval($_REQUEST['t_id']); //任务id
 
+        $task_dao = new \WDAO\Tasks();
+
         //删除之前的该任务 并重新写入
         if (isset($tmp['id']) && intval($tmp['id']) > 0)
         {
             $del_old_result = $task_dao->delOldTask(array('t_id' => intval($tmp['id']), 't_author' => intval($data['t_author'])));
             if (!$del_old_result)
             {
-                $this->exportData('无法完成任务覆盖');
+                $this->exportData('无法完成任务覆盖或任务草稿不存在');
             }
             //归还已经扣除资金及抵扣券
             $platform_funds_dao = new \WDAO\Platform_funds_log();
             $back_platform_funds = $platform_funds_dao->rebackFundsToUser(array(
                 'pfl_type' => 3,
+                'pfl_reason' => 'pubtask',
                 'pfl_type_id' => intval($tmp['id']),
                 'u_id' => intval($data['t_author']),
             ));
@@ -248,7 +253,7 @@ class Tasks extends \CLASSES\WebBase
                 $this->exportData('返还用户资金失败，请联系客服人员');
             }
 
-            if (!empty($bouns_data_param) && ($bouns_data_param['bd_id'] > 0 || '' != $bouns_data_param['bd_serial']))
+            if (!empty($bouns_data_param) && (isset($bouns_data_param['bd_id']) || isset($bouns_data_param['bd_serial'])) && ($bouns_data_param['bd_id'] > 0 || '' != $bouns_data_param['bd_serial']))
             {
                 $bouns_data_dao = new \WDAO\Bouns_data();
                 $reback_bouns_result = $bouns_data_dao->rebackBounsToUser($bouns_data_param);
@@ -260,7 +265,6 @@ class Tasks extends \CLASSES\WebBase
         }
 
         //写入任务
-        $task_dao = new \WDAO\Tasks();
         $result = $task_dao->addData($data);
         if (!$result)
         {
@@ -269,7 +273,7 @@ class Tasks extends \CLASSES\WebBase
 
         /*tasks_ext_info*/
         $tmp['t_id'] = $info['t_id'] = $result;
-        $info['t_desc'] = $data['t_info'];
+        $info['t_desc'] = (isset($data['t_info']) && '' != trim($data['t_info'])) ? trim($data['t_info']) : '';
         if (isset($_REQUEST['t_desc']) && '' != trim($_REQUEST['t_desc'])) $info['t_desc'] = trim($_REQUEST['t_desc']);
         $ext_info_dao = new \WDAO\Task_ext_info();
         $info_result = $ext_info_dao->addData($info);
@@ -296,7 +300,7 @@ class Tasks extends \CLASSES\WebBase
                 $worker[$key][] = isset($tmp['area']) ? $tmp['area'] : 0;
                 $worker[$key][] = isset($tmp['address']) ? $tmp['address'] : '';
                 $worker[$key][] = 0;
-                $tmp['total'] = $tmp['total_edit'] += $worker[$key][2] * $worker[$key][3];
+                $tmp['total'] = $tmp['total_edit'] += $worker[$key][2] * $worker[$key][3] * (($worker[$key][6] - $worker[$key][5]) / 3600 / 24 + 1);
             }
         }
         else
@@ -307,7 +311,7 @@ class Tasks extends \CLASSES\WebBase
             $worker['r_city'] = isset($tmp['city']) ? $tmp['city'] : 0;
             $worker['r_area'] = isset($tmp['area']) ? $tmp['area'] : 0;
             $worker['tew_address'] = isset($tmp['address']) ? $tmp['address'] : '';
-            $tmp['total'] = $tmp['total_edit'] += $worker['tew_worker_num'] * $worker['tew_price'];
+            $tmp['total'] = $tmp['total_edit'] += $worker['tew_worker_num'] * $worker['tew_price'] * 1;
         }
         $ext_worker_dao = new \WDAO\Task_ext_worker();
         $worker_result = $ext_worker_dao->addData($worker, $fields);
