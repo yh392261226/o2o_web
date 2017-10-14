@@ -182,13 +182,15 @@ class Tasks extends \CLASSES\WebBase
     /**
      * 任务发布/草稿
      */
-    private function pub()
+    private function publish()
     {
+        //$this->db->debug = 1;
         $data = $info = $worker = $fields = $message = $tmp = $bouns_data_param = array();
         $bouns_data_where = '';
 
         $data['t_storage'] = $tmp['t_storage'] = 1;
         if (isset($_REQUEST['t_storage']) && is_numeric($_REQUEST['t_storage'])) $data['t_storage'] = intval($_REQUEST['t_storage']);
+        $data['t_title'] = '未命名任务';
         if (isset($_REQUEST['t_title']) && '' != trim($_REQUEST['t_title'])) $data['t_title'] = trim($_REQUEST['t_title']);
         if (isset($_REQUEST['t_info']) && '' != trim($_REQUEST['t_info'])) $data['t_info'] = trim($_REQUEST['t_info']);
         if (isset($_REQUEST['t_amount']) && 0 < floatval($_REQUEST['t_amount'])) $data['t_amount'] = $data['t_edit_amount'] = floatval($_REQUEST['t_amount']);
@@ -200,7 +202,7 @@ class Tasks extends \CLASSES\WebBase
         {
             if (!isset($data['t_title'])) $message[] = '标题不能为空';
             if (!isset($data['t_info'])) $message[] = '简介不能为空';
-            if (!isset($data['t_duration'])) $message[] = '任务时长不能小于1天';
+            //if (!isset($data['t_duration'])) $message[] = '任务时长不能小于1天';
             if (!isset($data['t_posit_x'])) $message[] = 'x轴坐标不正确';
             if (!isset($data['t_posit_y'])) $message[] = 'y轴坐标不正确';
         }
@@ -209,8 +211,10 @@ class Tasks extends \CLASSES\WebBase
         {
             $this->exportData($message);
         }
-        $data['t_phone'] = 0;
-        if (isset($_REQUEST['t_phone']) && '' != trim($_REQUEST['t_phone'])) $data['t_phone'] = trim($_REQUEST['t_phone']);
+
+        if (isset($_REQUEST['t_posit_y'])) $data['t_posit_y'] = floatval($_REQUEST['t_posit_y']);
+        //$data['t_phone'] = 0;
+        //if (isset($_REQUEST['t_phone']) && '' != trim($_REQUEST['t_phone'])) $data['t_phone'] = trim($_REQUEST['t_phone']);
         $data['t_type'] = 0;
         if (isset($_REQUEST['t_type']) && '' != trim($_REQUEST['t_type'])) $data['t_type'] = trim($_REQUEST['t_type']);
         $data['t_phone_status'] = 1;
@@ -227,35 +231,23 @@ class Tasks extends \CLASSES\WebBase
         if (isset($_REQUEST['area']) && intval($_REQUEST['area']) > 0) $tmp['area'] = intval($_REQUEST['area']);
         if (isset($_REQUEST['address']) && '' != trim($_REQUEST['address'])) $tmp['address'] = trim($_REQUEST['address']);
         if (isset($_REQUEST['t_id']) && is_numeric($_REQUEST['t_id'])) $tmp['id'] = intval($_REQUEST['t_id']); //任务id
+        if (isset($_REQUEST['u_pass']) && '' != trim($_REQUEST['u_pass'])) $tmp['u_pass'] = trim($_REQUEST['u_pass']); //任务id
 
         //删除之前的该任务 并重新写入
-        if (isset($tmp['id']) && intval($tmp['id']) > 0)
+        if (isset($tmp['id']) && isset($data['t_author']))
         {
-            $del_old_result = $task_dao->delOldTask(array('t_id' => intval($tmp['id']), 't_author' => intval($data['t_author'])));
-            if (!$del_old_result)
-            {
-                $this->exportData('无法完成任务覆盖');
-            }
-            //归还已经扣除资金及抵扣券
-            $platform_funds_dao = new \WDAO\Platform_funds_log();
-            $back_platform_funds = $platform_funds_dao->rebackFundsToUser(array(
-                'pfl_type' => 3,
-                'pfl_type_id' => intval($tmp['id']),
-                'u_id' => intval($data['t_author']),
+            $del_result = $this->_delTaks(array(
+                't_id' => $tmp['id'],
+                't_author' => $data['t_author'],
+                'bd_id' => isset($bouns_data_param['bd_id']) ? $bouns_data_param['bd_id'] : 0,
+                'bd_serial' => isset($bouns_data_param['bd_serial']) ? $bouns_data_param['bd_serial'] : '',
             ));
-            if (!$back_platform_funds)
+            if ($del_result < 0)
             {
-                $this->exportData('返还用户资金失败，请联系客服人员');
-            }
-
-            if (!empty($bouns_data_param) && ($bouns_data_param['bd_id'] > 0 || '' != $bouns_data_param['bd_serial']))
-            {
-                $bouns_data_dao = new \WDAO\Bouns_data();
-                $reback_bouns_result = $bouns_data_dao->rebackBounsToUser($bouns_data_param);
-                if (!$reback_bouns_result)
-                {
-                    $this->exportData('还原抵扣券失败，请联系客服人员');
-                }
+                if ($del_result == -1) $this->exportData('无法完成任务覆盖或任务草稿不存在');
+                if ($del_result == -2) $this->exportData('返还用户资金失败，请联系客服人员');
+                if ($del_result == -3) $this->exportData('还原抵扣券失败，请联系客服人员');
+                if ($del_result == -9) $this->exportData('参数不正确');
             }
         }
 
@@ -269,7 +261,7 @@ class Tasks extends \CLASSES\WebBase
 
         /*tasks_ext_info*/
         $tmp['t_id'] = $info['t_id'] = $result;
-        $info['t_desc'] = $data['t_info'];
+        $info['t_desc'] = (isset($data['t_info']) && '' != trim($data['t_info'])) ? trim($data['t_info']) : '';
         if (isset($_REQUEST['t_desc']) && '' != trim($_REQUEST['t_desc'])) $info['t_desc'] = trim($_REQUEST['t_desc']);
         $ext_info_dao = new \WDAO\Task_ext_info();
         $info_result = $ext_info_dao->addData($info);
@@ -296,7 +288,7 @@ class Tasks extends \CLASSES\WebBase
                 $worker[$key][] = isset($tmp['area']) ? $tmp['area'] : 0;
                 $worker[$key][] = isset($tmp['address']) ? $tmp['address'] : '';
                 $worker[$key][] = 0;
-                $tmp['total'] = $tmp['total_edit'] += $worker[$key][2] * $worker[$key][3];
+                $tmp['total'] = $tmp['total_edit'] += $worker[$key][2] * $worker[$key][3] * (($worker[$key][6] - $worker[$key][5]) / 3600 / 24 + 1);
             }
         }
         else
@@ -307,8 +299,9 @@ class Tasks extends \CLASSES\WebBase
             $worker['r_city'] = isset($tmp['city']) ? $tmp['city'] : 0;
             $worker['r_area'] = isset($tmp['area']) ? $tmp['area'] : 0;
             $worker['tew_address'] = isset($tmp['address']) ? $tmp['address'] : '';
-            $tmp['total'] = $tmp['total_edit'] += $worker['tew_worker_num'] * $worker['tew_price'];
+            $tmp['total'] = $tmp['total_edit'] += $worker['tew_worker_num'] * $worker['tew_price'] * 1;
         }
+
         $ext_worker_dao = new \WDAO\Task_ext_worker();
         $worker_result = $ext_worker_dao->addData($worker, $fields);
         if (!$worker_result)
@@ -331,14 +324,24 @@ class Tasks extends \CLASSES\WebBase
                 }
 
                 $tmp['total_edit'] -= $bouns_data['b_amount'];
-                //$bouns_data_param['bd_author'] = intval($_REQUEST['t_author'])
-                //$bouns_data_dao->updateData(array('bd_use_time' => time()), $bouns_data_param); //抵扣券状态更改为已经使用
                 $tmp['bd_id'] = $bouns_data['bd_id'];
             }
             else
             {
                 $this->exportData('该抵扣券不存在');
             }
+        }
+
+        //获取用户支付密码及
+        if (!isset($tmp['u_pass']))
+        {
+            $this->exportData('用户支付密码不能为空');
+        }
+        $user_dao = new \WDAO\Users(array('table' => 'users'));
+        $pass_result = $user_dao->checkUserPayPassword(array('u_id' => intval($_REQUEST['t_author']), 'u_pass' => $tmp['u_pass']));
+        if (!$pass_result)
+        {
+            $this->exportData('用户支付密码错误');
         }
 
         //获取用户资金
@@ -391,5 +394,95 @@ class Tasks extends \CLASSES\WebBase
         }
     }
 
+    private function changePrice()
+    {
+        $data = $info = $worker = $fields = $message = $tmp = $bouns_data_param = array();
+
+        if (isset($_REQUEST['t_author']) && 0 < intval($_REQUEST['t_author'])) $data['t_author'] = $bouns_data_param['t_author'] = $data['t_last_editor'] = intval($_REQUEST['t_author']);
+        if (isset($_REQUEST['t_id']) && is_numeric($_REQUEST['t_id'])) $tmp['id'] = intval($_REQUEST['t_id']); //任务id
+
+    }
+
+    /**
+     * 删除任务及归还资金与抵扣券 [对外]
+     * @param array $data
+     * @return int
+     */
+    private function del($data = array())
+    {
+        $del_result = -9;
+        if (!empty($data) && isset($data['t_id']) && isset($data['t_author']))
+        {
+            $del_result = $this->_delTaks(array(
+                't_id' => $data['t_id'],
+                't_author' => $data['t_author'],
+                'bd_id' => isset($data['bd_id']) ? $data['bd_id'] : 0,
+                'bd_serial' => isset($data['bd_serial']) ? $data['bd_serial'] : '',
+            ));
+        }
+
+        if ($del_result < 0)
+        {
+            if ($del_result == -1) $this->exportData('无法完成任务覆盖或任务草稿不存在');
+            if ($del_result == -2) $this->exportData('返还用户资金失败，请联系客服人员');
+            if ($del_result == -3) $this->exportData('还原抵扣券失败，请联系客服人员');
+            if ($del_result == -9) $this->exportData('参数不正确');
+        }
+        $this->exportData('success');
+    }
+
+    /**
+     * 删除任务及归还资金与抵扣券
+     * @param array $data
+     * @return int
+     */
+    private function _delTaks($data = array())
+    {
+        if (isset($data['t_id']) && isset($data['t_author']))
+        {
+            $task_dao = new \WDAO\Tasks();
+            //删除之前的该任务 并重新写入
+            $del_old_result = $task_dao->delOldTask(array('t_id' => intval($data['t_id']), 't_author' => intval($data['t_author'])));
+            if (!$del_old_result)
+            {
+                return -1;
+                //$this->exportData('无法完成任务覆盖或任务草稿不存在');
+            }
+
+            //归还已经扣除资金
+            $platform_funds_dao = new \WDAO\Platform_funds_log();
+            $back_platform_funds = $platform_funds_dao->rebackFundsToUser(array(
+                'pfl_type' => 3,
+                'pfl_reason' => 'pubtask',
+                'pfl_type_id' => intval($data['t_id']),
+                'u_id' => intval($data['t_author']),
+            ));
+            if (!$back_platform_funds)
+            {
+                return -2;
+                //$this->exportData('返还用户资金失败，请联系客服人员');
+            }
+
+            //归还抵扣券
+            if ((isset($data['bd_id']) || isset($data['bd_serial'])))
+            {
+                $bouns_data_param = array();
+                if (isset($data['bd_id']) $bouns_data_param['bd_id'] = $data['bd_id'];
+                if (isset($data['bd_serial']) $bouns_data_param['bd_serial'] = $data['bd_serial'];
+                if ((isset($bouns_data_param['bd_id']) && $bouns_data_param['bd_id'] > 0) || (isset($bouns_data_param['bd_serial']) && '' != $bouns_data_param['bd_serial']))
+                {
+                    $bouns_data_dao = new \WDAO\Bouns_data();
+                    $reback_bouns_result = $bouns_data_dao->rebackBounsToUser($bouns_data_param);
+                    if (!$reback_bouns_result)
+                    {
+                        return -3;
+                        //$this->exportData('还原抵扣券失败，请联系客服人员');
+                    }
+                }
+            }
+            return 0;
+        }
+        return -9;
+    }
 
 }
