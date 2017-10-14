@@ -32,41 +32,46 @@ class Platform_funds_log extends \MDAOBASE\DaoBase
             {
                 $param['order'] = ' pfl_in_time desc ';
                 $param['limit'] = ' 1 ';
+                $param['pager'] = 0;
                 $info = $this->listData($param);
-                if (!empty($info[0]) && isset($info[0]['pfl_amount']) && $info[0]['pfl_amount'] > 0)
+                //print_r($info);exit;
+                if (!empty($info['data'][0]) && isset($info['data'][0]['pfl_amount']) && $info['data'][0]['pfl_amount'] > 0)
                 {
-                    $this->handler->start();
+                    \Swoole::$php->db->start();
                     //更新给用户的资金
-                    $sql = 'update users_ext_funds set uef_overage = uef_overage+'.$info[0]['pfl_amount'].' where u_id = ' . $uid;
+                    $sql = 'update users_ext_funds set uef_overage = uef_overage+'.$info['data'][0]['pfl_amount'].' where u_id = ' . $u_id;
                     if ('' != $sql)
                     {
                         //加给用户
-                        $user_funds_model = new \App\Model\Users_ext_funds();
+                        $user_funds_model = model('Users_ext_funds');
                         $user_funds_result = $user_funds_model->queryData($sql);
                     }
                     //减去平台资金表
-                    $platform_funds_model = new \App\Model\Platform_funds_log();
+                    $platform_funds_model = model('Platform_funds_log');
                     $platform_funds_result = $platform_funds_model->addData(array(
-                        'pfl_type' => $info[0]['pfl_type'],
-                        'pfl_type_id' => $info[0]['pfl_type_id'],
-                        'pfl_amount' => ($info[0]['pfl_amount'] * -1),
+                        'pfl_type' => $info['data'][0]['pfl_type'],
+                        'pfl_type_id' => $info['data'][0]['pfl_type_id'],
+                        'pfl_amount' => ($info['data'][0]['pfl_amount'] * -1),
                         'pfl_in_time' => time(),
                         'pfl_reason' => 'backtouser',
-                        'pfl_status' => $info[0]['pfl_status'],
+                        'pfl_status' => $info['data'][0]['pfl_status'],
 
                     ));
                     if ($user_funds_result && $platform_funds_result)
                     {
-                        $this->handler->commit();
+                        \Swoole::$php->db->commit();
                         return true;
                     }
                     else
                     {
-                        $this->handler->rollback();
+                        \Swoole::$php->db->rollback();
                     }
 
                 }
-
+            }
+            else
+            {//没有 自然返回成功
+                return 2;
             }
         }
         return false;

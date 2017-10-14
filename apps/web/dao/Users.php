@@ -50,5 +50,56 @@ class Users extends \MDAOBASE\DaoBase
 
     }
 
+    /**
+     * 验证支付密码
+     * @param array $data
+     * @return 失败返回false 成功返回含有uid及手机号的数组
+     *
+     */
+    public function checkUserPayPassword($data = array())
+    {
+        if (!empty($data) && isset($data['u_id']) && 0 < intval($data['u_id']) && isset($data['u_pass']) && '' != trim($data['u_pass']))
+        {
+            $info = $this->infoData(intval($data['u_id']));
+            if (!empty($info) && isset($info['u_pass']))
+            {
+                if ($info['u_pass'] != encyptPassword($data['u_pass']))
+                {
+                    return false;
+                }
+                return array('u_mobile' => $info['u_mobile'], 'u_id' => $info['u_id']);
+            }
+        }
+        return false;
+    }
+
+    //public function editPayPassword($data = array())
+    //{
+    //    if (!isset($data['u_id']) || intval($data['u_id']) <= 0)
+    //    {
+    //        return false;
+    //    }
+    //    $param['u_id'] = intval($data['u_id']);
+    //    if (isset($data['u_idcard']) && '' != trim($data['u_idcard'])) ? $param['u_idcard'] = $data['u_idcard'];
+    //
+    //    if (!empty($param))
+    //    {
+    //        $param['limit'] = 1;
+    //        $param['pager'] = 0;
+    //        $info = $this->listData($param);
+    //        if (!empty($info['data'][0]))
+    //        {
+    //            $info = $info['data'][0];
+    //
+    //            if (isset($data['u_pass']) && ('' == trim($data['u_pass']) ||  $info['u_pass'] != encyptPassword($data['u_pass'])))
+    //            {
+    //                return false;
+    //            }
+    //
+    //            return $this->updateData(array('u_pass' => encyptPassword($data['new_pass'])), array('u_id' => param['u_id']));
+    //        }
+    //    }
+    //    return false;
+    //}
 
 }
