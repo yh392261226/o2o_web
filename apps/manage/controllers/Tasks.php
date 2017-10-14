@@ -91,6 +91,7 @@ class Tasks extends \CLASSES\ManageBase
         if (isset($_REQUEST['t_phone_status'])) $data['t_phone_status'] = intval($_REQUEST['t_phone_status']);
         if (isset($_REQUEST['t_phone'])) $data['t_phone'] = trim($_REQUEST['t_phone']);
         $data['page'] = isset($_REQUEST['page']) ? intval($_REQUEST['page']) : 1;
+        $data['t_storage'] = 0;
 
         //可以区间值
         if (isset($_REQUEST['t_in_time'])) $data['t_in_time'] = strtotime(trim($_REQUEST['t_in_time']));

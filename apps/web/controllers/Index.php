@@ -48,4 +48,10 @@ class Index extends \CLASSES\WebBase
         }
         echo $message;exit;
     }
+
+    public function task()
+    {
+        echo "<pre>";
+        print_r($_REQUEST);
+    }
 }
