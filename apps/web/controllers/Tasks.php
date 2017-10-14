@@ -398,8 +398,8 @@ class Tasks extends \CLASSES\WebBase
     {
         $data = $info = $worker = $fields = $message = $tmp = $bouns_data_param = array();
 
-        if (isset($_REQUEST['t_author']) && 0 < intval($_REQUEST['t_author'])) $data['t_author'] = $bouns_data_param['t_author'] = $data['t_last_editor'] = intval($_REQUEST['t_author']);
-        if (isset($_REQUEST['t_id']) && is_numeric($_REQUEST['t_id'])) $tmp['id'] = intval($_REQUEST['t_id']); //任务id
+        if (isset($_REQUEST['t_author']) && 0 < intval($_REQUEST['t_author'])) $data['t_author'] = intval($_REQUEST['t_author']);
+        if (isset($_REQUEST['t_id']) && 0 < intval($_REQUEST['t_id'])) $tmp['id'] = intval($_REQUEST['t_id']); //任务id
 
     }
 
