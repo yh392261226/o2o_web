@@ -44,6 +44,7 @@
                                 <th data-field="offset" data-sortable="true">偏移量总数</th>
                                 <th data-field="used" data-sortable="true">已用数</th>
                                 <th data-field="price" data-sortable="true">价值</th>
+                                <th data-field="use_amount" data-sortable="true">满多少钱可用</th>
                                 <th data-field="status" data-sortable="true">状态</th>
                                 <th data-field="type" data-sortable="true">发放方式</th>
                                 <th data-field="start_time" data-sortable="true">开始时间</th>
@@ -64,6 +65,7 @@
                                 <td>{{$value.b_offset}}</td>
                                 <td>{{$value.used}}</td>
                                 <td>{{$value.b_amount}}</td>
+                                <td>{{$value.b_use_amount}}</td>
                                 <td>
                                     {{if $value.b_status == -1}}已删除{{/if}}
                                     {{if $value.b_status == 0}}无效{{/if}}
