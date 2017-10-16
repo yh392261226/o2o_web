@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-14 10:39:47
+ * @Last Modified time: 2017-10-15 14:35:29
  */
 namespace App\Controller;
 
@@ -103,15 +103,15 @@ class Users extends \CLASSES\WebBase
     }
 
     /*发送短信验证码*/
-    public function sendVerifyCode()
+    public function sendVerifyCode($msg='用户您好,您的登录验证码为',$number='')
     {
-        $phone_number = !empty($_GET['phone_number']) ? intval($_GET['phone_number']) : '';
+        $phone_number = !empty($_GET['phone_number']) ? intval($_GET['phone_number']) : $number;
         if(!empty($phone_number))
         {
             $code = mt_rand(99999,999999);
 
             /*发送验证码接口*/
-            $content = '用户您好,您的登录验证码为'.$code.'。';
+            $content = $msg.$code.'。';
             $result = sendSms($phone_number, $content);
             if(!$result)
             {
@@ -317,7 +317,7 @@ class Users extends \CLASSES\WebBase
 
         /*获取用户users表内信息*/
         $dao_funds = new \WDAO\Users(array('table'=>'users'));
-        $res = $dao_funds -> infoData(array('fields'=>'u_id,
+        $res = $dao_funds -> infoData(array('fields'=>'u_id,u_pass
         u_name,u_mobile,u_phone,u_fax,u_sex,u_in_time,u_online,u_status,u_type,u_task_status,u_skills,u_start,u_credit,u_top,u_recommend,u_jobs_num,u_worked_num,u_high_opinions,u_low_opinions,u_middle_opinions,u_dissensions,u_true_name,u_idcard','key'=>'u_id','val' => $u_id,'pager'=>false));
         // $skills_id = array();
         // if($res['u_skills'] != 0){
@@ -834,7 +834,21 @@ class Users extends \CLASSES\WebBase
                 $ext_data['c_mark'] = '';
                 $ext_data['c_desc'] = isset($_POST['c_desc']) ? trim($_POST['c_desc']) : ' ';
                 if(!empty($_POST['c_img'])){
-                    $ext_data['c_img'] = $dao_complaints ->uploadComplaintImg($_POST['c_img'],'../uploads/images/'.date('Y/m/d'));
+                    $ext_data['c_img'] = '';
+                    $res = $dao_complaints ->uploadComplaintImg($_POST['c_img'],'../uploads/images/'.date('Y/m/d'));
+                    if(intval($res) < 0){
+                        switch (intval($res)) {
+                            case -1:
+                                $this->exportData( array('msg'=>'图片目录创建失败'),0);
+                                break;
+                            case -1:
+                                $this->exportData( array('msg'=>'图片写入失败'),0);
+                                break;
+                            default:
+                                $ext_data['c_img'] = $res;
+                                break;
+                        }
+                    }
                 }
                 $dao_complaints_ext = new \WDAO\Users(array('table'=>'complaints_ext'));
                 $res_ext_add = $dao_complaints_ext -> addData($ext_data);
@@ -852,7 +866,20 @@ class Users extends \CLASSES\WebBase
                     'val' => $_POST['c_id'],
                     ));
                 $ext_data = '';
-                $img_path = $dao_complaints_ext ->uploadComplaintImg($_POST['c_img'],'../uploads/images/'.date('Y/m/d'));
+                $res = $dao_complaints_ext ->uploadComplaintImg($_POST['c_img'],'../uploads/images/'.date('Y/m/d'));
+                if(intval($res) < 0){
+                    switch (intval($res)) {
+                        case -1:
+                            $this->exportData( array('msg'=>'图片目录创建失败'),0);
+                            break;
+                        case -1:
+                            $this->exportData( array('msg'=>'图片写入失败'),0);
+                            break;
+                        default:
+                            $img_path = $res;
+                            break;
+                    }
+                }
 
                 if(!empty($img_path)){
                     if(!empty($complaints_ext_info['c_img'])){
@@ -1110,6 +1137,96 @@ class Users extends \CLASSES\WebBase
         }
         unset($list['pager']);
         $this->exportData( $list,1);
+    }
+
+    /*设置用户支付密码*/
+    public function setPassword()
+    {
+        if(empty($_REQUEST['u_id']) || empty($u_id =  intval($_REQUEST['u_id']))){
+            $this->exportData( array('msg'=>'用户id为空'),0);
+        }
+        if(empty($_REQUEST['u_pass']) || empty($u_pass =  trim($_REQUEST['u_pass']))){
+            $this->exportData( array('msg'=>'用户密码为空'),0);
+        }
+        $dao_users = new \WDAO\Users(array('table'=>'users'));
+        $u_info = $dao_users -> infoData(array('key'=>'u_id','val'=>$u_id,'fields'=>'u_id,u_pass'));
+        if(!empty($u_info['u_pass'])){
+            $this ->exportData( array('msg'=>'设置密码失败'),0);
+        }else{
+            $data = array();
+            $data['u_pass'] = encyptPassword($u_pass);
+            $res = $dao_users ->updateData($data,array('u_id'=>$u_id));
+            if($res){
+                $this ->exportData( array('msg'=>'设置密码成功'),1);
+            }else{
+                $this ->exportData( array('msg'=>'设置密码失败'),0);
+            }
+
+        }
+
+    }
+
+    public function passwordEdit()
+    {
+
+        $dao_users = new \WDAO\Users(array('table'=>'users'));
+        $res = false;
+
+        if(isset($_REQUEST['u_id']) && !empty($u_id = intval($_REQUEST['u_id'])) && !empty($_REQUEST['u_pass']))/*用户id原密码*/
+        {
+            if(empty($_REQUEST['new_pass']) || empty($u_pass = trim($_REQUEST['new_pass']))){
+                $this ->exportData( array('msg'=>'请输入新密码'),0);
+            }
+
+            $check_user_res = $dao_users ->checkUserPayPassword(array('u_id' => $u_id,'u_pass' => trim($_REQUEST['u_pass'])));
+            if(isset($check_user_res['u_id']) && !empty(intval($check_user_res['u_id']))){
+                $res = $dao_users ->passwordEdit($u_id,$_REQUEST['new_pass']);
+            }else{
+                $this ->exportData( array('msg'=>'原密码错误,密码修改失败'),0);
+            }
+        }
+
+        elseif(isset($_REQUEST['u_mobile']) && !empty($num = intval($_REQUEST['u_mobile'])) && !empty($_REQUEST['verify_code']) && !empty($_REQUEST['u_idcard']) && !empty($u_idcard = intval($_REQUEST['u_idcard'])) )/*手机号验证码身份证号*/
+        {
+            if(empty($_REQUEST['new_pass']) || empty($u_pass = trim($_REQUEST['new_pass']))){
+                $this ->exportData( array('msg'=>'请输入新密码'),0);
+            }
+            $res = $dao_users ->checkVerifies($num,trim($_REQUEST['verify_code']),$this ->web_config['verify_code_time']);
+            if($res === true){
+                $u_info = $dao_users ->listData(array('u_mobile'=>$num,'u_idcard'=>$u_idcard,'fields'=>'u_id','pager'=>false));
+
+                if (!empty($u_info['data'][0]['u_id']) && intval($u_info['data'][0]['u_id']) > 0) {
+                    $res = $dao_users ->passwordEdit($u_info['data'][0]['u_id'],$_REQUEST['new_pass']);
+                }else{
+                    $this ->exportData( array('msg'=>'身份证号错误,密码修改失败'),0);
+                }
+            }else{
+                switch ($res) {
+                    case '-1':
+                        $this ->exportData( array('msg'=>'系统错误请联系管理员'),0);
+                        break;
+                    case '-2':
+                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
+                        break;
+                    default:
+                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
+                        break;
+                }
+            }
+        }
+        elseif(isset($_REQUEST['u_mobile']) && !empty($num = intval($_REQUEST['u_mobile'])) && !isset($_REQUEST['u_idcard']) && !isset($_REQUEST['verify_code']))/*手机号发送验证码*/
+        {
+            $this ->sendVerifyCode('用户您好!您正在重置密码,验证码为',$num);
+        }
+        else
+        {
+            $this ->exportData( array('msg'=>'参数不足,密码修改失败'),0);
+        }
+        if($res){
+            $this ->exportData( array('msg'=>'密码修改成功'),1);
+        }else{
+            $this ->exportData( array('msg'=>'密码修改失败,请联系管理员'),0);
+        }
     }
 
 
