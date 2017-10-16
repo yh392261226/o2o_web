@@ -80,10 +80,10 @@ class Users extends \MDAOBASE\DaoBase
      * @date   2017-10-14
      * @param  [type]            $phone_number [description]手机号
      * @param  [type]            $verifies     [description]验证码
-     * @param  [type]            $max_time     [description]过期时间戳
+     * @param  [type]            $max_time     [description]有效时长
      * @return [bool]                          [description]
      */
-    public function checkVerifies($phone_number,$verifies,$max_time)
+    public function checkVerifies($phone_number,$verifies,$valid_time)
     {
          /*获取验证码信息*/
         $dao_verify_code = new \WDAO\Verifies(array('table'=>'verifies'));
@@ -93,11 +93,12 @@ class Users extends \MDAOBASE\DaoBase
             'limit' => 1,
             'pager'=> false,
                 ));
+        $time_max = $valid_time + $self_data['data']['0']['v_in_time'];
         $time = time();
         if(empty($self_data['data']['0']['code']) || empty($self_data['data']['0']['v_in_time'])){
             // $this->exportData(array('msg'=>'系统错误请联系管理员'),0);
             return -1;/*系统错误请联系管理员*/
-        }else if($verify_code != trim($self_data['data']['0']['code']) || ($time > $time_max))
+        }else if($verifies != trim($self_data['data']['0']['code']) || ($time > $time_max))
         {
             // $this->exportData(array('msg'=>'验证码不正确或验证码已过有效期'),0);
             return -2;/*验证码不正确或验证码已过有效期*/
@@ -106,15 +107,15 @@ class Users extends \MDAOBASE\DaoBase
         }
     }
 
-    //public function editPayPassword($data = array())
-    //{
+    // public function editPayPassword($data = array())
+    // {
     //    if (!isset($data['u_id']) || intval($data['u_id']) <= 0)
     //    {
     //        return false;
     //    }
     //    $param['u_id'] = intval($data['u_id']);
     //    if (isset($data['u_idcard']) && '' != trim($data['u_idcard'])) ? $param['u_idcard'] = $data['u_idcard'];
-    //
+
     //    if (!empty($param))
     //    {
     //        $param['limit'] = 1;
@@ -123,16 +124,21 @@ class Users extends \MDAOBASE\DaoBase
     //        if (!empty($info['data'][0]))
     //        {
     //            $info = $info['data'][0];
-    //
+
     //            if (isset($data['u_pass']) && ('' == trim($data['u_pass']) ||  $info['u_pass'] != encyptPassword($data['u_pass'])))
     //            {
     //                return false;
     //            }
-    //
+
     //            return $this->updateData(array('u_pass' => encyptPassword($data['new_pass'])), array('u_id' => param['u_id']));
     //        }
     //    }
     //    return false;
-    //}
+    // }
+
+    public function passwordEdit($u_id,$new_pass)
+    {
+        return $this->updateData(array('u_pass' => encyptPassword($new_pass)), array('u_id' => $u_id));
+    }
 
 }
