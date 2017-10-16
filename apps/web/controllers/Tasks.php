@@ -185,8 +185,7 @@ class Tasks extends \CLASSES\WebBase
     private function publish()
     {
         //$this->db->debug = 1;
-        $data = $info = $worker = $fields = $message = $tmp = $bouns_data_param = array();
-        $bouns_data_where = '';
+        $data = $info = $worker = $fields = $message = $tmp = array();
 
         $data['t_storage'] = $tmp['t_storage'] = 1;
         if (isset($_REQUEST['t_storage']) && is_numeric($_REQUEST['t_storage'])) $data['t_storage'] = intval($_REQUEST['t_storage']);
@@ -197,7 +196,7 @@ class Tasks extends \CLASSES\WebBase
         if (isset($_REQUEST['t_duration']) && 1 <= intval($_REQUEST['t_duration'])) $data['t_duration'] = intval($_REQUEST['t_duration']);
         if (isset($_REQUEST['t_posit_x'])) $data['t_posit_x'] = floatval($_REQUEST['t_posit_x']);
         if (isset($_REQUEST['t_posit_y'])) $data['t_posit_y'] = floatval($_REQUEST['t_posit_y']);
-        if (isset($_REQUEST['t_author']) && 0 < intval($_REQUEST['t_author'])) $data['t_author'] = $bouns_data_param['t_author'] = $data['t_last_editor'] = intval($_REQUEST['t_author']);
+        if (isset($_REQUEST['t_author']) && 0 < intval($_REQUEST['t_author'])) $data['t_author'] = $data['t_last_editor'] = intval($_REQUEST['t_author']);
         if ($data['t_storage'] == 0)
         {
             if (!isset($data['t_title'])) $message[] = '标题不能为空';
@@ -213,8 +212,6 @@ class Tasks extends \CLASSES\WebBase
         }
 
         if (isset($_REQUEST['t_posit_y'])) $data['t_posit_y'] = floatval($_REQUEST['t_posit_y']);
-        //$data['t_phone'] = 0;
-        //if (isset($_REQUEST['t_phone']) && '' != trim($_REQUEST['t_phone'])) $data['t_phone'] = trim($_REQUEST['t_phone']);
         $data['t_type'] = 0;
         if (isset($_REQUEST['t_type']) && '' != trim($_REQUEST['t_type'])) $data['t_type'] = trim($_REQUEST['t_type']);
         $data['t_phone_status'] = 1;
@@ -223,9 +220,6 @@ class Tasks extends \CLASSES\WebBase
         $data['t_amount_edit_times'] = 0;
         $data['t_status'] = 0;
         if (isset($_REQUEST['t_status']) && is_numeric($_REQUEST['t_status'])) $data['t_status'] = intval($_REQUEST['t_status']);
-        //if (isset($_REQUEST['bd_id']) && intval($_REQUEST['bd_id']) > 0) $bouns_data_param['bd_id'] = $bouns_data_where = intval($_REQUEST['bd_id']);
-        //if (isset($_REQUEST['serial']) && '' != trim($_REQUEST['serial'])) $bouns_data_param['bd_serial'] = trim($_REQUEST['serial']);
-        //if (isset($bouns_data_param['bd_serial'])) $bouns_data_where = array('key' => 'bd_serial', 'val' => $bouns_data_param['bd_serial']);
         if (isset($_REQUEST['province']) && intval($_REQUEST['province']) > 0) $tmp['province'] = intval($_REQUEST['province']);
         if (isset($_REQUEST['city']) && intval($_REQUEST['city']) > 0) $tmp['city'] = intval($_REQUEST['city']);
         if (isset($_REQUEST['area']) && intval($_REQUEST['area']) > 0) $tmp['area'] = intval($_REQUEST['area']);
@@ -291,15 +285,12 @@ class Tasks extends \CLASSES\WebBase
             $tmp['t_storage'] = 0; //插入失败 立马标注进草稿箱
         }
 
-
         //删除之前的该任务 并重新写入
         if (isset($tmp['id']) && isset($data['t_author']))
         {
             $del_result = $this->_delTaks(array(
                 't_id' => $tmp['id'],
                 't_author' => $data['t_author'],
-                'bd_id' => isset($bouns_data_param['bd_id']) ? $bouns_data_param['bd_id'] : 0,
-                'bd_serial' => isset($bouns_data_param['bd_serial']) ? $bouns_data_param['bd_serial'] : '',
             ));
             if ($del_result < 0)
             {
@@ -309,29 +300,6 @@ class Tasks extends \CLASSES\WebBase
                 if ($del_result == -9) $this->exportData('参数不正确');
             }
         }
-
-        //$tmp['bd_id'] = 0;
-        ////判断抵扣券
-        //if ((isset($bouns_data_param['bd_id']) || isset($bouns_data_param['bd_serial'])) && !empty($bouns_data_where))
-        //{
-        //    $bouns_data_dao = new \WDAO\Bouns_data();
-        //    $bouns_data = $bouns_data_dao->infoBounsData($bouns_data_where);
-        //
-        //    if (!empty($bouns_data) && $bouns_data['b_amount'] > 0)
-        //    {
-        //        if ($bouns_data['bd_author'] != intval($_REQUEST['t_author']) || $bouns_data['bd_use_time'] > 0)
-        //        {
-        //            $this->exportData('该抵扣券不存在或已被使用');
-        //        }
-        //
-        //        $tmp['total_edit'] -= $bouns_data['b_amount'];
-        //        $tmp['bd_id'] = $bouns_data['bd_id'];
-        //    }
-        //    else
-        //    {
-        //        $this->exportData('该抵扣券不存在');
-        //    }
-        //}
 
         //获取用户支付密码及
         if (!isset($tmp['u_pass']))
@@ -357,17 +325,9 @@ class Tasks extends \CLASSES\WebBase
         if ($worker_result && $data['t_storage'] == 0 && $tmp['t_storage'] == 1)
         {
             $this->db->start();
-            //$amount_result = $task_dao->updateData(array('t_edit_amount' => $tmp['total_edit'], 't_amount' => $tmp['total'], 'bd_id' => $tmp['bd_id'], 't_storage' => 0), array('t_id' => $result));
             $amount_result = $task_dao->updateData(array('t_edit_amount' => $tmp['total_edit'], 't_amount' => $tmp['total'], 't_phone' => $pass_result['u_mobile'], 't_storage' => 0), array('t_id' => $result));
             if ($amount_result)
             {
-                //使用抵扣券
-                //$bouns_data_result = true;
-                //if (isset($bouns_data_dao) && !empty($bouns_data_param))
-                //{
-                //    $bouns_data_result = $bouns_data_dao->updateData(array('bd_use_time' => time()), $bouns_data_param); //抵扣券状态更改为已经使用
-                //}
-
                 //扣除用户资金 并加入平台资金日志
                 $user_funds_result = $this->userFunds(intval($_REQUEST['t_author']), (-1 * $tmp['total_edit']), $type = 'pubtask'); //扣除用户资金
                 $platform_funds_result = $this->platformFundsLog($result, $tmp['total_edit'], 3, 'pubtask', 0);     //平台资金日志增加
@@ -401,7 +361,7 @@ class Tasks extends \CLASSES\WebBase
      */
     private function changePrice()
     {
-        $data = $info = $worker = $fields = $message = $tmp = $bouns_data_param = array();
+        $data = $info = $worker = $fields = $message = $tmp = array();
 
         if (isset($_REQUEST['t_author']) && 0 < intval($_REQUEST['t_author'])) $data['t_author'] = intval($_REQUEST['t_author']);
         if (isset($_REQUEST['t_id']) && 0 < intval($_REQUEST['t_id'])) $tmp['id'] = intval($_REQUEST['t_id']); //任务id
@@ -421,8 +381,6 @@ class Tasks extends \CLASSES\WebBase
             $del_result = $this->_delTaks(array(
                 't_id' => $data['t_id'],
                 't_author' => $data['t_author'],
-                //'bd_id' => isset($data['bd_id']) ? $data['bd_id'] : 0,
-                //'bd_serial' => isset($data['bd_serial']) ? $data['bd_serial'] : '',
             ));
         }
 
@@ -488,24 +446,6 @@ class Tasks extends \CLASSES\WebBase
                 return -2;
                 //$this->exportData('返还用户资金失败，请联系客服人员');
             }
-
-            //归还抵扣券
-            //if ((isset($data['bd_id']) || isset($data['bd_serial'])))
-            //{
-            //    $bouns_data_param = array();
-            //    if (isset($data['bd_id']) $bouns_data_param['bd_id'] = $data['bd_id'];
-            //    if (isset($data['bd_serial']) $bouns_data_param['bd_serial'] = $data['bd_serial'];
-            //    if ((isset($bouns_data_param['bd_id']) && $bouns_data_param['bd_id'] > 0) || (isset($bouns_data_param['bd_serial']) && '' != $bouns_data_param['bd_serial']))
-            //    {
-            //        $bouns_data_dao = new \WDAO\Bouns_data();
-            //        $reback_bouns_result = $bouns_data_dao->rebackBounsToUser($bouns_data_param);
-            //        if (!$reback_bouns_result)
-            //        {
-            //            return -3;
-            //            //$this->exportData('还原抵扣券失败，请联系客服人员');
-            //        }
-            //    }
-            //}
             return 0;
         }
         return -9;
