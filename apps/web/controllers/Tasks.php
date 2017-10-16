@@ -233,24 +233,6 @@ class Tasks extends \CLASSES\WebBase
         if (isset($_REQUEST['t_id']) && is_numeric($_REQUEST['t_id'])) $tmp['id'] = intval($_REQUEST['t_id']); //任务id
         if (isset($_REQUEST['u_pass']) && '' != trim($_REQUEST['u_pass'])) $tmp['u_pass'] = trim($_REQUEST['u_pass']); //任务id
 
-        //删除之前的该任务 并重新写入
-        if (isset($tmp['id']) && isset($data['t_author']))
-        {
-            $del_result = $this->_delTaks(array(
-                't_id' => $tmp['id'],
-                't_author' => $data['t_author'],
-                'bd_id' => isset($bouns_data_param['bd_id']) ? $bouns_data_param['bd_id'] : 0,
-                'bd_serial' => isset($bouns_data_param['bd_serial']) ? $bouns_data_param['bd_serial'] : '',
-            ));
-            if ($del_result < 0)
-            {
-                if ($del_result == -1) $this->exportData('无法完成任务覆盖或任务草稿不存在');
-                if ($del_result == -2) $this->exportData('返还用户资金失败，请联系客服人员');
-                if ($del_result == -3) $this->exportData('还原抵扣券失败，请联系客服人员');
-                if ($del_result == -9) $this->exportData('参数不正确');
-            }
-        }
-
         //写入任务
         $task_dao = new \WDAO\Tasks();
         $result = $task_dao->addData($data);
@@ -307,6 +289,25 @@ class Tasks extends \CLASSES\WebBase
         if (!$worker_result)
         {
             $tmp['t_storage'] = 0; //插入失败 立马标注进草稿箱
+        }
+
+
+        //删除之前的该任务 并重新写入
+        if (isset($tmp['id']) && isset($data['t_author']))
+        {
+            $del_result = $this->_delTaks(array(
+                't_id' => $tmp['id'],
+                't_author' => $data['t_author'],
+                'bd_id' => isset($bouns_data_param['bd_id']) ? $bouns_data_param['bd_id'] : 0,
+                'bd_serial' => isset($bouns_data_param['bd_serial']) ? $bouns_data_param['bd_serial'] : '',
+            ));
+            if ($del_result < 0)
+            {
+                if ($del_result == -1) $this->exportData('无法完成任务覆盖或任务草稿不存在');
+                if ($del_result == -2) $this->exportData('返还用户资金失败，请联系客服人员');
+                if ($del_result == -3) $this->exportData('还原抵扣券失败，请联系客服人员');
+                if ($del_result == -9) $this->exportData('参数不正确');
+            }
         }
 
         $tmp['bd_id'] = 0;
@@ -411,7 +412,7 @@ class Tasks extends \CLASSES\WebBase
     private function del($data = array())
     {
         $del_result = -9;
-        if (!empty($data) && isset($data['t_id']) && isset($data['t_author']))
+        if (!empty($data) && isset($data['t_id']) && isset($data['t_author']) && intval($data['t_id']) > 0 && intval($data['t_author']) > 0)
         {
             $del_result = $this->_delTaks(array(
                 't_id' => $data['t_id'],
@@ -426,6 +427,8 @@ class Tasks extends \CLASSES\WebBase
             if ($del_result == -1) $this->exportData('无法完成任务覆盖或任务草稿不存在');
             if ($del_result == -2) $this->exportData('返还用户资金失败，请联系客服人员');
             if ($del_result == -3) $this->exportData('还原抵扣券失败，请联系客服人员');
+            if ($del_result == -4) $this->exportData('该任务不存在');
+            if ($del_result == -5) $this->exportData('该任务已开工，不能删除');
             if ($del_result == -9) $this->exportData('参数不正确');
         }
         $this->exportData('success');
@@ -441,6 +444,25 @@ class Tasks extends \CLASSES\WebBase
         if (isset($data['t_id']) && isset($data['t_author']))
         {
             $task_dao = new \WDAO\Tasks();
+            $del_info = $task_dao->infoData(intval($data['t_id']));
+            if (!empty($del_info))
+            {
+                if (isset($del_info['t_author']) && $del_info['t_author'] == intval($data['t_author']))
+                {
+                    if (isset($del_info['t_status']) && $del_info['t_status'] != 0 && $del_info['t_status'] != 1)
+                    {
+                        return -5; //任务已开始 不能删除
+                    }
+                }
+                else
+                {
+                    return -4; // 任务不归该用户 即任务不存在
+                }
+            }
+            else
+            {
+                return -4; // 任务不存在
+            }
             //删除之前的该任务 并重新写入
             $del_old_result = $task_dao->delOldTask(array('t_id' => intval($data['t_id']), 't_author' => intval($data['t_author'])));
             if (!$del_old_result)
