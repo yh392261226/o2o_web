@@ -165,7 +165,13 @@ class Tasks extends \CLASSES\WebBase
                 $info['t_desc'] = $desc['t_desc'];
             }
             unset($desc);
-            $workers = $this->task_ext_worker_dao->listData(array('pager' => 0, 't_id' => intval($_REQUEST['t_id'])));
+            $workers_param = array(
+                'pager' => 0,
+                'fields' => 'orders.*, task_ext_worker.*',
+                'where' => 'task_ext_worker.t_id =' . intval($_REQUEST['t_id']),
+                'leftjoin' => array('orders', 'orders.t_id = task_ext_worker.t_id'),
+                );
+            $workers = $this->task_ext_worker_dao->listData($workers_param);
             if (!empty($workers['data']))
             {
                 $info['t_workers'] = $workers['data'];
@@ -388,7 +394,6 @@ class Tasks extends \CLASSES\WebBase
         {
             if ($del_result == -1) $this->exportData('无法完成任务覆盖或任务草稿不存在');
             if ($del_result == -2) $this->exportData('返还用户资金失败，请联系客服人员');
-            if ($del_result == -3) $this->exportData('还原抵扣券失败，请联系客服人员');
             if ($del_result == -4) $this->exportData('该任务不存在');
             if ($del_result == -5) $this->exportData('该任务已开工，不能删除');
             if ($del_result == -9) $this->exportData('参数不正确');
@@ -425,6 +430,7 @@ class Tasks extends \CLASSES\WebBase
             {
                 return -4; // 任务不存在
             }
+
             //删除之前的该任务 并重新写入
             $del_old_result = $task_dao->delOldTask(array('t_id' => intval($data['t_id']), 't_author' => intval($data['t_author'])));
             if (!$del_old_result)
