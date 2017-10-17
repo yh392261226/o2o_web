@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-15 14:35:29
+ * @Last Modified time: 2017-10-16 17:24:16
  */
 namespace App\Controller;
 
@@ -152,6 +152,11 @@ class Users extends \CLASSES\WebBase
 
         $dao_favorate = new \WDAO\Users_favorate(array('table'=>'users_favorate'));
         $favorate_arr = $dao_favorate -> listData(array('users_favorate.u_id'=>$u_id,'f_type'=>0,'join'=>array('tasks',"tasks.t_id = users_favorate.f_type_id"),'fields'=>'tasks.t_title,tasks.t_amount,tasks.t_duration,tasks.t_author,tasks.t_status,f_id','pager'=>false));
+        foreach ($favorate_arr['data'] as $key => &$value) {
+            if(!empty($value['t_author'])){
+                $value['u_img'] = $this-> getHeadById($value['t_author']);
+            }
+        }
         $this->exportData( $favorate_arr,1);
     }
     /*收藏工人列表*/
@@ -178,7 +183,7 @@ class Users extends \CLASSES\WebBase
             'fields'=>'f_type_id,f_id','pager'=>false,
             ));
         if(empty($favorate_arr['data'])){
-            $this->exportData( $favorate_id_arr,1);
+            $this->exportData( array('data'=>array()),1);
         }
         foreach ($favorate_arr['data'] as $key => $value) {
             $favorate_id_arr[] = $value['f_type_id'];
@@ -900,7 +905,7 @@ class Users extends \CLASSES\WebBase
             }
         }
     }
-
+    /*充值开始*/
     /*用户提现申请接口*/
     public function applyWithdraw()
     {
@@ -961,58 +966,44 @@ class Users extends \CLASSES\WebBase
         /*充值记录接口*/
         public function applyRechargeLog()
     {
-        if(empty($_GET['u_id']) || empty($u_id = intval($_GET['u_id']))){
+        if(empty($_REQUEST['u_id']) || empty($u_id = intval($_REQUEST['u_id']))){
             $this->exportData( array('msg'=>'用户ID为空'),0);
         }
-        if(empty($_GET['uwl_amount']) || empty($uwl_amount = intval($_GET['uwl_amount']))){
-            $this->exportData( array('msg'=>'提现金额不能为空'),0);
+        if(empty($_REQUEST['url_amount']) || empty($url_amount = intval($_REQUEST['url_amount']))){
+            $this->exportData( array('msg'=>'充值金额不能为空'),0);
         }
-        if(empty($_GET['p_id']) || empty($p_id = intval($_GET['p_id']))){
-            $this->exportData( array('msg'=>'提现方式不能为空'),0);
+        if(empty($_REQUEST['p_id']) || empty($p_id = intval($_REQUEST['p_id']))){
+            $this->exportData( array('msg'=>'支付方式不能为空'),0);
         }
-        if(empty($_GET['uwl_card']) || empty($uwl_card = intval($_GET['uwl_card']))){
-            $this->exportData( array('msg'=>'提现账号不能为空'),0);
-        }
-        if(empty($_GET['uwl_truename']) || empty($uwl_truename = trim($_GET['uwl_truename']))){
-            $this->exportData( array('msg'=>'提现账号姓名不能为空'),0);
-        }
-        $dao_user_withdraw_log = new \WDAO\Users(array('table'=>'user_withdraw_log'));
-        $dao_users_ext_funds = new \WDAO\Users(array('table'=>'users_ext_funds'));
-        /*判断用户余额是否大于提现余额*/
-        $uef_overage = $dao_users_ext_funds ->infoData(array('fields'=>'u_id,uef_overage','key'=>'u_id','val' => $u_id,'pager'=>false));
-        if(!empty($uef_overage['uef_overage'])){
-            if(intval($uef_overage['uef_overage']) >= $uwl_amount){
-                /*处理提现过程start*/
 
-                /*用户余额修改*/
-                $funds_res = $this ->userFunds($u_id, $uwl_amount*-1, $type = 'withdraw');
-                if(!$funds_res){
-                    $this->exportData( array('msg'=>'提现申请失败'),0);
+        /*用户充值申请日志*/
+        $RC_log_id = $this ->usersRechargeLog($u_id, floatval($url_amount), $name = '', $card = '', $status = 0, $p_id);
+        if (!empty(intval($RC_log_id))) {
+            /*第三方充值*/
+            $dao_users = new \WDAO\Users(array('table'=>'users'));
+            if ($p_id = $this ->web_config['wx_pid'])/*微信支付*/
+            {
+                $res = $dao_users ->WXRecharge($RC_log_id,floatval($url_amount));
+                if($res){
+                    $this->exportData( array('data'=>$res),1);
+                }else{
+                    $this->exportData( array('msg'=>'充值失败!系统错误请联系管理员'),0);
                 }
-                /*用户提现申请日志*/
-                $WD_log_id = $this ->usersWithdrawLog($u_id, $uwl_amount, $uwl_truename, $uwl_card, $status = 0, $p_id);
-                /*平台资金流向修改*/
-                $dao_platform_funds_log = new \WDAO\Users(array('table'=>'platform_funds_log'));
-                $data = array();
-                $data['pfl_type'] = 1;
-                $data['pfl_type_id'] = $WD_log_id;
-                $data['pfl_amount'] = $uwl_amount;
-                $data['pfl_in_time'] = time();
-                $data['pfl_reason'] = 'withdraw';
-                $data['pfl_status'] = 1;
-                $dao_platform_funds_log -> addData($data);
+            }
+            elseif($p_id = $this ->web_config['al_pid'])/*支付宝支付*/
+            {
 
-                /*处理提现过程end*/
-            }else{
-                $this->exportData( array('msg'=>'用户余额不足'),0);
             }
         }else{
-            $this->exportData( array('msg'=>'用户余额不足'),0);
+            $this->exportData( array('msg'=>'充值失败!系统错误请联系管理员'),0);
         }
-
+    }
+    /*回调接口*/
+    public function rechargeCallback()
+    {
 
     }
-
+    /*充值结束*/
     /*评价添加接口*/
     public function commentAdd()
     {

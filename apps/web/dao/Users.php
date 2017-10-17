@@ -141,4 +141,49 @@ class Users extends \MDAOBASE\DaoBase
         return $this->updateData(array('u_pass' => encyptPassword($new_pass)), array('u_id' => $u_id));
     }
 
+    /*微信充值模型*/
+    public function WXRecharge($RC_log_id,$url_amount)
+    {
+        if(empty($RC_log_id) || empty($url_amount)){
+            return false;
+        }
+        /*回调地址HOSTURL*/
+        ini_set('date.timezone','Asia/Shanghai');
+        //error_reporting(E_ERROR);
+        require_once WXPAY_PATH."/lib/WxPay.Api.php";
+        require_once WXPAY_PATH."/example/WxPay.JsApiPay.php";
+        require_once WXPAY_PATH.'/example/log.php';
+
+        //初始化日志
+        $logHandler= new \MLIB\WXPAY\CLogFileHandler(WXPAY_PATH."/logs/".date('Y-m-d').'.log');
+        $log = \MLIB\WXPAY\Log::Init($logHandler, 15);
+
+        //①、获取用户openid
+        $tools = new \MLIB\WXPAY\JsApiPay();
+        // $openId = $tools->GetOpenid();
+        $openId = 'wx88a7414f850651c8';
+        //②、统一下单
+        $input = new \MLIB\WXPAY\WxPayUnifiedOrder();
+        $input->SetBody("新用工充值");
+        $input->SetAttach("test");
+        $input->SetOut_trade_no($RC_log_id);/*充值单号*/
+        $input->SetTotal_fee(intval($url_amount*100));
+        $input->SetTime_start(date("YmdHis"));
+        $input->SetTime_expire(date("YmdHis", time() + 600));
+        $input->SetGoods_tag("test");
+        $input->SetNotify_url(HOSTURL."/Users/rechargeCallback");
+        $input->SetTrade_type("APP");
+        $input->SetOpenid($openId);
+        $order = \MLIB\WXPAY\WxPayApi::unifiedOrder($input);
+        $jsApiParameters = $tools->GetJsApiParameters($order);
+
+        return $jsApiParameters;
+
+    }
+    /*支付宝充值模型*/
+    public function alipayRecharge()
+    {
+
+    }
+
 }
