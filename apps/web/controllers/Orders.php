@@ -213,11 +213,15 @@ class Orders extends \CLASSES\WebBase
                     'pager' => 0,
                 ));
 
+                if (!empty($orders_data['data'][0]))
+                {
+                    $this->exportData('数据异常');
+                }
                 //2：将取出来的信息 与 要改的信息做比对 得出差额
                 //改后价
                 $tmp['edit_amount'] = ($data['tew_price'] * $data['worker_num'] * ceil(($data['end_time'] - $data['start_time']) / 3600 / 24));
                 //改价前后差价 = 原价 - 改后价
-                $tmp['agio'] = $orders_data['tew_price'] - $tmp['edit_amount'];
+                $tmp['agio'] = $orders_data['data'][0]['tew_price'] - $tmp['edit_amount'];
                 if ($tmp['agio'] < 0)
                 {
                     $user_funds_dao = new \WDAO\Users_ext_funds(array('table' => 'Users_ext_funds'));
@@ -246,7 +250,7 @@ class Orders extends \CLASSES\WebBase
                 ));
 
                 $orders_update = true;
-                if (!empty($orders_data['data']))
+                if (!empty($orders_data['data'][0]))
                 {
                     $orders_update = $this->orders_dao->updateData(array(
                         'o_amount' => $data['tew_price'],
@@ -272,12 +276,7 @@ class Orders extends \CLASSES\WebBase
                     $this->db->rollback();
                     $this->exportData('failure');
                 }
-
             }
-
-
-
-
         }
         $this->exportData('failure');
     }
