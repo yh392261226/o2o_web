@@ -124,6 +124,23 @@ function buildTable($el, cells, rows) {
         columns: 'glyphicon-list'
       }
     });
+    $('#exampleTableEvents').bootstrapTable({
+      //url: "3",
+      search: false,
+      pagination: false,
+      showRefresh: true,
+      showToggle: true,
+      showColumns: true,
+      height: 0,
+      //formatShowingRows: false,
+      iconSize: 'outline',
+      toolbar: '#exampleTableEventsToolbar',
+      icons: {
+        refresh: 'glyphicon-repeat',
+        toggle: 'glyphicon-list-alt',
+        columns: 'glyphicon-list'
+      }
+    });
 
     var $result = $('#examplebtTableEventsResult');
 
