@@ -227,7 +227,7 @@ class WebBase extends Swoole\Controller
     }
 
     /*获取用户头像信息*/
-    private function getHeadById($u_id = 0,$ext = '.jpg')
+    public function getHeadById($u_id = 0,$ext = '.jpg')
     {
         if(!is_dir($this ->web_config['u_img_path'])){
             $res = mkdir($this ->web_config['u_img_path'],0777,true);
