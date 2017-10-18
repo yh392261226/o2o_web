@@ -363,18 +363,6 @@ class Tasks extends \CLASSES\WebBase
     }
 
     /**
-     * 任务工种改价
-     */
-    private function changePrice()
-    {
-        $data = $info = $worker = $fields = $message = $tmp = array();
-
-        if (isset($_REQUEST['t_author']) && 0 < intval($_REQUEST['t_author'])) $data['t_author'] = intval($_REQUEST['t_author']);
-        if (isset($_REQUEST['t_id']) && 0 < intval($_REQUEST['t_id'])) $tmp['id'] = intval($_REQUEST['t_id']); //任务id
-
-    }
-
-    /**
      * 删除任务及归还资金与抵扣券 [对外]
      * @param array $data
      * @return int
