@@ -225,4 +225,21 @@ class WebBase extends Swoole\Controller
         );
         return $platform_funds_dao->addData($log_data);
     }
+
+    /*获取用户头像信息*/
+    private function getHeadById($u_id = 0,$ext = '.jpg')
+    {
+        if(!is_dir($this ->web_config['u_img_path'])){
+            $res = mkdir($this ->web_config['u_img_path'],0777,true);
+            if(!$res){
+                return '';
+            }
+        }
+        if(file_exists($this ->web_config['u_img_path'].$u_id.$ext)){
+            return $this ->web_config['u_img_url'].$u_id.$ext;
+        }else{
+            return $this ->web_config['u_img_url'].'0'.$ext;
+        }
+    }
+
 }
