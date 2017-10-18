@@ -325,12 +325,21 @@ class Orders extends \CLASSES\WebBase
         if (!empty($data) && isset($data['tew_id']) && isset($data['t_id']) && isset($data['o_worker']) && isset($data['s_id']))
         {
             //根据参数获取订单信息
-            $order_data = $this->orders_dao->
+            $order_count = $this->orders_dao->countData($data);
+            if ($order_count < 1)
+            {
+                $this->exportData('订单不存在');
+            }
 
             $result = $this->orders_dao->updateData(array('o_status' => -2), $data);
             if (!$result)
             {
                 $this->exportData('failure');
+            }
+
+            if (!empty($tmp))
+            {
+                
             }
 
             $this->exportData('success');

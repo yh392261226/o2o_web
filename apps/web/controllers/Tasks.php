@@ -108,9 +108,10 @@ class Tasks extends \CLASSES\WebBase
             foreach ($list['data'] as $key => $val)
             {
                 $list['data'][$key]['favorate'] = 0;
+                $list['data'][$key]['u_img'] = $this->getHeadById($val['t_author']);
             }
             unset($key, $val);
-            
+
             if (isset($_REQUEST['u_id']) && intval($_REQUEST['u_id']) > 0)
             {
 
