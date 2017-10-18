@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-18 16:18:00
+ * @Last Modified time: 2017-10-18 16:37:01
  */
 namespace App\Controller;
 
@@ -1027,18 +1027,23 @@ class Users extends \CLASSES\WebBase
         /*微信支付成功后处理返回的数据*/
         if(!empty(floatval($data['total_fee'])) && $data['result_code'] == 'SUCCESS' && isset($data['out_trade_no'])){
 
-            if(RECHARGE_CONFIRMATION){
 
-            }else{
-
-            }
             $total_fee = $data['total_fee'];/*支付金额*/
             $out_trade_no = $data['out_trade_no'];/*支付单号*/
             $recharge_data = $dao_recharge_log ->infodata(array('key'=>'url_id','val'=>$out_trade_no));
             /*如果微信实际充值金额小于申请时的金额返回*/
-            if($total_fee < $recharge_data['url_amount']){
-
+            $c_data = array();
+            if($total_fee != $recharge_data['url_amount']){
+                $c_data['url_remark'] = '用户实际支付金额不等于申请金额,申请金额为'.$recharge_data['url_amount'];
             }
+            $c_data['url_amount'] = $total_fee;
+
+            if(RECHARGE_CONFIRMATION){
+                $c_data['url_status'] = 2;
+            }else{
+                $c_data['url_status'] = 1;
+            }
+
 
 
         }else{
