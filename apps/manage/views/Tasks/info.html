@@ -67,7 +67,7 @@
                 </label>
             </div>
         </div>
-
+        <div class="hr-line-dashed"></div>
         {{if $info.workers}}
         {{foreach from=$info.workers item=workers}}
         <div class="row col-sm-12">
@@ -114,33 +114,14 @@
                 <label class="col-sm-9 form-control-static">{{$workers.tew_address}}</label>
             </div>
         </div>
-        {{/foreach}}
-        {{/if}}
-        <div class="row col-sm-12">
-            <div class="form-group ">
-                <label class="col-sm-1 control-label">标题：</label>
-                <label class="col-sm-9 form-control-static">{{$info.t_title}}</label>
-            </div>
-        </div>
-        <div class="row col-sm-12">
-            <div class="form-group">
-                <label class="col-sm-1 control-label">简介：</label>
-                <label class="col-sm-9 form-control-static">{{$info.t_info}}</label>
-            </div>
-        </div>
-        <div class="row col-sm-12">
-            <div class="form-group">
-                <label class="col-sm-1 control-label">详情：</label>
-                <label class="col-sm-9 form-control-static">{{$info.t_desc}}</label>
-            </div>
-        </div>
-    </div>
 
-    <div class="col-sm-12">
+        <div class="hr-line-dashed"></div>
+
+        <div class="col-sm-12">
         <!-- Example Events -->
         <div class="example-wrap">
             <div class="example">
-                <table id="exampleTableEvents" data-height="400" data-mobile-responsive="true" data-striped="true">
+                <table class="exampleTableEvents" data-height="400" data-mobile-responsive="true" data-striped="true">
                     <thead>
                     <tr>
                         <!--<th data-field="state" data-checkbox="true"></th>-->
@@ -157,6 +138,7 @@
                     <tbody>
                     {{if $orders_list.data}}
                     {{foreach from=$orders_list.data item=value}}
+                    {{if $workers.tew_skills eq $value.s_id}}
                     <tr>
                         <!--<td><input type="checkbox" name="p_id" value="{{$value.o_id}}"></td>-->
                         <td>{{$value.o_id}}</td>
@@ -178,7 +160,7 @@
 
                         </td>
                         <td>
-                            <a href="/Orders/status?o_id={{$value.o_id}}">详情</a>
+                            <!-- <a href="/Orders/status?o_id={{$value.o_id}}">详情</a> -->
                             <select class="input-sm form-control input-s-sm inline" name="" id="" onchange="changeStatus(this.value,{{$value.o_id}});">
                                 <option value="0">请选择</option>
                                 <option value="-4" {{if $value.o_status == -4}}selected="selected"{{/if}} >取消</option>
@@ -187,6 +169,7 @@
                             </select>
                         </td>
                     </tr>
+                    {{/if}}
                     {{/foreach}}
                     {{/if}}
                     </tbody>
@@ -194,7 +177,32 @@
             </div>
         </div>
         <!-- End Example Events -->
+        </div>
+
+        {{/foreach}}
+        {{/if}}
+        <div class="hr-line-dashed"></div>
+        <div class="row col-sm-12">
+            <div class="form-group ">
+                <label class="col-sm-1 control-label">标题：</label>
+                <label class="col-sm-9 form-control-static">{{$info.t_title}}</label>
+            </div>
+        </div>
+        <div class="row col-sm-12">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">简介：</label>
+                <label class="col-sm-9 form-control-static">{{$info.t_info}}</label>
+            </div>
+        </div>
+        <div class="row col-sm-12">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">详情：</label>
+                <label class="col-sm-9 form-control-static">{{$info.t_desc}}</label>
+            </div>
+        </div>
     </div>
+
+
 </div>
 
 <!-- End Panel Other -->

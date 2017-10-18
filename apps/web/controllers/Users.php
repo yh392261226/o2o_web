@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-16 17:24:16
+ * @Last Modified time: 2017-10-18 13:57:31
  */
 namespace App\Controller;
 
@@ -355,7 +355,7 @@ class Users extends \CLASSES\WebBase
         if (isset($_POST['u_online'])) $data_users['u_online'] = intval($_POST['u_online']);
         if (isset($_POST['u_true_name'])) $data_users['u_true_name'] = trim($_POST['u_true_name']);
         if (isset($_POST['u_idcard'])) $data_users['u_idcard'] = trim($_POST['u_idcard']);
-        if (isset($_POST['u_skills'])) $data_users['u_skills'] = trim(','.$_POST['u_skills'].',');
+        if (isset($_POST['u_skills'])) $data_users['u_skills'] = trim($_POST['u_skills']);
         /*修改users表内容*/
         $res = 0;
         if(!empty($data_users)){
@@ -463,9 +463,9 @@ class Users extends \CLASSES\WebBase
         {
             foreach ($data as $key => $val)
             {
-                if ($key == 'u_name')
+                if ($key == 'u_true_name')
                 {
-                    $data2['where'] .= ' and users.u_name like "%'.$val.'%"';
+                    $data2['where'] .= ' and users.u_true_name like "%'.$val.'%"';
                 }
                 elseif($key == 'u_skills')
                 {
@@ -1001,6 +1001,16 @@ class Users extends \CLASSES\WebBase
     /*回调接口*/
     public function rechargeCallback()
     {
+        $dao_users = new \WDAO\Users(array('table'=>'users'));
+        require_once WXPAY_PATH.'/example/notify.php';
+        $notify = new \MLIB\WXPAY\PayNotifyCallBack();
+        $data = $notify->Handle(false);
+        /*微信支付成功后处理返回的数据*/
+        if(!$data){
+            // array(17) { ["appid"]=> string(18) "wx2421b1c4370ec43b" ["attach"]=> string(12) "支付测试" ["bank_type"]=> string(3) "CFT" ["fee_type"]=> string(3) "CNY" ["is_subscribe"]=> string(1) "Y" ["mch_id"]=> string(8) "10000100" ["nonce_str"]=> string(32) "5d2b6c2a8db53831f7eda20af46e531c" ["openid"]=> string(28) "oUpF8uMEb4qRXf22hE3X68TekukE" ["out_trade_no"]=> string(10) "1409811653" ["result_code"]=> string(7) "SUCCESS" ["return_code"]=> string(7) "SUCCESS" ["sign"]=> string(32) "B552ED6B279343CB493C5DD0D78AB241" ["sub_mch_id"]=> string(8) "10000100" ["time_end"]=> string(14) "20140903131540" ["total_fee"]=> string(1) "1" ["trade_type"]=> string(5) "JSAPI" ["transaction_id"]=> string(28) "1004400740201409030005092168" } ";
+        }else{
+           return false;
+        }
 
     }
     /*充值结束*/

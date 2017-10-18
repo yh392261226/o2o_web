@@ -81,7 +81,8 @@ class WxPayApi
 		$url = "https://api.mch.weixin.qq.com/pay/orderquery";
 		//检测必填参数
 		if(!$inputObj->IsOut_trade_noSet() && !$inputObj->IsTransaction_idSet()) {
-			throw new WxPayException("订单查询接口中，out_trade_no、transaction_id至少填一个！");
+			// throw new WxPayException("订单查询接口中，out_trade_no、transaction_id至少填一个！");
+			return false;
 		}
 		$inputObj->SetAppid(WxPayConfig::APPID);//公众账号ID
 		$inputObj->SetMch_id(WxPayConfig::MCHID);//商户号
@@ -420,7 +421,6 @@ class WxPayApi
 			$msg = $e->errorMessage();
 			return false;
 		}
-
 		return call_user_func($callback, $result);
 	}
 

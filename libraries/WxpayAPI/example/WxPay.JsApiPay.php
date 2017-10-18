@@ -73,7 +73,7 @@ class JsApiPay
 			// throw new \MLIB\WXPAY\WxPayException("参数错误");
 			return false;
 		}
-		$jsapi = new WxPayJsApiPay();
+		$jsapi = new \MLIB\WXPAY\WxPayJsApiPay();
 		$jsapi->SetAppid($UnifiedOrderResult["appid"]);
 		$timeStamp = time();
 		$jsapi->SetTimeStamp("$timeStamp");
