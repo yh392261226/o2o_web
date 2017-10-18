@@ -107,7 +107,7 @@ function buildTable($el, cells, rows) {
   // Example Bootstrap Table Events
   // ------------------------------
   (function() {
-    $('#exampleTableEvents').bootstrapTable({
+    $('.exampleTableEvents').bootstrapTable({
       //url: "3",
       search: false,
       pagination: false,

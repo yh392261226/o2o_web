@@ -72,6 +72,20 @@ class Tasks extends \CLASSES\ManageBase
             't_id' => intval($_REQUEST['t_id']),
         );
         $orders_list = $this->orders_dao->listData($data);
+
+        // $s_id_key = array();
+        // $newlist = array();
+        // foreach ($orders_list['data'] as $key => $value) {
+        //     if(isset($value['s_id'])){
+        //         if(in_array($value['s_id'],$s_id_key)){
+        //             $newlist[$value['s_id']][] = $value;
+        //         }else{
+        //             $s_id_key[] = $value['s_id'];
+        //             $newlist[$value['s_id']][] = $value;
+        //         }
+        //     }
+        // }
+        // var_dump($orders_list);die;
         //print_r($orders_list);
         $this->tpl->assign('info', $info);
         $this->tpl->assign('orders_list', $orders_list);

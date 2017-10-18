@@ -180,6 +180,24 @@ class Users extends \MDAOBASE\DaoBase
         return $jsApiParameters;
 
     }
+    /*判断并处理微信支付结果*/
+    public function judgeResWX($data)
+    {
+        MLIB\WXPAY\Log::DEBUG("call back:" . json_encode($data));
+        $notfiyOutput = array();
+
+        if(!array_key_exists("transaction_id", $data)){
+            $msg = "输入参数不正确";
+            return false;
+        }
+        //查询订单，判断订单真实性
+        $payNotify = new MLIB\WXPAY\PayNotifyCallBack();
+        if( $payNotify ->Queryorder($data["transaction_id"])){
+            $msg = "订单查询失败";
+            return false;
+        }
+        return true;
+    }
     /*支付宝充值模型*/
     public function alipayRecharge()
     {
