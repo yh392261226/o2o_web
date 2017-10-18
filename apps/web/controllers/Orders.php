@@ -193,7 +193,12 @@ class Orders extends \CLASSES\WebBase
         if (isset($_REQUEST['end_time']) && intval($_REQUEST['end_time']) > 0) $data['end_time'] = strtotime($_REQUEST['end_time']);
         if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
 
-        if (!empty($data) && isset($data['tew_id']) && $data['tew_id'] > 0 && isset($tmp['t_id']) && $tmp['t_id'] > 0 && isset($data['t_author']) && $data['t_author'] > 0)
+        if (!empty($data) && isset($data['tew_id']) && $data['tew_id'] > 0 &&
+            isset($tmp['t_id']) && $tmp['t_id'] > 0 &&
+            isset($data['t_author']) && $data['t_author'] > 0 &&
+            isset($data['amount']) && $data['amount'] > 0 &&
+            isset($data['worker_num']) && $data['worker_num'] > 0 &&
+            isset($data['o_worker']) && $data['o_worker'] > 0)
         {
             //1：根据条件 获取该条订单信息
             $task_dao = new \WDAO\Task_ext_worker();
@@ -235,23 +240,13 @@ class Orders extends \CLASSES\WebBase
 
                 $this->db->start();
                 //3：改数据库中的数据
-                //任务更新改价次数及改后价格
-                $time_update = $task_dao->queryData('update tasks set t_amount_edit_times=t_amount_edit_times+1, t_amount=t_amount + ' . ($tmp['agio'] * -1) . ', t_last_edit_time = ' . time() . ', t_last_editor = ' . $data['t_author'] . ' where t_id = "' . $tmp['t_id'] . '"');
-                $tew_update = $task_dao->updateData(array(
-                    'tew_price' => $data['tew_price'],
-                    'tew_worker_num' => $data['worker_num'],
-                    'tew_start_time' => $data['start_time'],
-                    'tew_end_time' => $data['end_time'],
-                ), array(
-                    'tew_id' => $data['tew_id'],
-                    't_id' => $tmp['t_id'],
-                    'u_id' => $data['t_author'],
-                    's_id' => $task_data['tew_skills'],
-                ));
+                //任务更新改价次数
+                $times_update = $task_dao->queryData('update tasks set t_amount_edit_times=t_amount_edit_times+1, t_amount=t_amount + ' . ($tmp['agio'] * -1) . ', t_last_edit_time = ' . time() . ', t_last_editor = ' . $data['t_author'] . ' where t_id = "' . $tmp['t_id'] . '"');
 
                 $orders_update = true;
                 if (!empty($orders_data['data'][0]))
                 {
+                    //更改该工人的订单价格
                     $orders_update = $this->orders_dao->updateData(array(
                         'o_amount' => $data['tew_price'],
                         'o_confirm' => 0,
@@ -266,7 +261,7 @@ class Orders extends \CLASSES\WebBase
                 $user_funds_result = $this->userFunds($data['t_author'], $tmp['total_edit'], $type = 'changeprice'); //用户资金
                 $platform_funds_result = $this->platformFundsLog($tmp['t_id'], (-1 * $tmp['total_edit']), 3, 'changeprice', 0);     //平台资金日志
 
-                if ($time_update && $tew_update && $orders_update && $user_funds_result && $platform_funds_result)
+                if ($times_update && $orders_update && $user_funds_result && $platform_funds_result)
                 {
                     $this->db->commit();
                     $this->exportData('success');
@@ -274,7 +269,6 @@ class Orders extends \CLASSES\WebBase
                 else
                 {
                     $this->db->rollback();
-                    $this->exportData('failure');
                 }
             }
         }
