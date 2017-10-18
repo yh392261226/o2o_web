@@ -52,8 +52,12 @@ class Tasks extends \CLASSES\WebBase
             $data['order'] = 'orders.o_id desc';
             $list = $this->orders_dao->listData($data);
         }
-        if (!empty($list))
+        if (!empty($list['data']))
         {
+            foreach ($list['data'] as $key => $val)
+            {
+                $list['data'][$key]['u_img'] = $this->getHeadById($val['t_author']);
+            }
             $this->exportData($list['data']);
         }
         else
