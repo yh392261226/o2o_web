@@ -3,13 +3,12 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-18 16:37:01
+ * @Last Modified time: 2017-10-18 17:06:34
  */
 namespace App\Controller;
 
 class Users extends \CLASSES\WebBase
 {
-    private $head_format = '.jpg';/*头像格式*/
     public function __construct($swoole)
     {
         parent::__construct($swoole);
@@ -516,14 +515,15 @@ class Users extends \CLASSES\WebBase
 
         /*获取收藏列表*/
         $favorate_id_arr = array();
-        if (isset($_REQUEST['fu_id']) && intval($_REQUEST['fu_id']) > 0) $fu_id = intval($_REQUEST['fu_id']);
-        if($fu_id > 0){
-            $dao_users_favorate = new \WDAO\Users(array('table'=>'users_favorate'));
-            $favorate_arr = $dao_users_favorate -> listData(array('u_id' => $fu_id,'f_type' => 1,'fields'=>'u_id,f_type_id','pager'=>false));
-            foreach ($favorate_arr['data'] as $key => $value) {
-               $favorate_id_arr[] = $value['f_type_id'];
+        if (isset($_REQUEST['fu_id']) && intval($_REQUEST['fu_id']) > 0) {
+            $fu_id = intval($_REQUEST['fu_id']);
+            if($fu_id > 0){
+                $dao_users_favorate = new \WDAO\Users(array('table'=>'users_favorate'));
+                $favorate_arr = $dao_users_favorate -> listData(array('u_id' => $fu_id,'f_type' => 1,'fields'=>'u_id,f_type_id','pager'=>false));
+                foreach ($favorate_arr['data'] as $key => $value) {
+                   $favorate_id_arr[] = $value['f_type_id'];
+                }
             }
-
         }
 
         foreach ($list['data'] as  &$v) {
@@ -540,21 +540,21 @@ class Users extends \CLASSES\WebBase
     }
 
 
-    /*获取用户头像信息*/
-    private function getHeadById($u_id = 0)
-    {
-        if(!is_dir($this ->web_config['u_img_path'])){
-            $res = mkdir($this ->web_config['u_img_path'],0777,true);
-            if(!$res){
-                return '';
-            }
-        }
-        if(file_exists($this ->web_config['u_img_path'].$u_id.$this->head_format)){
-            return $this ->web_config['u_img_url'].$u_id.$this->head_format;
-        }else{
-            return $this ->web_config['u_img_url'].'0'.$this->head_format;
-        }
-    }
+    // /*获取用户头像信息*/
+    // private function getHeadById($u_id = 0)
+    // {
+    //     if(!is_dir($this ->web_config['u_img_path'])){
+    //         $res = mkdir($this ->web_config['u_img_path'],0777,true);
+    //         if(!$res){
+    //             return '';
+    //         }
+    //     }
+    //     if(file_exists($this ->web_config['u_img_path'].$u_id.$this->head_format)){
+    //         return $this ->web_config['u_img_url'].$u_id.$this->head_format;
+    //     }else{
+    //         return $this ->web_config['u_img_url'].'0'.$this->head_format;
+    //     }
+    // }
 
     /*获取用户资金日志*/
     public function getUsersFundsLog()
@@ -1039,9 +1039,11 @@ class Users extends \CLASSES\WebBase
             $c_data['url_amount'] = $total_fee;
 
             if(RECHARGE_CONFIRMATION){
-                $c_data['url_status'] = 2;
+                $c_data['url_status'] = 0;
             }else{
                 $c_data['url_status'] = 1;
+                $c_data['url_solut_time'] = time();
+                $c_data['url_solut_author'] = 0;
             }
 
 
