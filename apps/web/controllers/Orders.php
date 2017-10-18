@@ -302,6 +302,43 @@ class Orders extends \CLASSES\WebBase
     }
 
     /**
+     * 解雇工人或工人辞职
+     */
+    private function unbind()
+    {
+        $data = array();
+        //任务工人关系id
+        if (isset($_REQUEST['tew_id']) && intval($_REQUEST['tew_id']) > 0) $data['tew_id'] = intval($_REQUEST['tew_id']);
+        //任务id
+        if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']);
+        //工人id
+        if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
+        //雇主id
+        if (isset($_REQUEST['u_id']) && intval($_REQUEST['u_id']) > 0) $data['u_id'] = intval($_REQUEST['u_id']);
+        //技能id
+        if (isset($_REQUEST['s_id']) && intval($_REQUEST['s_id']) > 0) $data['s_id'] = intval($_REQUEST['s_id']);
+        //星级
+        if (isset($_REQUEST['start']) && intval($_REQUEST['start']) >= 0) $tmp['start'] = intval($_REQUEST['start']);
+        //评价内容
+        if (isset($_REQUEST['appraisal']) && trim($_REQUEST['appraisal']) != '') $tmp['appraisal'] = trim($_REQUEST['appraisal']);
+
+        if (!empty($data) && isset($data['tew_id']) && isset($data['t_id']) && isset($data['o_worker']) && isset($data['s_id']))
+        {
+            //根据参数获取订单信息
+            $order_data = $this->orders_dao->
+
+            $result = $this->orders_dao->updateData(array('o_status' => -2), $data);
+            if (!$result)
+            {
+                $this->exportData('failure');
+            }
+
+            $this->exportData('success');
+        }
+        $this->exportData('数据异常');
+    }
+
+    /**
      * 订单支付
      */
     private function payout()

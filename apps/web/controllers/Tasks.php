@@ -105,8 +105,15 @@ class Tasks extends \CLASSES\WebBase
 
         if (!empty($list))
         {
+            foreach ($list['data'] as $key => $val)
+            {
+                $list['data'][$key]['favorate'] = 0;
+            }
+            unset($key, $val);
+            
             if (isset($_REQUEST['u_id']) && intval($_REQUEST['u_id']) > 0)
             {
+
                 $this->users_favorate_dao = new \WDAO\Users_favorate(array('table' => 'Users_favorate'));
                 $favorates = $marked = array();
                 $favorates = $this->users_favorate_dao->listData(array('f_type' => 0, 'u_id' => intval($_REQUEST['u_id']), 'pager' => 0));
