@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-18 13:57:31
+ * @Last Modified time: 2017-10-18 16:18:00
  */
 namespace App\Controller;
 
@@ -412,7 +412,7 @@ class Users extends \CLASSES\WebBase
      */
     public function getUsers()
     {
-
+        /**/
         $data = array();
         if (isset($_REQUEST['u_id']) && intval($_REQUEST['u_id']) > 0) $data['u_id'] = intval($_REQUEST['u_id']);
         if(isset($_REQUEST['u_mobile']) && intval($_REQUEST['u_mobile']) > 0) $data['u_mobile'] = intval($_REQUEST['u_mobile']);
@@ -513,9 +513,27 @@ class Users extends \CLASSES\WebBase
         $data2['fields'] = 'users.u_id,u_name,u_skills,users_ext_info.uei_info,u_task_status,u_true_name,ucp_posit_x,ucp_posit_y';
 
         $list = $dao_info ->listData($data2);
+
+        /*获取收藏列表*/
+        $favorate_id_arr = array();
+        if (isset($_REQUEST['fu_id']) && intval($_REQUEST['fu_id']) > 0) $fu_id = intval($_REQUEST['fu_id']);
+        if($fu_id > 0){
+            $dao_users_favorate = new \WDAO\Users(array('table'=>'users_favorate'));
+            $favorate_arr = $dao_users_favorate -> listData(array('u_id' => $fu_id,'f_type' => 1,'fields'=>'u_id,f_type_id','pager'=>false));
+            foreach ($favorate_arr['data'] as $key => $value) {
+               $favorate_id_arr[] = $value['f_type_id'];
+            }
+
+        }
+
         foreach ($list['data'] as  &$v) {
             if(isset($v['u_id'])){
-               $v['u_img'] = $this-> getHeadById($v['u_id']);
+                $v['u_img'] = $this-> getHeadById($v['u_id']);
+            }
+            if(in_array($v['u_id'],$favorate_id_arr)){
+                $v['is_fav'] = 1;
+            }else{
+                $v['is_fav'] = 0;
             }
         }
         $this->exportData($list,1);
@@ -905,7 +923,7 @@ class Users extends \CLASSES\WebBase
             }
         }
     }
-    /*充值开始*/
+
     /*用户提现申请接口*/
     public function applyWithdraw()
     {
@@ -962,7 +980,7 @@ class Users extends \CLASSES\WebBase
             $this->exportData( array('msg'=>'用户余额不足'),0);
         }
     }
-
+        /*充值开始*/
         /*充值记录接口*/
         public function applyRechargeLog()
     {
@@ -1001,13 +1019,28 @@ class Users extends \CLASSES\WebBase
     /*回调接口*/
     public function rechargeCallback()
     {
-        $dao_users = new \WDAO\Users(array('table'=>'users'));
+        $dao_recharge_log = new \WDAO\Users(array('table'=>'user_recharge_log'));
         require_once WXPAY_PATH.'/example/notify.php';
         $notify = new \MLIB\WXPAY\PayNotifyCallBack();
-        $data = $notify->Handle(false);
+        // $data = $notify->Handle(false);\
+        $data = array("appid" => "wx2421b1c4370ec43b","attach" => "支付测试", "bank_type" =>"CFT" ,"fee_type" =>"CNY", "is_subscribe" =>"Y" ,"mch_id" =>"10000100" ,"nonce_str" => "5d2b6c2a8db53831f7eda20af46e531c", "openid" => "oUpF8uMEb4qRXf22hE3X68TekukE", "out_trade_no" => "6", "result_code" =>"SUCCESS", "return_code" =>"SUCCESS" ,"sign" => "B552ED6B279343CB493C5DD0D78AB241" ,"sub_mch_id" =>"10000100" ,"time_end" => "20140903131540" ,"total_fee" =>"1" ,"trade_type" =>"JSAPI" ,"transaction_id" => "1004400740201409030005092168",);
         /*微信支付成功后处理返回的数据*/
-        if(!$data){
-            // array(17) { ["appid"]=> string(18) "wx2421b1c4370ec43b" ["attach"]=> string(12) "支付测试" ["bank_type"]=> string(3) "CFT" ["fee_type"]=> string(3) "CNY" ["is_subscribe"]=> string(1) "Y" ["mch_id"]=> string(8) "10000100" ["nonce_str"]=> string(32) "5d2b6c2a8db53831f7eda20af46e531c" ["openid"]=> string(28) "oUpF8uMEb4qRXf22hE3X68TekukE" ["out_trade_no"]=> string(10) "1409811653" ["result_code"]=> string(7) "SUCCESS" ["return_code"]=> string(7) "SUCCESS" ["sign"]=> string(32) "B552ED6B279343CB493C5DD0D78AB241" ["sub_mch_id"]=> string(8) "10000100" ["time_end"]=> string(14) "20140903131540" ["total_fee"]=> string(1) "1" ["trade_type"]=> string(5) "JSAPI" ["transaction_id"]=> string(28) "1004400740201409030005092168" } ";
+        if(!empty(floatval($data['total_fee'])) && $data['result_code'] == 'SUCCESS' && isset($data['out_trade_no'])){
+
+            if(RECHARGE_CONFIRMATION){
+
+            }else{
+
+            }
+            $total_fee = $data['total_fee'];/*支付金额*/
+            $out_trade_no = $data['out_trade_no'];/*支付单号*/
+            $recharge_data = $dao_recharge_log ->infodata(array('key'=>'url_id','val'=>$out_trade_no));
+            /*如果微信实际充值金额小于申请时的金额返回*/
+            if($total_fee < $recharge_data['url_amount']){
+
+            }
+
+
         }else{
            return false;
         }
