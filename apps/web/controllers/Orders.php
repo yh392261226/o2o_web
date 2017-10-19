@@ -311,6 +311,9 @@ class Orders extends \CLASSES\WebBase
         if (isset($_REQUEST['tew_id']) && intval($_REQUEST['tew_id']) > 0) $data['tew_id'] = intval($_REQUEST['tew_id']);
         //任务id
         if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']);
+        //方式 0解雇工人 1工人辞职
+        $tmp['type'] = (isset($_REQUEST['type']) && in_array(trim($_REQUEST['type']), array('fire', 'resign'))) ? $_REQUEST['type'] : '';
+        if ('' == $tmp['type']) $this->exportData('参数错误');
         //工人id
         if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
         //雇主id
@@ -322,7 +325,7 @@ class Orders extends \CLASSES\WebBase
         //评价内容
         if (isset($_REQUEST['appraisal']) && trim($_REQUEST['appraisal']) != '') $tmp['appraisal'] = trim($_REQUEST['appraisal']);
 
-        if (!empty($data) && isset($data['tew_id']) && isset($data['t_id']) && isset($data['o_worker']) && isset($data['s_id']))
+        if (!empty($data) && isset($data['tew_id']) && isset($data['t_id']) && isset($data['o_worker']) && isset($data['s_id']) && isset($data['u_id']))
         {
             //根据参数获取订单信息
             $order_count = $this->orders_dao->countData($data);
@@ -331,7 +334,7 @@ class Orders extends \CLASSES\WebBase
                 $this->exportData('订单不存在');
             }
 
-            $result = $this->orders_dao->updateData(array('o_status' => -2), $data);
+            $result = $this->orders_dao->updateData(array('o_status' => -2, 'unbind_time' => time()), $data);
             if (!$result)
             {
                 $this->exportData('failure');
@@ -339,7 +342,14 @@ class Orders extends \CLASSES\WebBase
 
             if (!empty($tmp))
             {
-                
+                $comment_dao = new \WDAO\Task_comment();
+                $comment_dao->addComment(array(
+                    't_id' => $data['t_id'],
+                    'u_id' => ($tmp['type'] == 'fire') ? $data['u_id'] : $data['o_worker'],
+                    'tc_u_id' => ($tmp['type'] == 'fire') ? $data['o_worker'] : $data['u_id'],
+                    'start' => $tmp['start'],
+                    'desc' => $tmp['appraisal']
+                ));
             }
 
             $this->exportData('success');
