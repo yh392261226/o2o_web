@@ -33,7 +33,7 @@ class Tasks extends \CLASSES\WebBase
             if (isset($_REQUEST['t_id'])) $data['t_id'] = intval($_REQUEST['t_id']);
             if (isset($_REQUEST['u_id'])) $data['u_id'] = intval($_REQUEST['u_id']);
 
-            if (isset($_REQUEST['o_status'])) $data['o_status'] = intval($_REQUEST['o_status']);
+            if (isset($_REQUEST['o_status']) && is_numeric($_REQUEST['o_status'])) $data['o_status'] = intval($_REQUEST['o_status']);
             $data['where'] = '1';
             if (isset($_REQUEST['o_confirm'])) $data['where'] .= ' and orders.o_confirm in (' . trim($_REQUEST['o_confirm'] . ')');
             if (isset($_REQUEST['s_id'])) $data['s_id'] = intval($_REQUEST['s_id']);
