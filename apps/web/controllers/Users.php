@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-20 15:29:56
+ * @Last Modified time: 2017-10-20 15:50:38
  */
 namespace App\Controller;
 
@@ -63,9 +63,12 @@ class Users extends \CLASSES\WebBase
             $data['u_last_edit_time'] = $time;
             $res = $dao_users ->updateData($data,array('u_id'=>$user_data['data']['0']['u_id']));
             $u_img = $this-> getHeadById($user_data['data']['0']['u_id']);
+            $u_idcard = isset($user_data['data']['0']['u_idcard']) ? $user_data['data']['0']['u_idcard'] :'';
+            $u_pass = isset($user_data['data']['0']['u_pass']) ? $user_data['data']['0']['u_pass'] :'';
+            $u_sex = isset($user_data['data']['0']['u_sex']) ? $user_data['data']['0']['u_sex'] : '';
             if($res){
                 $token = $this->createToken($user_data['data']['0']['u_name'],$user_data['data']['0']['u_pass']);
-                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass'],'u_idcard'=>$user_data['data']['0']['u_idcard'] ),1);
+                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass'],'u_idcard'=>$u_idcard ),1);
             }
 
 
@@ -547,7 +550,6 @@ class Users extends \CLASSES\WebBase
         if(empty($_GET['u_id']) || empty($u_id = intval($_GET['u_id']))){
             $this->exportData( array('msg'=>'用户id不能为空'),0);
         }
-        $page = !empty($_GET['page']) && !empty(intval($_GET['page'])) ? intval($_GET['page']) :1;
         $category = !empty($_GET['category'])  ? trim($_GET['category']) : 'all';
         $dao_users_funds = new \WDAO\Users(array('table'=>'users_ext_funds'));
         $user_funds = $dao_users_funds ->infoData(array('key'=>'u_id','val'=>$u_id,'fields'=>'u_id,uef_overage'));
@@ -573,9 +575,6 @@ class Users extends \CLASSES\WebBase
             $time[$k]  = $v['time'];
             $arr[$k] = $v;
         }
-
-        // 将数据根据 volume 降序排列，根据 edition 升序排列
-        // 把 $data 作为最后一个参数，以通用键排序
         $res = array_multisort($time, SORT_DESC, $arr, SORT_ASC, $data);
 
 
@@ -596,10 +595,7 @@ class Users extends \CLASSES\WebBase
             }
         }
 
-
-
-        var_dump($data);die;
-        $this->exportData( array('recharge_list'=>$recharge_list['data'],'withdraw_list'=>$withdraw_list['data']),1);
+        $this->exportData( array('data'=>$data),1);
 
     }
 
