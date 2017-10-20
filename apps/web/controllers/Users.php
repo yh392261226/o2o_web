@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-20 14:17:49
+ * @Last Modified time: 2017-10-20 15:29:56
  */
 namespace App\Controller;
 
@@ -65,7 +65,7 @@ class Users extends \CLASSES\WebBase
             $u_img = $this-> getHeadById($user_data['data']['0']['u_id']);
             if($res){
                 $token = $this->createToken($user_data['data']['0']['u_name'],$user_data['data']['0']['u_pass']);
-                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass']),1);
+                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass'],'u_idcard'=>$user_data['data']['0']['u_idcard'] ),1);
             }
 
 
@@ -552,9 +552,9 @@ class Users extends \CLASSES\WebBase
         $dao_users_funds = new \WDAO\Users(array('table'=>'users_ext_funds'));
         $user_funds = $dao_users_funds ->infoData(array('key'=>'u_id','val'=>$u_id,'fields'=>'u_id,uef_overage'));
         /*充值*/
-        $recharge_list['data'] = '';
-        $withdraw_list['data'] = '';
-        if($category=='recharge'){
+        $recharge_list['data'] = array();
+        $withdraw_list['data'] = array();
+        if($category=='recharge' || $category=='all'){
         $dao_recharge_log = new \WDAO\Users(array('table'=>'user_recharge_log'));
         $recharge_list = $dao_recharge_log ->listData(array('u_id'=>$u_id,'pager'=>false,'url_status'=>1, 'fields'=>'url_amount as amount,url_id as id ,url_in_time as time, "recharge"'));
         }
@@ -562,12 +562,43 @@ class Users extends \CLASSES\WebBase
 
 
         /*提现*/
-        if($category=='withdraw'){
+        if($category=='withdraw' || $category=='all'){
         $dao_withdraw_log = new \WDAO\Users(array('table'=>'user_withdraw_log'));
         $withdraw_list = $dao_withdraw_log ->listData(array('u_id'=>$u_id,'pager'=>false,'where' => 'uwl_status > -1', 'fields'=>'uwl_id as id,uwl_amount as amount,uwl_in_time as time,"withdraw"'));
         }
 
-        var_dump($withdraw_list);die;
+
+        $data = array_merge($recharge_list['data'],$withdraw_list['data']);
+        foreach ($data as $k => $v) {
+            $time[$k]  = $v['time'];
+            $arr[$k] = $v;
+        }
+
+        // 将数据根据 volume 降序排列，根据 edition 升序排列
+        // 把 $data 作为最后一个参数，以通用键排序
+        $res = array_multisort($time, SORT_DESC, $arr, SORT_ASC, $data);
+
+
+        foreach ($data as $key => &$value) {
+            if(isset($value['withdraw'])){
+                $value['balances'] = floatval($user_funds['uef_overage']);
+                $user_funds['uef_overage'] = $value['balances'] + floatval($value['amount']);
+                $value['type'] = 'withdraw';
+                unset($value['withdraw']);
+
+            }elseif(isset($value['recharge'])){
+                $value['balances'] = floatval($user_funds['uef_overage']);
+                $user_funds['uef_overage'] = $value['balances'] - floatval($value['amount']);
+                $value['type'] = 'recharge';
+                unset($value['recharge']);
+            }else{
+
+            }
+        }
+
+
+
+        var_dump($data);die;
         $this->exportData( array('recharge_list'=>$recharge_list['data'],'withdraw_list'=>$withdraw_list['data']),1);
 
     }
