@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-20 10:26:38
+ * @Last Modified time: 2017-10-20 14:17:49
  */
 namespace App\Controller;
 
@@ -110,7 +110,7 @@ class Users extends \CLASSES\WebBase
             $code = mt_rand(99999,999999);
 
             /*发送验证码接口*/
-            $content = $msg.$code.'。';
+            $content = '登录验证码为'.$msg.$code.'。';
             $result = sendSms($phone_number, $content);
             if(!$result)
             {
@@ -549,21 +549,25 @@ class Users extends \CLASSES\WebBase
         }
         $page = !empty($_GET['page']) && !empty(intval($_GET['page'])) ? intval($_GET['page']) :1;
         $category = !empty($_GET['category'])  ? trim($_GET['category']) : 'all';
+        $dao_users_funds = new \WDAO\Users(array('table'=>'users_ext_funds'));
+        $user_funds = $dao_users_funds ->infoData(array('key'=>'u_id','val'=>$u_id,'fields'=>'u_id,uef_overage'));
         /*充值*/
         $recharge_list['data'] = '';
         $withdraw_list['data'] = '';
-        if($category=='all' || $category=='recharge'){
+        if($category=='recharge'){
         $dao_recharge_log = new \WDAO\Users(array('table'=>'user_recharge_log'));
-        $recharge_list = $dao_recharge_log ->listData(array('u_id'=>$u_id,'page'=>$page, 'fields'=>'url_amount,url_id,p_id,url_in_time,url_status,url_solut_time,url_card'));
+        $recharge_list = $dao_recharge_log ->listData(array('u_id'=>$u_id,'pager'=>false,'url_status'=>1, 'fields'=>'url_amount as amount,url_id as id ,url_in_time as time, "recharge"'));
         }
+
+
 
         /*提现*/
-        if($category=='all' || $category=='withdraw'){
+        if($category=='withdraw'){
         $dao_withdraw_log = new \WDAO\Users(array('table'=>'user_withdraw_log'));
-        $withdraw_list = $dao_withdraw_log ->listData(array('u_id'=>$u_id,'page'=>$page, 'fields'=>'uwl_id,uwl_amount,uwl_in_time,uwl_status,uwl_solut_time,uwl_card,p_id'));
+        $withdraw_list = $dao_withdraw_log ->listData(array('u_id'=>$u_id,'pager'=>false,'where' => 'uwl_status > -1', 'fields'=>'uwl_id as id,uwl_amount as amount,uwl_in_time as time,"withdraw"'));
         }
 
-
+        var_dump($withdraw_list);die;
         $this->exportData( array('recharge_list'=>$recharge_list['data'],'withdraw_list'=>$withdraw_list['data']),1);
 
     }
@@ -1226,12 +1230,8 @@ class Users extends \CLASSES\WebBase
         $dao_users = new \WDAO\Users(array('table'=>'users'));
         $res = false;
 
-        if(isset($_REQUEST['u_id']) && !empty($u_id = intval($_REQUEST['u_id'])) && !empty($_REQUEST['u_pass']))/*用户id原密码*/
+        if(isset($_REQUEST['u_id']) && !empty($u_id = intval($_REQUEST['u_id'])) && !empty($_REQUEST['u_pass']) && !empty($_REQUEST['new_pass'])  )/*用户id原密码*/
         {
-            if(empty($_REQUEST['new_pass']) || empty($u_pass = trim($_REQUEST['new_pass']))){
-                $this ->exportData( array('msg'=>'请输入新密码'),0);
-            }
-
             $check_user_res = $dao_users ->checkUserPayPassword(array('u_id' => $u_id,'u_pass' => trim($_REQUEST['u_pass'])));
             if(isset($check_user_res['u_id']) && !empty(intval($check_user_res['u_id']))){
                 $res = $dao_users ->passwordEdit($u_id,$_REQUEST['new_pass']);
@@ -1240,7 +1240,7 @@ class Users extends \CLASSES\WebBase
             }
         }
 
-        elseif(isset($_REQUEST['u_mobile']) && !empty($num = intval($_REQUEST['u_mobile'])) && !empty($_REQUEST['verify_code']) && !empty($_REQUEST['u_idcard']) && !empty($u_idcard = intval($_REQUEST['u_idcard'])) )/*手机号验证码身份证号*/
+        elseif(isset($_REQUEST['u_mobile']) && !empty($num = intval($_REQUEST['u_mobile'])) && !empty($_REQUEST['verify_code']) && !empty($_REQUEST['u_idcard']) && !empty($u_idcard = trim($_REQUEST['u_idcard'])) && !empty($_REQUEST['new_pass'])  )/*手机号验证码身份证号*/
         {
             if(empty($_REQUEST['new_pass']) || empty($u_pass = trim($_REQUEST['new_pass']))){
                 $this ->exportData( array('msg'=>'请输入新密码'),0);
@@ -1266,6 +1266,48 @@ class Users extends \CLASSES\WebBase
                         $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
                         break;
                 }
+            }
+        }
+        /*验证验证码*/
+        elseif(isset($_REQUEST['u_mobile']) && !empty($num = intval($_REQUEST['u_mobile'])) && !empty($_REQUEST['verify_code']))
+        {
+            $res = $dao_users ->checkVerifies($num,trim($_REQUEST['verify_code']),$this ->web_config['verify_code_time']);
+            if($res === true){
+               $this ->exportData( array('msg'=>'验证码正确'),1);
+            }else{
+                switch ($res) {
+                    case '-1':
+                        $this ->exportData( array('msg'=>'系统错误请联系管理员'),0);
+                        break;
+                    case '-2':
+                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
+                        break;
+                    default:
+                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
+                        break;
+                }
+            }
+        }
+        /*验证身份证号*/
+        elseif(isset($_REQUEST['u_mobile']) && !empty($num = intval($_REQUEST['u_mobile'])) && !empty($_REQUEST['u_idcard']))
+        {
+            $u_idcard = trim($_REQUEST['u_idcard']);
+            $u_info = $dao_users ->listData(array('u_mobile'=>$num,'u_idcard'=>$u_idcard,'fields'=>'u_id','pager'=>false));
+            if (!empty($u_info['data'][0]['u_id']) && intval($u_info['data'][0]['u_id']) > 0) {
+                    $this ->exportData( array('msg'=>'身份证号验证成功'),1);
+                }else{
+                    $this ->exportData( array('msg'=>'身份证号验证失败'),0);
+                }
+
+        }
+        /*验证原密码密码*/
+        elseif(isset($_REQUEST['u_id']) && !empty($u_id = intval($_REQUEST['u_id'])) && !empty($_REQUEST['u_pass']))
+        {
+            $check_user_res = $dao_users ->checkUserPayPassword(array('u_id' => $u_id,'u_pass' => trim($_REQUEST['u_pass'])));
+            if(isset($check_user_res['u_id']) && !empty(intval($check_user_res['u_id']))){
+                $this ->exportData( array('msg'=>'原密码正确'),1);
+            }else{
+                $this ->exportData( array('msg'=>'原密码错误'),0);
             }
         }
         elseif(isset($_REQUEST['u_mobile']) && !empty($num = intval($_REQUEST['u_mobile'])) && !isset($_REQUEST['u_idcard']) && !isset($_REQUEST['verify_code']))/*手机号发送验证码*/
