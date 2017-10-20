@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-18 17:06:34
+ * @Last Modified time: 2017-10-20 10:26:38
  */
 namespace App\Controller;
 
@@ -65,7 +65,7 @@ class Users extends \CLASSES\WebBase
             $u_img = $this-> getHeadById($user_data['data']['0']['u_id']);
             if($res){
                 $token = $this->createToken($user_data['data']['0']['u_name'],$user_data['data']['0']['u_pass']);
-                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id']),1);
+                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass']),1);
             }
 
 
@@ -528,7 +528,7 @@ class Users extends \CLASSES\WebBase
 
         foreach ($list['data'] as  &$v) {
             if(isset($v['u_id'])){
-                $v['u_img'] = $this-> getHeadById($v['u_id']);
+                $v['u_img'] = $this -> getHeadById($v['u_id']);
             }
             if(in_array($v['u_id'],$favorate_id_arr)){
                 $v['is_fav'] = 1;
@@ -540,21 +540,6 @@ class Users extends \CLASSES\WebBase
     }
 
 
-    // /*获取用户头像信息*/
-    // private function getHeadById($u_id = 0)
-    // {
-    //     if(!is_dir($this ->web_config['u_img_path'])){
-    //         $res = mkdir($this ->web_config['u_img_path'],0777,true);
-    //         if(!$res){
-    //             return '';
-    //         }
-    //     }
-    //     if(file_exists($this ->web_config['u_img_path'].$u_id.$this->head_format)){
-    //         return $this ->web_config['u_img_url'].$u_id.$this->head_format;
-    //     }else{
-    //         return $this ->web_config['u_img_url'].'0'.$this->head_format;
-    //     }
-    // }
 
     /*获取用户资金日志*/
     public function getUsersFundsLog()
@@ -927,7 +912,7 @@ class Users extends \CLASSES\WebBase
     /*用户提现申请接口*/
     public function applyWithdraw()
     {
-        if(empty($_REQUEST['u_id']) || empty($u_id = intval($_GET['u_id']))){
+        if(empty($_REQUEST['u_id']) || empty($u_id = intval($_REQUEST['u_id']))){
             $this->exportData( array('msg'=>'用户ID为空'),0);
         }
         if(empty($_REQUEST['uwl_amount']) || empty($uwl_amount = intval($_REQUEST['uwl_amount']))){
@@ -942,10 +927,20 @@ class Users extends \CLASSES\WebBase
         if(empty($_REQUEST['uwl_truename']) || empty($uwl_truename = trim($_REQUEST['uwl_truename']))){
             $this->exportData( array('msg'=>'提现账号姓名不能为空'),0);
         }
+        if(empty($_REQUEST['u_pass']) || empty($u_pass = trim($_REQUEST['u_pass']))){
+            $this->exportData( array('msg'=>'提现密码不能为空'),0);
+        }
+        /*验证支付密码是否正确*/
+        $dao_users = new \WDAO\Users(array('table'=>'users'));
+        $check_res = $dao_users ->checkUserPayPassword(array('u_id' =>$u_id,'u_pass' =>$u_pass));
+        if(!$check_res){
+            $this->exportData( array('msg'=>'提现密码错误'),0);
+        }
         $dao_user_withdraw_log = new \WDAO\Users(array('table'=>'user_withdraw_log'));
         $dao_users_ext_funds = new \WDAO\Users(array('table'=>'users_ext_funds'));
         /*判断用户余额是否大于提现余额*/
         $uef_overage = $dao_users_ext_funds ->infoData(array('fields'=>'u_id,uef_overage','key'=>'u_id','val' => $u_id,'pager'=>false));
+
         if(!empty($uef_overage['uef_overage'])){
             if(intval($uef_overage['uef_overage']) >= $uwl_amount){
                 /*处理提现过程start*/
@@ -1011,6 +1006,8 @@ class Users extends \CLASSES\WebBase
             elseif($p_id = $this ->web_config['al_pid'])/*支付宝支付*/
             {
 
+            }else{
+                $this->exportData( array('msg'=>'充值失败!系统错误请联系管理员'),0);
             }
         }else{
             $this->exportData( array('msg'=>'充值失败!系统错误请联系管理员'),0);
@@ -1020,18 +1017,20 @@ class Users extends \CLASSES\WebBase
     public function rechargeCallback()
     {
         $dao_recharge_log = new \WDAO\Users(array('table'=>'user_recharge_log'));
+        $dao_users = new \WDAO\Users(array('table'=>'users'));
         require_once WXPAY_PATH.'/example/notify.php';
         $notify = new \MLIB\WXPAY\PayNotifyCallBack();
-        // $data = $notify->Handle(false);\
+        // $data = $notify->Handle(false);
+        $this->db->start();
         $data = array("appid" => "wx2421b1c4370ec43b","attach" => "支付测试", "bank_type" =>"CFT" ,"fee_type" =>"CNY", "is_subscribe" =>"Y" ,"mch_id" =>"10000100" ,"nonce_str" => "5d2b6c2a8db53831f7eda20af46e531c", "openid" => "oUpF8uMEb4qRXf22hE3X68TekukE", "out_trade_no" => "6", "result_code" =>"SUCCESS", "return_code" =>"SUCCESS" ,"sign" => "B552ED6B279343CB493C5DD0D78AB241" ,"sub_mch_id" =>"10000100" ,"time_end" => "20140903131540" ,"total_fee" =>"1" ,"trade_type" =>"JSAPI" ,"transaction_id" => "1004400740201409030005092168",);
         /*微信支付成功后处理返回的数据*/
         if(!empty(floatval($data['total_fee'])) && $data['result_code'] == 'SUCCESS' && isset($data['out_trade_no'])){
 
 
-            $total_fee = $data['total_fee'];/*支付金额*/
+            $total_fee = floatval($data['total_fee']);/*支付金额*/
             $out_trade_no = $data['out_trade_no'];/*支付单号*/
             $recharge_data = $dao_recharge_log ->infodata(array('key'=>'url_id','val'=>$out_trade_no));
-            /*如果微信实际充值金额小于申请时的金额返回*/
+
             $c_data = array();
             if($total_fee != $recharge_data['url_amount']){
                 $c_data['url_remark'] = '用户实际支付金额不等于申请金额,申请金额为'.$recharge_data['url_amount'];
@@ -1044,6 +1043,20 @@ class Users extends \CLASSES\WebBase
                 $c_data['url_status'] = 1;
                 $c_data['url_solut_time'] = time();
                 $c_data['url_solut_author'] = 0;
+
+                $res_recharge_log = $dao_recharge_log -> updateData($c_data,array('url_id' => $recharge_data['url_id']));
+                $judge_data = array();
+                $judge_data['pfl_type_id'] = $recharge_data['url_id'];
+                $judge_data['pfl_amount'] = $total_fee;
+                $judge_data['u_id'] = $recharge_data['u_id'];
+                $res_judgeWX = $dao_users ->judgeResWX($judge_data);
+            }
+
+            if($res_judgeWX && $res_recharge_log){
+                $this->db->commit();
+                $this->exportData('success');
+            }else{
+                $this->db->rollback();
             }
 
 

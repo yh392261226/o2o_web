@@ -180,23 +180,29 @@ class Users extends \MDAOBASE\DaoBase
         return $jsApiParameters;
 
     }
-    /*判断并处理微信支付结果*/
+    /*处理微信支付结果添加记录和修改用户金额*/
     public function judgeResWX($data)
     {
-        MLIB\WXPAY\Log::DEBUG("call back:" . json_encode($data));
-        $notfiyOutput = array();
+        /*平台资金流向记录*/
+        if(isset($data['pfl_type_id']) && isset($data['pfl_amount']) && isset($data['u_id'])){
+            $dao_funds_log = new \WDAO\Users(array('table'=>'platform_funds_log'));
+            /*用户余额表*/
+            $sql = 'update users_ext_funds set uef_overage = uef_overage + '. $data['pfl_amount'] .' where u_id = ' . $data['u_id'];
+            $res_users_funds = $dao_funds_log ->queryData($sql);
+            unset($data['u_id']);
 
-        if(!array_key_exists("transaction_id", $data)){
-            $msg = "输入参数不正确";
-            return false;
+            $data['pfl_type'] = 2;
+            $data['pfl_reason'] = 'recharge';
+            $data['pfl_in_time'] = time();
+            $data['pfl_last_edit_time'] = time();
+            $res_funds_log = $dao_funds_log -> addData($data);
+
+            if($res_users_funds && $res_funds_log){
+                return true;
+            }
         }
-        //查询订单，判断订单真实性
-        $payNotify = new MLIB\WXPAY\PayNotifyCallBack();
-        if( $payNotify ->Queryorder($data["transaction_id"])){
-            $msg = "订单查询失败";
-            return false;
-        }
-        return true;
+        return false;
+
     }
     /*支付宝充值模型*/
     public function alipayRecharge()
