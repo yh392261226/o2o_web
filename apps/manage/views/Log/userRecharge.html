@@ -116,7 +116,15 @@
                                 <td>{{$info.url_in_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
                                 <td>{{$info.url_solut_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
                                 <td>{{$info.url_solut_author}}</td>
-                                <td>{{if $info.url_status eq -1}}确认失败{{elseif $info.url_status eq 0}}待确认{{elseif $info.url_status eq 1}}已确认成功{{/if}}</td>
+                                <td>{{if $info.url_status neq 1 }}
+                                    <select class="input-sm form-control input-s-sm inline" name="" id="" onchange="submitChange(this.value,{{$info.url_id}});">
+                                        <option value="0" {{if $info.s_status eq 0}} selected {{/if}} >待确认</option>
+                                        <option value="-1" {{if $info.s_status eq 1}} selected {{/if}} >确认失败</option>
+                                        <option value="1" {{if $info.s_status eq 1}} selected {{/if}} >确认成功</option>
+                                    </select>
+                                    {{elseif $info.url_status eq 1}}已确认成功{{/if}}
+
+                                </td>
                                 <td>{{$info.url_card}}</td>
                                 <td>{{$info.url_truename}}</td>
                                 <td>{{$info.url_remark}}</td>
@@ -196,6 +204,27 @@
     {
 
             $('form').submit();
+    }
+
+    /*提交修改status*/
+    function submitChange( val,url_id)
+    {
+        $.ajax({
+            url: 'changeRechargeStatus?url_id='+url_id+'&url_status='+val,
+            type: 'GET',
+            dataType:'json',
+            success : function(result) {
+                if(result.status==1){
+                    alert('修改成功');
+                }else{
+                    alert(result.msg);
+                }
+            },
+            error:function() {
+                alert('修改失败了');
+            }
+        })
+
     }
 
 

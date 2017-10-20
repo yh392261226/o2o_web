@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-09 14:37:08
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-12 15:31:26
+ * @Last Modified time: 2017-10-20 10:27:10
  */
 
 namespace App\Controller;
@@ -199,6 +199,36 @@ class Log extends \CLASSES\ManageBase
         $this->tpl->assign('data',$arr_order['data']);
         $this->tpl->display("Log/userRecharge.html");
     }
+
+    /*人工修改充值状态*/
+    public function changeRechargeStatus()
+    {
+        if(isset($_REQUEST['url_id']) && !empty($url_id = intval($_REQUEST['url_id'])) && isset($_REQUEST['url_status']) && (!empty(intval($_REQUEST['url_status'] || $_REQUEST['url_status'] === '0')))){
+            $dao_user_recharge_log = new \MDAO\Log(array('table'=>'user_recharge_log'));
+            $url_status = intval($_REQUEST['url_status']);
+            $info = $dao_user_recharge_log ->infoData(array('key'=>'url_id','val'=>$url_id));
+            if($info['url_status'] == '1'){
+                echo json_encode(array('msg' => '确认成功后不可修改状态', 'status' => 0));exit;
+            }else{
+                $recharge_res = $dao_user_recharge_log ->updateData(array('url_status'=>$url_status,'url_solut_author'=>parent::$manager_status,'url_solut_time'=>time()),array('url_id'=>$url_id));
+                if($url_status == 1 && $recharge_res){
+                    $dao_web_users = new \MDAO\Users(array('table'=>'users'));
+
+                    $data['u_id'] = $info['u_id'];
+                    $data['pfl_amount'] = $info['url_amount'];
+                    $data['pfl_type_id'] = $info['url_id'];
+                    $data['pfl_last_editor'] = parent::$manager_status;
+                    $res = $dao_web_users ->judgeReChargeRes($data);
+                }
+            }
+            echo json_encode(array('msg' => '修改成功', 'status' => 1));exit;
+
+        }else{
+            echo json_encode(array('msg' => '参数不足操作失败', 'status' => 0));exit;
+        }
+    }
+
+    /*修改充值备注*/
 
     public function userWithdrawProof()
     {

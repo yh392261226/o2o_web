@@ -27,7 +27,7 @@ class ManageBase extends Swoole\Controller
         }
         $this->validataLoginStatus(); //验证登陆状态
         $this->managerAssign();
-        //$this->db->debug = true;
+        // $this->db->debug = true;
 
     }
 

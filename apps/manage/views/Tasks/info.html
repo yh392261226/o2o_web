@@ -20,101 +20,112 @@
 </head>
 
 <body class="gray-bg">
-<div class="wrapper wrapper-content animated fadeInRight">
-    <div class="form-horizontal">
-        <div class="row col-sm-12">
-            <div class="form-group col-sm-4">
-                <label class="col-sm-3 control-label">发布人：&nbsp;</label>
-                <label class="col-sm-9 form-control-static">{{$info.t_author}}</label>
+<div class="wrapper-content animated fadeInRight">
+    <div class="ibox-content">
+        <div class="form-horizontal has-success">
+            <div class="form-group">
+                <div class="col-sm-4">
+                    <label class="col-sm-3 control-label">发布人：&nbsp;</label>
+                    <label class="col-sm-9 form-control-static">{{$info.t_author}}</label>
+                </div>
+                <div class="col-sm-4">
+                    <label class="col-sm-3 control-label">任务总价：&nbsp;</label>
+                    <label class="col-sm-9 form-control-static">初始价格：{{$info.t_amount}} / 最终价格：{{if $info.t_edit_amount > 0}}{{$info.t_edit_amount}}{{else}}{{$info.t_amount}}{{/if}}</label>
+                </div>
             </div>
-            <div class="form-group col-sm-4">
-                <label class="col-sm-3 control-label">任务总价：&nbsp;</label>
-                <label class="col-sm-9 form-control-static">初始价格：{{$info.t_amount}} / 最终价格：{{if $info.t_edit_amount > 0}}{{$info.t_edit_amount}}{{else}}{{$info.t_amount}}{{/if}}</label>
+            <div class="hr-line-dashed"></div>
+            <div class="form-group ">
+                <div class="col-sm-4">
+                    <label class="col-sm-3 control-label">修改次数：&nbsp;</label>
+                    <label class="col-sm-9 form-control-static">{{$info.t_amount_edit_times}}</label>
+                </div>
+                <div class="col-sm-4">
+                    <label class="col-sm-3 control-label">任务状态：&nbsp;</label>
+                    <label class="col-sm-9 form-control-static">
+                        {{if $info.t_status == -9}}发布者删除{{/if}}
+                        {{if $info.t_status == -3}}纠纷关闭{{/if}}
+                        {{if $info.t_status == -2}}管理员关闭{{/if}}
+                        {{if $info.t_status == -1}}发布者关闭{{/if}}
+                        {{if $info.t_status == 0}}等待认领{{/if}}
+                        {{if $info.t_status == 1}}洽谈中{{/if}}
+                        {{if $info.t_status == 2}}工作中{{/if}}
+                        {{if $info.t_status == 3}}工作完成{{/if}}
+                        {{if $info.t_status == 4}}纠纷解决{{/if}}
+                    </label>
+                </div>
+            </div>
+            <div class="hr-line-dashed"></div>
+            <div class="form-group ">
+                <div class="col-sm-4">
+                    <label class="col-sm-3 control-label">联系电话：&nbsp;</label>
+                    <label class="col-sm-9 form-control-static">{{if $info.t_phone > 0}}{{$info.t_phone}}{{/if}}</label>
+                </div>
+                <div class="col-sm-4">
+                    <label class="col-sm-3 control-label">电话状态：&nbsp;</label>
+                    <label class="col-sm-9 form-control-static">
+                        {{if $info.t_phone > 0}}
+                        {{if $info.t_phone_status == 0}}隐藏{{/if}}
+                        {{if $info.t_phone_status == 1}}显示{{/if}}
+                        {{/if}}
+                    </label>
+                </div>
             </div>
         </div>
-        <div class="row col-sm-12">
-            <div class="form-group col-sm-4">
-                <label class="col-sm-3 control-label">修改次数：&nbsp;</label>
-                <label class="col-sm-9 form-control-static">{{$info.t_amount_edit_times}}</label>
-            </div>
-            <div class="form-group col-sm-4">
-                <label class="col-sm-3 control-label">任务状态：&nbsp;</label>
-                <label class="col-sm-9 form-control-static">
-                    {{if $info.t_status == -9}}发布者删除{{/if}}
-                    {{if $info.t_status == -3}}纠纷关闭{{/if}}
-                    {{if $info.t_status == -2}}管理员关闭{{/if}}
-                    {{if $info.t_status == -1}}发布者关闭{{/if}}
-                    {{if $info.t_status == 0}}等待认领{{/if}}
-                    {{if $info.t_status == 1}}洽谈中{{/if}}
-                    {{if $info.t_status == 2}}工作中{{/if}}
-                    {{if $info.t_status == 3}}工作完成{{/if}}
-                    {{if $info.t_status == 4}}纠纷解决{{/if}}
-                </label>
-            </div>
-        </div>
-        <div class="row col-sm-12">
-            <div class="form-group col-sm-4">
-                <label class="col-sm-3 control-label">联系电话：&nbsp;</label>
-                <label class="col-sm-9 form-control-static">{{if $info.t_phone > 0}}{{$info.t_phone}}{{/if}}</label>
-            </div>
-            <div class="form-group col-sm-4">
-                <label class="col-sm-3 control-label">电话状态：&nbsp;</label>
-                <label class="col-sm-9 form-control-static">
-                    {{if $info.t_phone > 0}}
-                    {{if $info.t_phone_status == 0}}隐藏{{/if}}
-                    {{if $info.t_phone_status == 1}}显示{{/if}}
-                    {{/if}}
-                </label>
-            </div>
-        </div>
+   </div>
         <div class="hr-line-dashed"></div>
         {{if $info.workers}}
         {{foreach from=$info.workers item=workers}}
-        <div class="row col-sm-12">
-            <div class="form-group col-sm-4">
-                <label class="col-sm-3 control-label">技能：&nbsp;</label>
-                <label class="col-sm-9 form-control-static">{{$workers.s_name}}</label>
-            </div>
-            <div class="form-group col-sm-4">
-                <label class="col-sm-3 control-label">所需数量：&nbsp;</label>
-                <label class="col-sm-9 form-control-static">{{$workers.tew_worker_num}}</label>
-            </div>
-            <div class="form-group col-sm-4">
-                <label class="col-sm-3 control-label">工人单价：&nbsp;</label>
-                <label class="col-sm-9 form-control-static">{{$workers.tew_price}}</label>
+        <div class="ibox-content">
+                <div class="form-horizontal has-success">
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">技能：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{$workers.s_name}}</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">所需数量：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{$workers.tew_worker_num}}</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">工人单价：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{$workers.tew_price}}</label>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">开始：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{if $workers.tew_start_time > 0}}{{$workers.tew_start_time|date_format:"%y-%m-%d %H:%M:%S"}}{{/if}}</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">结束：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{if $workers.tew_end_time > 0}}{{$workers.tew_end_time|date_format:"%y-%m-%d %H:%M:%S"}}{{/if}}</label>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">省：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{$regions_cache[$workers.r_province].r_name}}</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">市：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{$regions_cache[$workers.r_city].r_name}}</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">区：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{$regions_cache[$workers.r_area].r_name}}</label>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">详细地址：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{$workers.tew_address}}</label>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="row col-sm-12">
-            <div class="form-group col-sm-4">
-                <label class="col-sm-3 control-label">开始：&nbsp;</label>
-                <label class="col-sm-9 form-control-static">{{if $workers.tew_start_time > 0}}{{$workers.tew_start_time|date_format:"%y-%m-%d %H:%M:%S"}}{{/if}}</label>
-            </div>
-            <div class="form-group col-sm-4">
-                <label class="col-sm-3 control-label">结束：&nbsp;</label>
-                <label class="col-sm-9 form-control-static">{{if $workers.tew_end_time > 0}}{{$workers.tew_end_time|date_format:"%y-%m-%d %H:%M:%S"}}{{/if}}</label>
-            </div>
-        </div>
-        <div class="row col-sm-12">
-            <div class="form-group col-sm-4">
-                <label class="col-sm-3 control-label">省：&nbsp;</label>
-                <label class="col-sm-9 form-control-static">{{$regions_cache[$workers.r_province].r_name}}</label>
-            </div>
-            <div class="form-group col-sm-4">
-                <label class="col-sm-3 control-label">市：&nbsp;</label>
-                <label class="col-sm-9 form-control-static">{{$regions_cache[$workers.r_city].r_name}}</label>
-            </div>
-            <div class="form-group col-sm-4">
-                <label class="col-sm-3 control-label">区：&nbsp;</label>
-                <label class="col-sm-9 form-control-static">{{$regions_cache[$workers.r_area].r_name}}</label>
-            </div>
-        </div>
-        <div class="row col-sm-12">
-            <div class="form-group col-sm-4">
-                <label class="col-sm-3 control-label">详细地址：&nbsp;</label>
-                <label class="col-sm-9 form-control-static">{{$workers.tew_address}}</label>
-            </div>
-        </div>
-
         <div class="hr-line-dashed"></div>
 
         <div class="col-sm-12">
@@ -182,26 +193,30 @@
         {{/foreach}}
         {{/if}}
         <div class="hr-line-dashed"></div>
-        <div class="row col-sm-12">
-            <div class="form-group ">
-                <label class="col-sm-1 control-label">标题：</label>
-                <label class="col-sm-9 form-control-static">{{$info.t_title}}</label>
+        <div class="ibox-content">
+                <div class="form-horizontal has-success">
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <label class="col-sm-1 control-label">标题：</label>
+                        <label class="col-sm-9 form-control-static">{{$info.t_title}}</label>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <label class="col-sm-1 control-label">简介：</label>
+                        <label class="col-sm-9 form-control-static">{{$info.t_info}}</label>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <label class="col-sm-1 control-label">详情：</label>
+                        <label class="col-sm-9 form-control-static">{{$info.t_desc}}</label>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="row col-sm-12">
-            <div class="form-group">
-                <label class="col-sm-1 control-label">简介：</label>
-                <label class="col-sm-9 form-control-static">{{$info.t_info}}</label>
-            </div>
-        </div>
-        <div class="row col-sm-12">
-            <div class="form-group">
-                <label class="col-sm-1 control-label">详情：</label>
-                <label class="col-sm-9 form-control-static">{{$info.t_desc}}</label>
-            </div>
-        </div>
-    </div>
-
 
 </div>
 
