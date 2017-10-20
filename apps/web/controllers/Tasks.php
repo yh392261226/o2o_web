@@ -33,7 +33,9 @@ class Tasks extends \CLASSES\WebBase
             if (isset($_REQUEST['t_id'])) $data['t_id'] = intval($_REQUEST['t_id']);
             if (isset($_REQUEST['u_id'])) $data['u_id'] = intval($_REQUEST['u_id']);
 
-            if (isset($_REQUEST['o_status'])) $data['o_status'] = intval($_REQUEST['o_status']);
+            if (isset($_REQUEST['o_status']) && is_numeric($_REQUEST['o_status'])) $data['o_status'] = intval($_REQUEST['o_status']);
+            $data['where'] = '1';
+            if (isset($_REQUEST['o_confirm'])) $data['where'] .= ' and orders.o_confirm in (' . trim($_REQUEST['o_confirm'] . ')');
             if (isset($_REQUEST['s_id'])) $data['s_id'] = intval($_REQUEST['s_id']);
             if (isset($_REQUEST['tew_id'])) $data['tew_id'] = intval($_REQUEST['tew_id']);
             //区间值
@@ -45,11 +47,11 @@ class Tasks extends \CLASSES\WebBase
             if (isset($_REQUEST['le_in_time']) && intval($_REQUEST['le_in_time']) > 0) $data['o_last_edit_time'][1] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['le_in_time']));
 
             $data['leftjoin'] = array('tasks', ' orders.t_id = tasks.t_id ');
-            $data['fields'] = 'orders.o_id, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_last_edit_time, orders.o_status, orders.tew_id, orders.s_id,
+            $data['fields'] = 'orders.o_id, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_last_edit_time, orders.o_status, orders.tew_id, orders.s_id, orders.o_confirm, orders.unbind_time,
             tasks.t_id, tasks.t_title, tasks.t_status, tasks.t_author, tasks.t_phone, tasks.t_phone_status, tasks.t_amount, tasks.t_edit_amount, tasks.t_duration, tasks.t_amount_edit_times, tasks.t_posit_x, tasks.t_posit_y, tasks.t_in_time';
             //$data['where'] = ' orders.o_worker = "' . intval($_REQUEST['o_worker']) . '"';
             $data['pager'] = 0;
-            $data['order'] = 'orders.o_id desc';
+            $data['order'] = 'orders.o_in_time, orders.o_id desc';
             $list = $this->orders_dao->listData($data);
         }
         if (!empty($list['data']))
