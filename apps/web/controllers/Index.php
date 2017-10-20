@@ -20,6 +20,7 @@ class Index extends \CLASSES\WebBase
             'Bouns',
             'Tools',
             'Application_config',
+            'Orders',
         );
 
         if (!empty($api_list))

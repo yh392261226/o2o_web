@@ -76,7 +76,7 @@ class Tasks extends \CLASSES\WebBase
         if (isset($_REQUEST['t_author'])) $data['t_author'] = intval($_REQUEST['t_author']);
         if (isset($_REQUEST['t_phone'])) $data['t_phone'] = intval($_REQUEST['t_phone']);
         if (isset($_REQUEST['t_phone_status'])) $data['t_phone_status'] = intval($_REQUEST['t_phone_status']);
-        $data['t_storage'] = 0;
+        $data['where'] = 't_storage = 0';
         if (isset($_REQUEST['t_storage'])) $data['t_storage'] = intval($_REQUEST['t_storage']);
 
         //price between
@@ -98,7 +98,11 @@ class Tasks extends \CLASSES\WebBase
         if (isset($_REQUEST['ge_in_time']) && intval($_REQUEST['ge_in_time']) > 0) $data['t_in_time'][0] = array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['ge_in_time']));
         if (isset($_REQUEST['le_in_time']) && intval($_REQUEST['le_in_time']) > 0) $data['t_in_time'][1] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['le_in_time']));
 
-        if (isset($_REQUEST['skills']) && intval($_REQUEST['skills']) > 0) $data['leftjoin'] = array('task_ext_worker', ' task_ext_worker.t_id = tasks.t_id and task_ext_worker.tew_skills = "' . intval($_REQUEST['skills']) . '"');
+        if (isset($_REQUEST['skills']) && intval($_REQUEST['skills']) > 0)
+        {
+            $data['leftjoin'] = array('task_ext_worker', ' task_ext_worker.t_id = tasks.t_id');
+            $data['where'] .=  ' and task_ext_worker.tew_skills = "' . intval($_REQUEST['skills']) . '"';
+        }
         if (isset($data['leftjoin']))
         {
             $data['fields'] = 'tasks.t_id, tasks.t_title, tasks.t_status, tasks.t_author, tasks.t_phone, tasks.t_phone_status, tasks.t_amount, tasks.t_edit_amount, tasks.t_duration, tasks.t_amount_edit_times, tasks.t_posit_x, tasks.t_posit_y, tasks.t_in_time, tasks.t_storage, task_ext_worker.tew_skills, task_ext_worker.tew_worker_num, task_ext_worker.tew_price, task_ext_worker.tew_start_time, task_ext_worker.tew_end_time, task_ext_worker.r_province, task_ext_worker.r_city, task_ext_worker.r_area, task_ext_worker.tew_address, task_ext_worker.tew_lock';

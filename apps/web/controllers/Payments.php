@@ -27,7 +27,7 @@ class Payments extends \CLASSES\WebBase
         $list = $data = array();
         if (isset($_REQUEST['p_id'])) $data['p_id'] = array('type' => 'in', 'value' => $_REQUEST['p_id']);
         if (isset($_REQUEST['p_name'])) $data['p_name'] = array('type'=>'like', 'value' => trim($_REQUEST['p_name']));
-        if (isset($_REQUEST['p_status'])) $data['p_status'] = intval($_REQUEST['p_status']);
+        $data['p_status'] = 1;
         if (isset($_REQUEST['p_type'])) $data['p_type'] = intval($_REQUEST['p_type']);
         if (isset($_REQUEST['p_default'])) $data['p_default'] = intval($_REQUEST['p_default']);
         if (isset($_REQUEST['p_author'])) $data['p_author'] = trim($_REQUEST['p_author']);
