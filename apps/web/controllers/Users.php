@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-20 15:50:38
+ * @Last Modified time: 2017-10-20 15:55:12
  */
 namespace App\Controller;
 
@@ -47,7 +47,7 @@ class Users extends \CLASSES\WebBase
         $user_data = $dao_users->listData(array(
             'u_mobile' => $phone_number,
             'pager' => false,
-            'fields'=>'u_name,u_pass,u_status,u_online,u_id,u_sex',
+            'fields'=>'u_name,u_pass,u_status,u_online,u_id,u_sex,u_idcard',
                 ));
 
 
