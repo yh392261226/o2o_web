@@ -109,11 +109,6 @@ class Orders extends \CLASSES\WebBase
                     {//半开工
                         $task_dao->updateData(array('t_status' => 5), array('t_id' => intval($info['data'][0]['t_id'])));
                     }
-
-                    //工人与该任务的工种关系中间表操作
-                    $task_ext_worker_order_dao = new \WDAO\Task_ext_worker_order();
-                    $task_ext_worker_order_dao->updateData(array('tewo_status' => 1), array('o_id' => $data['o_id']));
-
                 }
                 $this->exportData('success');
             }
@@ -184,17 +179,6 @@ class Orders extends \CLASSES\WebBase
             't_status' => 0,
         ));
 
-        //工人与该任务的工种关系中间表操作
-        $task_ext_worker_order_dao = new \WDAO\Task_ext_worker_order();
-        $task_ext_worker_order_dao->addData(array(
-            't_id' => $worker_result['data'][0]['t_id'],
-            't_author' => $worker_result['data'][0]['t_author'],
-            'tewo_worker' => $data['o_worker'],
-            'tew_id' => $worker_result['data'][0]['tew_id'],
-            's_id' => $worker_result['data'][0]['tew_skills'],
-            'o_id' => $result,
-            'tewo_status' => 0,
-        ));
         $this->exportData($result);
     }
 
@@ -368,20 +352,6 @@ class Orders extends \CLASSES\WebBase
                 $this->exportData('failure');
             }
 
-            //工人与该任务的工种关系中间表操作
-            foreach($order_data['data'] as $key => $val)
-            {
-                if (isset($val['o_id']) && $val['o_id'] > 0)
-                {
-                    $tmp['o_id'][] = $val['o_id'];
-                }
-            }
-            if (!empty($tmp['o_id']))
-            {
-                $task_ext_worker_order_dao = new \WDAO\Task_ext_worker_order();
-                $task_ext_worker_order_dao->updateData(array('tewo_status' => ($tmp['type'] == 'fire') ? 4 : 5), array('where' => 'o_id in ('. implode(',', $tmp['o_id']) .')'));
-            }
-
             if (!empty($tmp))
             {
                 $comment_dao = new \WDAO\Task_comment();
@@ -420,12 +390,6 @@ class Orders extends \CLASSES\WebBase
             if (!$result)
             {
                 $this->exportData('failure');
-            }
-
-            if (!empty($task_param) && (isset($task_param['o_id']) || (isset($task_param['t_id']) && isset($task_param['tewo_worker']) && (isset($task_param['tew_id']) || isset($task_param['s_id'])))))
-            {
-                $task_ext_worker_order_dao = new \WDAO\Task_ext_worker_order();
-                $task_ext_worker_order_dao->delData($task_param);
             }
             $this->exportData('success');
         }
