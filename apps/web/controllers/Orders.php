@@ -408,7 +408,7 @@ class Orders extends \CLASSES\WebBase
         //雇主id
         if (isset($_REQUEST['t_author']) && intval($_REQUEST['t_author']) > 0) $data['t_author'] = intval($_REQUEST['t_author']);
 
-        if (!empty($data) && isset($data['t_author']) && isset($data['t_id']))
+        if (!empty($data) && isset($data['t_author']) && isset($data['t_id']) && isset($data['tew_id']))
         {
             //先获取任务信息
             $task_dao = new \WDAO\Tasks();
