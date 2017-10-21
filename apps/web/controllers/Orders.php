@@ -400,13 +400,21 @@ class Orders extends \CLASSES\WebBase
      */
     private function payout()
     {
+        $data = array();
         //任务工人关系id
-        if (isset($_REQUEST['tew_id']) && intval($_REQUEST['tew_id']) > 0) $data['tew_id'] = $task_param['tew_id'] = intval($_REQUEST['tew_id']);
+        if (isset($_REQUEST['tew_id']) && intval($_REQUEST['tew_id']) > 0) $data['tew_id'] = intval($_REQUEST['tew_id']);
         //任务id
-        if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $tmp['t_id'] = intval($_REQUEST['t_id']);
+        if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']);
         //雇主id
         if (isset($_REQUEST['t_author']) && intval($_REQUEST['t_author']) > 0) $data['t_author'] = intval($_REQUEST['t_author']);
 
+        if (isset($data['t_author']) && isset($data['t_id']))
+        {
+            $order_data = array();
+
+            $order_data = $this->orders_dao->listData($param);
+        }
+        $this->exportData('failure');
     }
 
 }
