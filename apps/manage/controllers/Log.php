@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-09 14:37:08
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-20 17:08:53
+ * @Last Modified time: 2017-10-22 11:56:51
  */
 
 namespace App\Controller;
@@ -426,6 +426,7 @@ class Log extends \CLASSES\ManageBase
         $uwl_id = isset($_REQUEST['uwl_id']) && intval($_REQUEST['uwl_id']) > 0 ? intval($_REQUEST['uwl_id']) : 0;
         $is_ajax = isset($_REQUEST['is_ajax']) ? intval($_REQUEST['is_ajax']) : 0;
         $uwl_status = isset($_REQUEST['uwl_status']) && in_array($_REQUEST['uwl_status'], array('-1', '1')) ? trim($_REQUEST['uwl_status']) : '';
+        $user_funds = new \MDAO\Users_ext_funds();
         if (!$uwl_id || '' == $uwl_status)
         {
             if (!$is_ajax)
@@ -464,13 +465,18 @@ class Log extends \CLASSES\ManageBase
                 ));
                 if ($pf_result)
                 {
-                    $user_funds = new \MDAO\Users_ext_funds();
-                    $sql = 'insert into users_ext_funds (u_id, uef_overage) values (' . $info['u_id'] . ', ' . $info['uwl_amount'] . ') ON DUPLICATE KEY update users_ext_funds set uef_overage=uef_overage+' . $info['uwl_amount'] . ' where u_id=' . $info['u_id'];
+
+                    // $sql = 'insert into users_ext_funds (u_id, uef_overage) values (' . $info['u_id'] . ', ' . $info['uwl_amount'] . ') ON DUPLICATE KEY update users_ext_funds set uef_overage=uef_overage+' . $info['uwl_amount'] . ' where u_id=' . $info['u_id'];
+                    $sql = 'update users_ext_funds set uef_overage=uef_overage+' . $info['uwl_amount'] . ' where u_id=' . $info['u_id'];
                     $user_funds->queryData($sql);
                 }
             }
         }
-
+        /*获取余额*/
+        $info = $dao_log->infoData($uwl_id);
+        $user_url_overage = $user_funds ->infoData(array('key'=>'u_id','val'=>$info['u_id']));
+        $url_overage = $user_url_overage['uef_overage'];
+        $result = $dao_log->updateData(array('uwl_overage'=>$url_overage), array('uwl_id' => $uwl_id));
         if (!$is_ajax)
         {
             return 1;

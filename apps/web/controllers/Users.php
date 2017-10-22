@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-20 17:28:44
+ * @Last Modified time: 2017-10-22 12:54:42
  */
 namespace App\Controller;
 
@@ -558,7 +558,7 @@ class Users extends \CLASSES\WebBase
         $withdraw_list['data'] = array();
         if($category=='recharge' || $category=='all'){
         $dao_recharge_log = new \WDAO\Users(array('table'=>'user_recharge_log'));
-        $recharge_list = $dao_recharge_log ->listData(array('u_id'=>$u_id,'pager'=>false,'url_status'=>1, 'fields'=>'url_amount as amount,url_id as id ,url_in_time as time, "recharge"'));
+        $recharge_list = $dao_recharge_log ->listData(array('u_id'=>$u_id,'pager'=>false,'url_status'=>1, 'fields'=>'url_amount as amount,url_id as id ,url_in_time as time,url_overage as balances, "recharge"'));
         }
 
 
@@ -566,7 +566,7 @@ class Users extends \CLASSES\WebBase
         /*提现*/
         if($category=='withdraw' || $category=='all'){
         $dao_withdraw_log = new \WDAO\Users(array('table'=>'user_withdraw_log'));
-        $withdraw_list = $dao_withdraw_log ->listData(array('u_id'=>$u_id,'pager'=>false,'where' => 'uwl_status > -1', 'fields'=>'uwl_id as id,uwl_amount as amount,uwl_in_time as time,"withdraw"'));
+        $withdraw_list = $dao_withdraw_log ->listData(array('u_id'=>$u_id,'pager'=>false,'where' => 'uwl_status > -1', 'fields'=>'uwl_id as id,uwl_amount as amount,uwl_in_time as time,uwl_overage as balances,"withdraw"'));
         }
 
 
@@ -580,14 +580,14 @@ class Users extends \CLASSES\WebBase
 
         foreach ($data as $key => &$value) {
             if(isset($value['withdraw'])){
-                $value['balances'] = floatval($user_funds['uef_overage']);
-                $user_funds['uef_overage'] = $value['balances'] + floatval($value['amount']);
+                // $value['balances'] = floatval($user_funds['uef_overage']);
+                // $user_funds['uef_overage'] = $value['balances'] + floatval($value['amount']);
                 $value['type'] = 'withdraw';
                 unset($value['withdraw']);
 
             }elseif(isset($value['recharge'])){
-                $value['balances'] = floatval($user_funds['uef_overage']);
-                $user_funds['uef_overage'] = $value['balances'] - floatval($value['amount']);
+                // $value['balances'] = floatval($user_funds['uef_overage']);
+                // $user_funds['uef_overage'] = $value['balances'] - floatval($value['amount']);
                 $value['type'] = 'recharge';
                 unset($value['recharge']);
             }else{
