@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-09 14:37:08
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-20 10:27:10
+ * @Last Modified time: 2017-10-22 11:56:51
  */
 
 namespace App\Controller;
@@ -210,15 +210,22 @@ class Log extends \CLASSES\ManageBase
             if($info['url_status'] == '1'){
                 echo json_encode(array('msg' => '确认成功后不可修改状态', 'status' => 0));exit;
             }else{
-                $recharge_res = $dao_user_recharge_log ->updateData(array('url_status'=>$url_status,'url_solut_author'=>parent::$manager_status,'url_solut_time'=>time()),array('url_id'=>$url_id));
+                $dao_web_users = new \MDAO\Users(array('table'=>'users'));
+                $dao_users_ext_funds = new \MDAO\Users_ext_funds();
+                /*获取用户当前余额*/
+                $user_url_overage = $dao_users_ext_funds ->infoData(array('key'=>'u_id','val'=>$info['u_id']));
+                $url_overage = $user_url_overage['uef_overage'] + $info['url_amount'];
+
+
+                $recharge_res = $dao_user_recharge_log ->updateData(array('url_status'=>$url_status,'url_overage'=>$url_overage,'url_solut_author'=>parent::$manager_status,'url_solut_time'=>time()),array('url_id'=>$url_id));
                 if($url_status == 1 && $recharge_res){
-                    $dao_web_users = new \MDAO\Users(array('table'=>'users'));
 
                     $data['u_id'] = $info['u_id'];
                     $data['pfl_amount'] = $info['url_amount'];
                     $data['pfl_type_id'] = $info['url_id'];
                     $data['pfl_last_editor'] = parent::$manager_status;
                     $res = $dao_web_users ->judgeReChargeRes($data);
+
                 }
             }
             echo json_encode(array('msg' => '修改成功', 'status' => 1));exit;
@@ -229,6 +236,22 @@ class Log extends \CLASSES\ManageBase
     }
 
     /*修改充值备注*/
+    public function changeRechargeRemark()
+    {
+        if(isset($_REQUEST['url_id']) && !empty($url_id = intval($_REQUEST['url_id'])) && isset($_REQUEST['url_remark'])){
+            $dao_user_recharge_log = new \MDAO\Log(array('table'=>'user_recharge_log'));
+            $url_remark = trim($_REQUEST['url_remark']);
+            $res = $dao_user_recharge_log -> updateData(array('url_remark' =>$url_remark),array('url_id'=>$url_id));
+            if($res){
+                echo json_encode(array('msg' => '修改成功', 'status' => 1));exit;
+            }else{
+                echo json_encode(array('msg' => '修改失败', 'status' => 0));exit;
+            }
+
+        }else{
+            echo json_encode(array('msg' => '参数不足操作失败', 'status' => 0));exit;
+        }
+    }
 
     public function userWithdrawProof()
     {
@@ -403,6 +426,7 @@ class Log extends \CLASSES\ManageBase
         $uwl_id = isset($_REQUEST['uwl_id']) && intval($_REQUEST['uwl_id']) > 0 ? intval($_REQUEST['uwl_id']) : 0;
         $is_ajax = isset($_REQUEST['is_ajax']) ? intval($_REQUEST['is_ajax']) : 0;
         $uwl_status = isset($_REQUEST['uwl_status']) && in_array($_REQUEST['uwl_status'], array('-1', '1')) ? trim($_REQUEST['uwl_status']) : '';
+        $user_funds = new \MDAO\Users_ext_funds();
         if (!$uwl_id || '' == $uwl_status)
         {
             if (!$is_ajax)
@@ -441,13 +465,18 @@ class Log extends \CLASSES\ManageBase
                 ));
                 if ($pf_result)
                 {
-                    $user_funds = new \MDAO\Users_ext_funds();
-                    $sql = 'insert into users_ext_funds (u_id, uef_overage) values (' . $info['u_id'] . ', ' . $info['uwl_amount'] . ') ON DUPLICATE KEY update users_ext_funds set uef_overage=uef_overage+' . $info['uwl_amount'] . ' where u_id=' . $info['u_id'];
+
+                    // $sql = 'insert into users_ext_funds (u_id, uef_overage) values (' . $info['u_id'] . ', ' . $info['uwl_amount'] . ') ON DUPLICATE KEY update users_ext_funds set uef_overage=uef_overage+' . $info['uwl_amount'] . ' where u_id=' . $info['u_id'];
+                    $sql = 'update users_ext_funds set uef_overage=uef_overage+' . $info['uwl_amount'] . ' where u_id=' . $info['u_id'];
                     $user_funds->queryData($sql);
                 }
             }
         }
-
+        /*获取余额*/
+        $info = $dao_log->infoData($uwl_id);
+        $user_url_overage = $user_funds ->infoData(array('key'=>'u_id','val'=>$info['u_id']));
+        $url_overage = $user_url_overage['uef_overage'];
+        $result = $dao_log->updateData(array('uwl_overage'=>$url_overage), array('uwl_id' => $uwl_id));
         if (!$is_ajax)
         {
             return 1;

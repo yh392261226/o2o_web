@@ -187,6 +187,10 @@ class WebBase extends Swoole\Controller
             return false;
         }
         $withdraw_dao = new \MDAOBASE\DaoBase(array('table' => 'user_withdraw_log'));
+        /*获取余额*/
+        $user_funds = new \WDAO\Users_ext_funds(array('table' => 'users_ext_funds'));
+        $user_url_overage = $user_funds ->infoData(array('key'=>'u_id','val'=>$uid));
+
         $log_data = array(
             'u_id' => $uid,
             'p_id' => $payid,
@@ -195,6 +199,7 @@ class WebBase extends Swoole\Controller
             'uwl_card' => $card,
             'uwl_in_time' => time(),
             'uwl_status' => $status,
+            'uwl_overage' => $user_url_overage['uef_overage'],
         );
         return $withdraw_dao->addData($log_data);
     }

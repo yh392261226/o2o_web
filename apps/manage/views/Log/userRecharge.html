@@ -127,7 +127,7 @@
                                 </td>
                                 <td>{{$info.url_card}}</td>
                                 <td>{{$info.url_truename}}</td>
-                                <td>{{$info.url_remark}}</td>
+                                <td><input type="text" onchange="submitRemark(this.value,{{$info.url_id}});" value="{{$info.url_remark}}"></td>
                             </tr>
                             {{/foreach}}
                             {{/if}}
@@ -209,10 +209,34 @@
     /*提交修改status*/
     function submitChange( val,url_id)
     {
+        alert(1);
         $.ajax({
             url: 'changeRechargeStatus?url_id='+url_id+'&url_status='+val,
             type: 'GET',
             dataType:'json',
+            success : function(result) {
+                if(result.status==1){
+                    alert('修改成功');
+                }else{
+                    alert(result.msg);
+                }
+            },
+            error:function() {
+                alert('修改失败了');
+            }
+        })
+
+    }
+
+    /*提交修改备注*/
+    function submitRemark(val,url_id)
+    {
+        $.ajax({
+            url: 'changeRechargeRemark',
+            type: 'POST',
+            dataType:'json',
+            data:{'url_id':url_id,
+                'url_remark':val},
             success : function(result) {
                 if(result.status==1){
                     alert('修改成功');
