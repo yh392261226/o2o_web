@@ -48,7 +48,7 @@ class Tasks extends \CLASSES\WebBase
 
             $data['leftjoin'] = array('tasks', ' orders.t_id = tasks.t_id ');
             $data['fields'] = 'orders.o_id, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_last_edit_time, orders.o_status, orders.tew_id, orders.s_id, orders.o_confirm, orders.unbind_time,
-            tasks.t_id, tasks.t_title, tasks.t_status, tasks.t_author, tasks.t_phone, tasks.t_phone_status, tasks.t_amount, tasks.t_edit_amount, tasks.t_duration, tasks.t_amount_edit_times, tasks.t_posit_x, tasks.t_posit_y, tasks.t_in_time';
+            tasks.t_id, tasks.t_title, tasks.t_info, tasks.t_status, tasks.t_author, tasks.t_phone, tasks.t_phone_status, tasks.t_amount, tasks.t_edit_amount, tasks.t_duration, tasks.t_amount_edit_times, tasks.t_posit_x, tasks.t_posit_y, tasks.t_in_time';
             //$data['where'] = ' orders.o_worker = "' . intval($_REQUEST['o_worker']) . '"';
             $data['pager'] = 0;
             $data['order'] = 'orders.o_in_time, orders.o_id desc';
