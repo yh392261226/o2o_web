@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-09 14:37:08
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-22 11:56:51
+ * @Last Modified time: 2017-10-23 09:34:07
  */
 
 namespace App\Controller;
@@ -466,8 +466,9 @@ class Log extends \CLASSES\ManageBase
                 if ($pf_result)
                 {
 
-                    // $sql = 'insert into users_ext_funds (u_id, uef_overage) values (' . $info['u_id'] . ', ' . $info['uwl_amount'] . ') ON DUPLICATE KEY update users_ext_funds set uef_overage=uef_overage+' . $info['uwl_amount'] . ' where u_id=' . $info['u_id'];
-                    $sql = 'update users_ext_funds set uef_overage=uef_overage+' . $info['uwl_amount'] . ' where u_id=' . $info['u_id'];
+
+                    $sql = 'insert into users_ext_funds (u_id, uef_overage) values (' . $info['u_id'] . ', ' . $info['uwl_amount'] . ') ON DUPLICATE KEY update uef_overage = uef_overage + ' . $info['uwl_amount'] . ',u_id='. $info['u_id'];
+
                     $user_funds->queryData($sql);
                 }
             }

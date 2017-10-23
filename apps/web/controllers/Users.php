@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-22 12:54:42
+ * @Last Modified time: 2017-10-23 09:50:00
  */
 namespace App\Controller;
 
@@ -512,32 +512,35 @@ class Users extends \CLASSES\WebBase
                 }
             }
         }
-        $data2['fields'] = 'users.u_id,u_name,u_skills,users_ext_info.uei_info,u_task_status,u_true_name,ucp_posit_x,ucp_posit_y';
+        $data2['fields'] = 'users.u_id,users.u_mobile,users.u_sex,u_name,u_skills,users_ext_info.uei_info,u_task_status,u_true_name,ucp_posit_x,ucp_posit_y,users_ext_info.uei_address';
 
         $list = $dao_info ->listData($data2);
 
+        if(!empty($list['data'])){
         /*获取收藏列表*/
-        $favorate_id_arr = array();
-        if (isset($_REQUEST['fu_id']) && intval($_REQUEST['fu_id']) > 0) {
-            $fu_id = intval($_REQUEST['fu_id']);
-            if($fu_id > 0){
-                $dao_users_favorate = new \WDAO\Users(array('table'=>'users_favorate'));
-                $favorate_arr = $dao_users_favorate -> listData(array('u_id' => $fu_id,'f_type' => 1,'fields'=>'u_id,f_type_id','pager'=>false));
-                foreach ($favorate_arr['data'] as $key => $value) {
-                   $favorate_id_arr[] = $value['f_type_id'];
+            $favorate_id_arr = array();
+            if (isset($_REQUEST['fu_id']) && intval($_REQUEST['fu_id']) > 0) {
+                $fu_id = intval($_REQUEST['fu_id']);
+                if($fu_id > 0){
+                    $dao_users_favorate = new \WDAO\Users(array('table'=>'users_favorate'));
+                    $favorate_arr = $dao_users_favorate -> listData(array('u_id' => $fu_id,'f_type' => 1,'fields'=>'u_id,f_type_id','pager'=>false));
+                    foreach ($favorate_arr['data'] as $key => $value) {
+                       $favorate_id_arr[] = $value['f_type_id'];
+                    }
                 }
             }
-        }
 
-        foreach ($list['data'] as  &$v) {
-            if(isset($v['u_id'])){
-                $v['u_img'] = $this -> getHeadById($v['u_id']);
+            foreach ($list['data'] as  &$v) {
+                if(isset($v['u_id'])){
+                    $v['u_img'] = $this -> getHeadById($v['u_id']);
+                }
+                if(in_array($v['u_id'],$favorate_id_arr)){
+                    $v['is_fav'] = 1;
+                }else{
+                    $v['is_fav'] = 0;
+                }
             }
-            if(in_array($v['u_id'],$favorate_id_arr)){
-                $v['is_fav'] = 1;
-            }else{
-                $v['is_fav'] = 0;
-            }
+
         }
         $this->exportData($list,1);
     }
