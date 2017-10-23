@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-09 14:37:08
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-23 09:34:07
+ * @Last Modified time: 2017-10-23 10:11:23
  */
 
 namespace App\Controller;
@@ -476,7 +476,10 @@ class Log extends \CLASSES\ManageBase
         /*获取余额*/
         $info = $dao_log->infoData($uwl_id);
         $user_url_overage = $user_funds ->infoData(array('key'=>'u_id','val'=>$info['u_id']));
-        $url_overage = $user_url_overage['uef_overage'];
+        $url_overage = 0;
+        if(isset($user_url_overage['uef_overage'])){
+            $url_overage = $user_url_overage['uef_overage'];
+        }
         $result = $dao_log->updateData(array('uwl_overage'=>$url_overage), array('uwl_id' => $uwl_id));
         if (!$is_ajax)
         {
