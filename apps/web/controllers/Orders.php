@@ -400,13 +400,72 @@ class Orders extends \CLASSES\WebBase
      */
     private function payout()
     {
-        //任务工人关系id
-        if (isset($_REQUEST['tew_id']) && intval($_REQUEST['tew_id']) > 0) $data['tew_id'] = $task_param['tew_id'] = intval($_REQUEST['tew_id']);
+        $data = array();
+        //任务工人关系id 即单个工种的id
+        if (isset($_REQUEST['tew_id']) && intval($_REQUEST['tew_id']) > 0) $data['tew_id'] = intval($_REQUEST['tew_id']);
         //任务id
-        if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $tmp['t_id'] = intval($_REQUEST['t_id']);
+        if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']);
         //雇主id
         if (isset($_REQUEST['t_author']) && intval($_REQUEST['t_author']) > 0) $data['t_author'] = intval($_REQUEST['t_author']);
 
+        if (!empty($data) && isset($data['t_author']) && isset($data['t_id']) && isset($data['tew_id']))
+        {
+            //先获取任务信息
+            $task_dao = new \WDAO\Tasks();
+            $data['pager'] = 0;
+            $task_data = $task_dao->listData($data);
+            if (!empty($task_data['data'][0]))
+            {
+                $order_param = array();
+                //获取该任务所属的全部订单信息
+                $order_param['where'] = 'orders.o_confirm = 1';
+                $order_param['join'] = array('task_ext_worker', 'task_ext_worker.tew_id = orders.tew_id and task_ext_worker.tew_skills = orders.s_id, task_ext_worker.t_id = orders.t_id');
+                $order_param['fields'] = 'task_ext_worker.tew_id, task_ext_worker.tew_skills, task_ext_worker.tew_worker_num, task_ext_worker.tew_price, task_ext_worker.tew_start_time, task_ext_worker.tew_end_time,
+                orders.o_id, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_status';
+                $order_param['where'] .= ' and orders.t_id = "' . intval($data['t_id']) . '" and orders.u_id = "' . $data['t_author'] . '"';
+                if (isset($data['tew_id']))
+                {
+                    $order_param['where'] .= ' and orders.tew_id = "' . $data['tew_id'] . '"';
+                }
+                $order_param['pager'] = 0;
+                $orders_data = $this->orders_dao->listData($order_param);
+                if (!empty($orders_data['data']))
+                {
+                    $pay_status = 1;
+                    $this->db->start();
+                    foreach ($orders_data['data'] as $key => $val)
+                    {
+                        if (!empty($val) && isset($val['o_id']) && $val['o_id'] > 0 &&
+                            isset($val['o_amount']) && $val['o_amount'] > 0 &&
+                            isset($val['o_worker']) && $val['o_worker'] > 0 &&
+                            isset($val['o_status']) && $val['o_status'] == 0 &&
+                            isset($val['o_confirm']) && $val['o_confirm'] == 1)
+                        {
+                            //给每个工人单独发钱并单独扣除平台款项
+                            $platform_result = $user_result = 0;
+                            $platform_result = $this->platformFundsLog($val['o_id'], ($val['o_amount'] * -1), 0, 'payorder');
+                            $user_result = $this->userFunds($val['o_worker'], $val['o_amount'], 'overage');
+                            if (!$platform_result || !$user_result)
+                            {
+                                $pay_status = 0;
+                            }
+                        }
+                    }
+                    unset($key, $val);
+
+                    if ($pay_status == 1)
+                    {
+                        $this->db->commit();
+                        $this->exportData('success');
+                    }
+                    else
+                    {
+                        $this->db->rollback();
+                    }
+                }
+            }
+        }
+        $this->exportData('failure');
     }
 
 }
