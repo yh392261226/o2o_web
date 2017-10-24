@@ -204,16 +204,61 @@ class Tasks extends \CLASSES\WebBase
             unset($desc);
             $workers_param = array(
                 'pager' => 0,
-                'fields' => 'orders.*, task_ext_worker.*',
+                //'fields' => 'orders.*, task_ext_worker.*',
                 'where' => 'task_ext_worker.t_id =' . intval($_REQUEST['t_id']),
-                'leftjoin' => array('orders', 'orders.t_id = task_ext_worker.t_id'),
+                //'leftjoin' => array('orders', 'orders.t_id = task_ext_worker.t_id'),
                 );
             $workers = $this->task_ext_worker_dao->listData($workers_param);
+            //
+            //
+            //if (!empty($workers['data']))
+            //{
+            //    $info['t_workers'] = $workers['data'];
+            //}
+            //unset($workers);
+            //
+
             if (!empty($workers['data']))
             {
-                $info['t_workers'] = $workers['data'];
+                $orders_param = $tew_ids = array();
+                foreach ($workers['data'] as $key => $val)
+                {
+                    $workers['data'][$key]['remaining'] = $val['tew_worker_num'];
+                    $tew_ids[] = isset($val['tew_id']) && $val['tew_id'] > 0 ? $val['tew_id'] : 0;
+                }
+                unset($key, $val);
+                if (!empty($tew_ids))
+                {
+                    $orders_param['tew_id'] = array('type' => 'in', 'value' => $tew_ids);
+                    $orders_param['pager'] = 0;
+                    $orders_param['o_confirm'] = 1;
+                    $orders_dao = new \WDAO\Orders();
+                    $orders_data = $orders_dao->listData($orders_param);
+                    if (!empty($orders_data['data']))
+                    {
+                        foreach ($workers['data'] as $key => $val)
+                        {
+                            $order_count = 0;
+                            foreach ($orders_data['data'] as $k => $v)
+                            {
+                                if ($val['tew_id'] == $v['tew_id'])
+                                {
+                                    $order_count += 1;
+                                    $workers['data'][$key]['orders'][] = $v;
+                                }
+                            }
+                            $workers['data'][$key]['remaining'] = $val['tew_worker_num'] - $order_count;
+                            unset($k, $v);
+                        }
+                        unset($key, $val, $order_count, $orders_data);
+                    }
+                }
+                if (!empty($workers['data']))
+                {
+                    $info['t_workers'] = $workers['data'];
+                }
+                unset($workers);
             }
-            unset($workers);
             $this->exportData($info);
         }
         else

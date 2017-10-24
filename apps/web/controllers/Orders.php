@@ -131,39 +131,45 @@ class Orders extends \CLASSES\WebBase
 
         if (!isset($data['tew_id']) || !isset($_REQUEST['t_id']) || !isset($_REQUEST['o_worker'])) $this->exportData('failure');
 
+        //验证任务是否存在
         $worker_dao = new \WDAO\Task_ext_worker();
         $worker_result = $worker_dao->listData(array(
             'pager' => 0,
-            'fields' => 'orders.*, task_ext_worker.*',
-            'where' => 'task_ext_worker.tew_id = ' . intval($data['tew_id']) . ' and task_ext_worker.t_id =' . intval($_REQUEST['t_id'])  . ' and orders.o_confirm != 1',
-            'leftjoin' => array('orders', 'orders.t_id = task_ext_worker.t_id'),
+            'fields' => 'tasks.*, task_ext_worker.*',
+            'where' => 'task_ext_worker.tew_id = ' . intval($data['tew_id']) . ' and task_ext_worker.t_id =' . intval($_REQUEST['t_id']),
             'join' => array('tasks', 'tasks.t_id = task_ext_worker.t_id'),
-            'order' => 'orders.o_id desc',
+            'order' => 'task_ext_worker.tew_id desc',
             ));
+        $worker_result = isset($worker_result['data'][0]) ? $worker_result['data'][0] : array();
 
-        if (empty($worker_result['data']) || !isset($worker_result['data'][0]['tew_worker_num']) || $worker_result['data'][0]['tew_worker_num'] < 1 ||
-            !isset($worker_result['data'][0]['t_id']) || $worker_result['data'][0]['t_id'] <= 0 ||
-            !isset($worker_result['data'][0]['t_author']) || $worker_result['data'][0]['t_author'] <= 0 ||
-            !isset($worker_result['data'][0]['tew_price']) || $worker_result['data'][0]['tew_price'] <= 0 ||
-            !isset($worker_result['data'][0]['tew_id']) || $worker_result['data'][0]['tew_id'] <= 0 ||
-            !isset($worker_result['data'][0]['tew_skills']) || $worker_result['data'][0]['tew_skills'] <= 0)
+        if (empty($worker_result) || !isset($worker_result['tew_worker_num']) || $worker_result['tew_worker_num'] < 1 ||
+            !isset($worker_result['t_id']) || $worker_result['t_id'] <= 0 ||
+            !isset($worker_result['t_author']) || $worker_result['t_author'] <= 0 ||
+            !isset($worker_result['tew_price']) || $worker_result['tew_price'] <= 0 ||
+            !isset($worker_result['tew_id']) || $worker_result['tew_id'] <= 0 ||
+            !isset($worker_result['tew_skills']) || $worker_result['tew_skills'] <= 0)
         {
             $this->exportData('数据异常,请稍后重试');
         }
+//print_r($worker_result);exit;
 
         //已成单数量判断
-        if (count($worker_result['data']) > 0 && $worker_result['data'][0]['tew_worker_num'] <= count($worker_result['data'])) $this->exportData('你来晚了，任务已被领取');
+        $orders_count = $this->orders_dao->countData(array('u_id' => $worker_result['t_author'], 't_id' => $worker_result['t_id'], 'tew_id' => $worker_result['tew_id'], 's_id' => $worker_result['tew_skills'], 'where' => 'o_confirm > 0 and o_status in (0,1)'));
+        if ($orders_count >= $worker_result['tew_worker_num'])
+        {
+            $this->exportData('来晚咯，已经被人捷足先登。');
+        }
 
         $curtime = time();
         $result = $this->orders_dao->addData(array(
-            't_id' => $worker_result['data'][0]['t_id'],
-            'u_id' => $worker_result['data'][0]['t_author'],
+            't_id' => $worker_result['t_id'],
+            'u_id' => $worker_result['t_author'],
             'o_worker' => $data['o_worker'],
-            'o_amount' => $worker_result['data'][0]['tew_price'],
+            'o_amount' => $worker_result['tew_price'],
             'o_in_time' => $curtime,
             'o_last_edit_time' => $curtime,
-            'tew_id' => $worker_result['data'][0]['tew_id'],
-            's_id' => $worker_result['data'][0]['tew_skills'],
+            'tew_id' => $worker_result['tew_id'],
+            's_id' => $worker_result['tew_skills'],
         ));
         if (!$result)
         {
@@ -175,7 +181,7 @@ class Orders extends \CLASSES\WebBase
         $task_dao->updateData(array(
             't_status' => 1
         ),array(
-            't_id' => $worker_result['data'][0]['t_id'],
+            't_id' => $worker_result['t_id'],
             't_status' => 0,
         ));
 
