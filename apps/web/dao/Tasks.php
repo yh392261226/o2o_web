@@ -39,12 +39,14 @@ class Tasks extends \MDAOBASE\DaoBase
                 {
                     return false;
                 }
+
+                $where = $this->createWhere(array('t_id' => array('value' => $param['t_id'], 'type' => 'in'), 'pager' => 0));
                 //删除任务详情
                 $info_model = model('Task_ext_info');
-                $info_model->delData(array('t_id' => array('value' => $param['t_id'], 'type' => 'in')));
+                $info_model->delData($where);
                 //删除任务相关工人信息
                 $worker_model = model('Task_ext_worker');
-                $worker_model->delData(array('t_id' => array('value' => $param['t_id'], 'type' => 'in')));
+                $worker_model->delData($where);
                 return true;
             }
         }

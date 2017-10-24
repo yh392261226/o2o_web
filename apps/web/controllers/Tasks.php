@@ -104,23 +104,42 @@ class Tasks extends \CLASSES\WebBase
         {
             $data['leftjoin'] = array('task_ext_worker', ' task_ext_worker.t_id = tasks.t_id');
             $data['where'] .=  ' and task_ext_worker.tew_skills in (' . trim($_REQUEST['skills']) . ')';
-        }
-        if (isset($data['leftjoin']))
-        {
-            $data['fields'] = 'tasks.t_id, tasks.t_title, tasks.t_status, tasks.t_author, tasks.t_phone, tasks.t_phone_status, tasks.t_amount, tasks.t_edit_amount, tasks.t_duration, tasks.t_amount_edit_times, tasks.t_posit_x, tasks.t_posit_y, tasks.t_in_time, tasks.t_storage, task_ext_worker.tew_skills, task_ext_worker.tew_worker_num, task_ext_worker.tew_price, task_ext_worker.tew_start_time, task_ext_worker.tew_end_time, task_ext_worker.r_province, task_ext_worker.r_city, task_ext_worker.r_area, task_ext_worker.tew_address, task_ext_worker.tew_lock';
+            $data['fields'] = 'tasks.t_id, tasks.t_title, tasks.t_status, tasks.t_author, tasks.t_phone, tasks.t_phone_status, tasks.t_amount, tasks.t_edit_amount, tasks.t_duration, tasks.t_amount_edit_times, tasks.t_posit_x, tasks.t_posit_y, tasks.t_in_time, tasks.t_storage, task_ext_worker.tew_id, task_ext_worker.tew_skills, task_ext_worker.tew_worker_num, task_ext_worker.tew_price, task_ext_worker.tew_start_time, task_ext_worker.tew_end_time, task_ext_worker.r_province, task_ext_worker.r_city, task_ext_worker.r_area, task_ext_worker.tew_address, task_ext_worker.tew_lock';
         }
         $data['pager'] = 0;
-        $data['order'] = 't_id desc';
+        $data['order'] = 'tasks.t_id desc';
         $list = $this->tasks_dao->listData($data);
 
         if (!empty($list))
         {
+            $tasks_ids = array();
             foreach ($list['data'] as $key => $val)
             {
+                $list['data'][$key]['workers'] = array();
                 $list['data'][$key]['favorate'] = 0;
                 $list['data'][$key]['u_img'] = $this->getHeadById($val['t_author']);
+                $tasks_ids[] = isset($val['t_id']) && $val['t_id'] > 0 ? $val['t_id'] : 0;
             }
             unset($key, $val);
+            if (!empty($tasks_ids) && !isset($data['leftjoin']))
+            {
+                $tasks_ext_worker_dao = new \WDAO\Task_ext_worker();
+                $tasks_ext_worker_data = $tasks_ext_worker_dao->listData(array('t_id' => array('type' => 'in', 'value' => $tasks_ids), 'pager' => 0));
+                if (!empty($tasks_ext_worker_data['data']))
+                {
+                    foreach ($list['data'] as $k => $v)
+                    {
+                        foreach ($tasks_ext_worker_data['data'] as $key => $val)
+                        {
+                            if ($v['t_id'] == $val['t_id'])
+                            {
+                                $list['data'][$k]['workers'][] = $val;
+                            }
+                        }
+                    }
+                    unset($key, $val, $k, $v, $tasks_ext_worker_dao, $tasks_ext_worker_data);
+                }
+            }
 
             if (isset($_REQUEST['u_id']) && intval($_REQUEST['u_id']) > 0)
             {
@@ -465,7 +484,7 @@ class Tasks extends \CLASSES\WebBase
             }
 
             //删除之前的该任务 并重新写入
-            $del_old_result = $task_dao->delOldTask(array('t_id' => intval($data['t_id']), 't_author' => intval($data['t_author'])));
+            $del_old_result = $task_dao->delOldTask(array('t_id' => $data['t_id'], 't_author' => $data['t_author']));
             if (!$del_old_result)
             {
                 return -1;
