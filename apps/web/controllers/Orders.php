@@ -179,7 +179,7 @@ class Orders extends \CLASSES\WebBase
             't_status' => 0,
         ));
 
-        $this->exportData($result);
+        $this->exportData('success');
     }
 
     /**
