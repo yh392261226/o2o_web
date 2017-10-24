@@ -204,19 +204,9 @@ class Tasks extends \CLASSES\WebBase
             unset($desc);
             $workers_param = array(
                 'pager' => 0,
-                //'fields' => 'orders.*, task_ext_worker.*',
                 'where' => 'task_ext_worker.t_id =' . intval($_REQUEST['t_id']),
-                //'leftjoin' => array('orders', 'orders.t_id = task_ext_worker.t_id'),
                 );
             $workers = $this->task_ext_worker_dao->listData($workers_param);
-            //
-            //
-            //if (!empty($workers['data']))
-            //{
-            //    $info['t_workers'] = $workers['data'];
-            //}
-            //unset($workers);
-            //
 
             if (!empty($workers['data']))
             {
@@ -253,6 +243,7 @@ class Tasks extends \CLASSES\WebBase
                         unset($key, $val, $order_count, $orders_data);
                     }
                 }
+
                 if (!empty($workers['data']))
                 {
                     $info['t_workers'] = $workers['data'];
