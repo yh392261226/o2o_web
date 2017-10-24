@@ -6,20 +6,15 @@ class Tools extends \CLASSES\WebBase
     {
         parent::__construct($swoole);
     }
+
     public function index()
     {
-        $data = array();
-        $data['datetime'] = $this->serverTime();
-        $this->exportData($data);
-    }
-
-    private function serverTime()
-    {
-        return array(
+        $data['datetime'] = array(
             'timestamp' => time(),
             'date'      => date('Y-m-d'), //2009-10-10
             'his'       => date('H:i:s'), //22:10:10
         );
+        $this->exportData($data);
     }
 
     public function subTotal()
@@ -27,6 +22,7 @@ class Tools extends \CLASSES\WebBase
         $result = 0;
         if (!empty($_REQUEST['worker']))
         {
+            $_REQUEST = json_decode($_REQUEST, true);
             $worker = array();
             foreach ($_REQUEST['worker'] as $key => $val)
             {
@@ -37,6 +33,19 @@ class Tools extends \CLASSES\WebBase
                 $result += $worker[$key][0] * $worker[$key][1] * (ceil($worker[$key][3] - $worker[$key][2]) / 3600 / 24 + 1);
             }
         }
-        return $result;
+        $this->exportData($result);
+    }
+
+    /**
+     * 任务类型
+     */
+    public function taskType()
+    {
+        $types = array(
+            0 => '小型工地',
+            1 => '个人家装',
+            2 => '大型建筑',
+        );
+        $this->exportData($types);
     }
 }
