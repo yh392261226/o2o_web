@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-23 17:29:50
+ * @Last Modified time: 2017-10-24 11:13:11
  */
 namespace App\Controller;
 
@@ -47,7 +47,7 @@ class Users extends \CLASSES\WebBase
         $user_data = $dao_users->listData(array(
             'u_mobile' => $phone_number,
             'pager' => false,
-            'fields'=>'u_true_name,u_pass,u_status,u_online,u_id,u_sex,u_idcard',
+            'fields'=>'u_true_name,u_pass,u_status,u_online,u_id,u_sex,u_idcard,u_name',
                 ));
 
 
@@ -885,7 +885,7 @@ class Users extends \CLASSES\WebBase
                         case -1:
                             $this->exportData( array('msg'=>'图片目录创建失败'),0);
                             break;
-                        case -1:
+                        case -2:
                             $this->exportData( array('msg'=>'图片写入失败'),0);
                             break;
                         default:
