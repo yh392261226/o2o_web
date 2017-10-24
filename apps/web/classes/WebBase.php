@@ -190,6 +190,9 @@ class WebBase extends Swoole\Controller
         /*获取余额*/
         $user_funds = new \WDAO\Users_ext_funds(array('table' => 'users_ext_funds'));
         $user_url_overage = $user_funds ->infoData(array('key'=>'u_id','val'=>$uid));
+        if(!isset($user_url_overage['uef_overage'])){
+            $user_url_overage['uef_overage'] = 0;
+        }
 
         $log_data = array(
             'u_id' => $uid,

@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-23 09:50:00
+ * @Last Modified time: 2017-10-23 17:29:50
  */
 namespace App\Controller;
 
@@ -47,7 +47,7 @@ class Users extends \CLASSES\WebBase
         $user_data = $dao_users->listData(array(
             'u_mobile' => $phone_number,
             'pager' => false,
-            'fields'=>'u_name,u_pass,u_status,u_online,u_id,u_sex,u_idcard',
+            'fields'=>'u_true_name,u_pass,u_status,u_online,u_id,u_sex,u_idcard',
                 ));
 
 
@@ -68,7 +68,7 @@ class Users extends \CLASSES\WebBase
             $u_sex = isset($user_data['data']['0']['u_sex']) ? $user_data['data']['0']['u_sex'] : '';
             if($res){
                 $token = $this->createToken($user_data['data']['0']['u_name'],$user_data['data']['0']['u_pass']);
-                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass'],'u_idcard'=>$u_idcard ),1);
+                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_true_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass'],'u_idcard'=>$u_idcard ),1);
             }
 
 
@@ -195,7 +195,7 @@ class Users extends \CLASSES\WebBase
         $dao_users = new \WDAO\Users_favorate(array('table'=>'users'));
         $users_arr = $dao_users -> listData(array(
             'u_id' => array('type' => 'in', 'value' => $favorate_id_arr),
-            'fields'=>'u_id,u_task_status,u_name,u_sex','pager'=>false,
+            'fields'=>'u_id,u_task_status,users.u_true_name as u_name,u_sex','pager'=>false,
             )
         );
         $dao_users_ext_info = new \WDAO\Users_favorate(array('table'=>'users_ext_info'));
@@ -512,7 +512,7 @@ class Users extends \CLASSES\WebBase
                 }
             }
         }
-        $data2['fields'] = 'users.u_id,users.u_mobile,users.u_sex,u_name,u_skills,users_ext_info.uei_info,u_task_status,u_true_name,ucp_posit_x,ucp_posit_y,users_ext_info.uei_address';
+        $data2['fields'] = 'users.u_id,users.u_mobile,users.u_idcard,users.u_sex,users.u_true_name as u_name,u_skills,users_ext_info.uei_info,u_task_status,u_true_name,ucp_posit_x,ucp_posit_y,users_ext_info.uei_address';
 
         $list = $dao_info ->listData($data2);
 
@@ -554,8 +554,6 @@ class Users extends \CLASSES\WebBase
             $this->exportData( array('msg'=>'用户id不能为空'),0);
         }
         $category = !empty($_GET['category'])  ? trim($_GET['category']) : 'all';
-        $dao_users_funds = new \WDAO\Users(array('table'=>'users_ext_funds'));
-        $user_funds = $dao_users_funds ->infoData(array('key'=>'u_id','val'=>$u_id,'fields'=>'u_id,uef_overage'));
         /*充值*/
         $recharge_list['data'] = array();
         $withdraw_list['data'] = array();
@@ -583,14 +581,10 @@ class Users extends \CLASSES\WebBase
 
         foreach ($data as $key => &$value) {
             if(isset($value['withdraw'])){
-                // $value['balances'] = floatval($user_funds['uef_overage']);
-                // $user_funds['uef_overage'] = $value['balances'] + floatval($value['amount']);
                 $value['type'] = 'withdraw';
                 unset($value['withdraw']);
 
             }elseif(isset($value['recharge'])){
-                // $value['balances'] = floatval($user_funds['uef_overage']);
-                // $user_funds['uef_overage'] = $value['balances'] - floatval($value['amount']);
                 $value['type'] = 'recharge';
                 unset($value['recharge']);
             }else{
@@ -760,30 +754,7 @@ class Users extends \CLASSES\WebBase
     }
 
 
-    /*前台配置文件接口*/
-    public function getAppConfig()
-    {
-        $application_config = array();
-        if (file_exists(WEBPATH . '/configs/application_config.php')){
-            require WEBPATH . '/configs/application_config.php';
-        }else{
-            $dao_application_config = new \WDAO\Users(array('table'=>'application_config'));
-            $data = $dao_application_config ->listData(array('pager'=>false,'fields'=>'ac_name,ac_value','ac_status'=>1));
 
-            $res = array();
-            foreach ($data['data'] as  $v) {
-                $res["{$v['ac_name']}"] = $v['ac_value'];
-            }
-            file_put_contents(WEBPATH . '/configs/application_config.php','<?php $application_config='.var_export($res,true).'?>');
-            if (file_exists(WEBPATH . '/configs/application_config.php')){
-                require WEBPATH . '/configs/application_config.php';
-            }else{
-                $this->exportData(0,array('msg'=>'系统错误请联系管理员'));
-            }
-        }
-        $this->exportData( array('data' => $application_config),1);
-
-    }
 
     /*用户位置信息修改*/
     public function updatePosition()
@@ -883,7 +854,7 @@ class Users extends \CLASSES\WebBase
                             case -1:
                                 $this->exportData( array('msg'=>'图片目录创建失败'),0);
                                 break;
-                            case -1:
+                            case -2:
                                 $this->exportData( array('msg'=>'图片写入失败'),0);
                                 break;
                             default:
@@ -905,7 +876,7 @@ class Users extends \CLASSES\WebBase
                 $complaints_ext_info = $dao_complaints_ext -> infoData(array(
                     'fields' => 'c_img,c_id',
                     'key' => 'c_id',
-                    'val' => $_POST['c_id'],
+                    'val' => intval($_POST['c_id']),
                     ));
                 $ext_data = '';
                 $res = $dao_complaints_ext ->uploadComplaintImg($_POST['c_img'],'../uploads/images/'.date('Y/m/d'));
@@ -923,7 +894,7 @@ class Users extends \CLASSES\WebBase
                     }
                 }
 
-                if(!empty($img_path)){
+                if(!empty($img_path) && intval($res) >= 0){
                     if(!empty($complaints_ext_info['c_img'])){
                         $ext_data = array('c_img'=>$complaints_ext_info['c_img'].','.$img_path);
                     }else{
@@ -941,6 +912,7 @@ class Users extends \CLASSES\WebBase
 
             }
         }
+        $this->exportData( array('msg'=>'参数不足,图片信息写入失败!'),0);
     }
 
     /*用户提现申请接口*/
