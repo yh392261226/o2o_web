@@ -103,7 +103,7 @@ class Tasks extends \CLASSES\WebBase
         if (isset($_REQUEST['skills']) && intval($_REQUEST['skills']) > 0)
         {
             $data['leftjoin'] = array('task_ext_worker', ' task_ext_worker.t_id = tasks.t_id');
-            $data['where'] .=  ' and task_ext_worker.tew_skills = "' . intval($_REQUEST['skills']) . '"';
+            $data['where'] .=  ' and task_ext_worker.tew_skills in (' . trim($_REQUEST['skills']) . ')';
         }
         if (isset($data['leftjoin']))
         {
@@ -210,17 +210,20 @@ class Tasks extends \CLASSES\WebBase
     {
         //$this->db->debug = 1;
         $data = $info = $worker = $fields = $message = $tmp = array();
-
+        echo json_encode($_REQUEST);exit;
+        error_log($_REQUEST['basic'], 3, './log.log');
+        if (!empty($_REQUEST['basic']))  $_REQUEST['basic'] = json_decode($_REQUEST['basic'], true);
         $data['t_storage'] = $tmp['t_storage'] = 1;
-        if (isset($_REQUEST['t_storage']) && is_numeric($_REQUEST['t_storage'])) $data['t_storage'] = intval($_REQUEST['t_storage']);
+        if (isset($_REQUEST['basic']['t_storage']) && is_numeric($_REQUEST['basic']['t_storage'])) $data['t_storage'] = intval($_REQUEST['basic']['t_storage']);
         $data['t_title'] = '未命名任务';
-        if (isset($_REQUEST['t_title']) && '' != trim($_REQUEST['t_title'])) $data['t_title'] = trim($_REQUEST['t_title']);
-        if (isset($_REQUEST['t_info']) && '' != trim($_REQUEST['t_info'])) $data['t_info'] = trim($_REQUEST['t_info']);
-        if (isset($_REQUEST['t_amount']) && 0 < floatval($_REQUEST['t_amount'])) $data['t_amount'] = $data['t_edit_amount'] = floatval($_REQUEST['t_amount']);
-        if (isset($_REQUEST['t_duration']) && 1 <= intval($_REQUEST['t_duration'])) $data['t_duration'] = intval($_REQUEST['t_duration']);
-        if (isset($_REQUEST['t_posit_x'])) $data['t_posit_x'] = floatval($_REQUEST['t_posit_x']);
-        if (isset($_REQUEST['t_posit_y'])) $data['t_posit_y'] = floatval($_REQUEST['t_posit_y']);
-        if (isset($_REQUEST['t_author']) && 0 < intval($_REQUEST['t_author'])) $data['t_author'] = $data['t_last_editor'] = intval($_REQUEST['t_author']);
+        if (isset($_REQUEST['basic'][0][0]['data']) && '' != trim($_REQUEST['basic'][0][0]['data'])) $data['t_title'] = trim($_REQUEST['basic'][0][0]['data']);
+        if (isset($_REQUEST['basic'][0][1]['data']) && '' != trim($_REQUEST['basic'][0][1]['data'])) $data['t_info'] = trim($_REQUEST['basic'][0][1]['data']);
+        if (isset($_REQUEST['basic']['t_amount']) && 0 < floatval($_REQUEST['basic']['t_amount'])) $data['t_amount'] = $data['t_edit_amount'] = floatval($_REQUEST['basic']['t_amount']);
+        if (!isset($_REQUEST['basic']['t_duration'])) $_REQUEST['basic']['t_duration'] = 1;
+        if (isset($_REQUEST['basic']['t_duration']) && 1 <= intval($_REQUEST['basic']['t_duration'])) $data['t_duration'] = intval($_REQUEST['basic']['t_duration']);
+        if (isset($_REQUEST['basic']['t_posit_x'])) $data['t_posit_x'] = floatval($_REQUEST['basic']['t_posit_x']);
+        if (isset($_REQUEST['basic']['t_posit_y'])) $data['t_posit_y'] = floatval($_REQUEST['basic']['t_posit_y']);
+        if (isset($_REQUEST['basic'][5]['t_author']) && 0 < intval($_REQUEST['basic'][5]['t_author'])) $data['t_author'] = $data['t_last_editor'] = intval($_REQUEST['basic'][5]['t_author']);
         if ($data['t_storage'] == 0)
         {
             if (!isset($data['t_title'])) $message[] = '标题不能为空';
@@ -235,21 +238,21 @@ class Tasks extends \CLASSES\WebBase
             $this->exportData($message);
         }
 
-        if (isset($_REQUEST['t_posit_y'])) $data['t_posit_y'] = floatval($_REQUEST['t_posit_y']);
+        //if (isset($_REQUEST['t_posit_y'])) $data['t_posit_y'] = floatval($_REQUEST['t_posit_y']);
         $data['t_type'] = 0;
-        if (isset($_REQUEST['t_type']) && '' != trim($_REQUEST['t_type'])) $data['t_type'] = trim($_REQUEST['t_type']);
+        if (isset($_REQUEST[0][2]['data']) && is_numeric($_REQUEST[0][2]['data'])) $data['t_type'] = intval($_REQUEST[0][2]['data']);
         $data['t_phone_status'] = 1;
         if (isset($_REQUEST['t_phone_status']) && in_array($_REQUEST['t_phone_status'], array(0, 1))) $data['t_phone_status'] = intval($_REQUEST['t_phone_status']);
         $data['t_in_time'] = $data['t_last_edit_time'] = time();
         $data['t_amount_edit_times'] = 0;
         $data['t_status'] = 0;
-        if (isset($_REQUEST['t_status']) && is_numeric($_REQUEST['t_status'])) $data['t_status'] = intval($_REQUEST['t_status']);
-        if (isset($_REQUEST['province']) && intval($_REQUEST['province']) > 0) $tmp['province'] = intval($_REQUEST['province']);
-        if (isset($_REQUEST['city']) && intval($_REQUEST['city']) > 0) $tmp['city'] = intval($_REQUEST['city']);
-        if (isset($_REQUEST['area']) && intval($_REQUEST['area']) > 0) $tmp['area'] = intval($_REQUEST['area']);
-        if (isset($_REQUEST['address']) && '' != trim($_REQUEST['address'])) $tmp['address'] = trim($_REQUEST['address']);
-        if (isset($_REQUEST['t_id']) && is_numeric($_REQUEST['t_id'])) $tmp['id'] = intval($_REQUEST['t_id']); //任务id
-        if (isset($_REQUEST['u_pass']) && '' != trim($_REQUEST['u_pass'])) $tmp['u_pass'] = trim($_REQUEST['u_pass']); //任务id
+        if (isset($_REQUEST['basic']['t_status']) && is_numeric($_REQUEST['basic']['t_status'])) $data['t_status'] = intval($_REQUEST['basic']['t_status']);
+        if (isset($_REQUEST['basic']['province']) && intval($_REQUEST['basic']['province']) > 0) $tmp['province'] = intval($_REQUEST['basic']['province']);
+        if (isset($_REQUEST['basic']['city']) && intval($_REQUEST['basic']['city']) > 0) $tmp['city'] = intval($_REQUEST['basic']['city']);
+        if (isset($_REQUEST['basic']['area']) && intval($_REQUEST['basic']['area']) > 0) $tmp['area'] = intval($_REQUEST['basic']['area']);
+        if (isset($_REQUEST[0][4]['data']) && '' != trim($_REQUEST[0][4]['data'])) $tmp['address'] = trim($_REQUEST[0][4]['data']);
+        if (isset($_REQUEST['basic']['t_id']) && intval($_REQUEST['basic']['t_id']) > 0) $tmp['id'] = intval($_REQUEST['basic']['t_id']); //任务id
+        if (isset($_REQUEST['basic']['u_pass']) && '' != trim($_REQUEST['basic']['u_pass'])) $tmp['u_pass'] = trim($_REQUEST['basic']['u_pass']); //任务id
 
         //写入任务
         $task_dao = new \WDAO\Tasks();
@@ -262,7 +265,7 @@ class Tasks extends \CLASSES\WebBase
         /*tasks_ext_info*/
         $tmp['t_id'] = $info['t_id'] = $result;
         $info['t_desc'] = (isset($data['t_info']) && '' != trim($data['t_info'])) ? trim($data['t_info']) : '';
-        if (isset($_REQUEST['t_desc']) && '' != trim($_REQUEST['t_desc'])) $info['t_desc'] = trim($_REQUEST['t_desc']);
+        if (isset($_REQUEST['basic']['t_desc']) && '' != trim($_REQUEST['basic']['t_desc'])) $info['t_desc'] = trim($_REQUEST['basic']['t_desc']);
         $ext_info_dao = new \WDAO\Task_ext_info();
         $info_result = $ext_info_dao->addData($info);
         if (!$info_result)
@@ -381,14 +384,38 @@ class Tasks extends \CLASSES\WebBase
     }
 
     /**
+     * 雇主删除任务 假删除 更改任务状态为-9
+     */
+    private function del2()
+    {
+        $data = array();
+        if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']);
+        if (isset($_REQUEST['t_author']) && intval($_REQUEST['t_author']) > 0) $data['t_author'] = intval($_REQUEST['t_author']);
+
+        if (!empty($data) && isset($data['t_id']) && isset($data['t_author']))
+        {
+            $result = $this->tasks_dao->updateData(array('t_status' => -9), array('t_id' => $data['t_id'], 't_author' => $data['t_author']));
+            if ($result)
+            {
+                $this->exportData('success');
+            }
+        }
+        $this->exportData('failure');
+    }
+
+    /**
      * 删除任务及归还资金与抵扣券 [对外]
      * @param array $data
      * @return int
      */
-    private function del($data = array())
+    private function del()
     {
+        $data = array();
         $del_result = -9;
-        if (!empty($data) && isset($data['t_id']) && isset($data['t_author']) && intval($data['t_id']) > 0 && intval($data['t_author']) > 0)
+        if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']);
+        if (isset($_REQUEST['t_author']) && intval($_REQUEST['t_author']) > 0) $data['t_author'] = intval($_REQUEST['t_author']);
+
+        if (!empty($data) && isset($data['t_id']) && isset($data['t_author']))
         {
             $del_result = $this->_delTaks(array(
                 't_id' => $data['t_id'],
