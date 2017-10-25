@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-24 11:13:11
+ * @Last Modified time: 2017-10-25 16:08:15
  */
 namespace App\Controller;
 
@@ -346,18 +346,26 @@ class Users extends \CLASSES\WebBase
     public function usersInfoEdit()
     {
         $data_users = array();
-        if (empty($_POST['u_id']) || intval($_POST['u_id']) == 0){
-             $this->exportData( array('msg'=>'请输入用户id'),0);
+        if(!empty($_REQUEST['u_online']) && !empty($_REQUEST['u_id'])){
+
+            $data_r = array();
+            $data_r['u_online'] = $_REQUEST['u_online'] ;
+            $data_r['u_id'] = $_REQUEST['u_id'] ;
+            unset($_REQUEST);
+            $_REQUEST = $data_r;
+
+        }elseif (empty($_REQUEST['u_id']) || empty($_REQUEST['u_sex']) || empty($_REQUEST['u_true_name']) || empty($_REQUEST['u_idcard']) || empty($_REQUEST['uei_info']) || empty($_REQUEST['uei_address']) || empty($_REQUEST['uei_province']) || empty($_REQUEST['uei_city']) || empty($_REQUEST['uei_area'])){
+             $this->exportData( array('msg'=>'参数不足'),0);
         }
-        $u_id= intval($_POST['u_id']);
+        $u_id= intval($_REQUEST['u_id']);
         /*users表*/
-        if (isset($_POST['u_phone'])) $data_users['u_phone'] = trim($_POST['u_phone']);
-        if (isset($_POST['u_fax'])) $data_users['u_fax'] = trim($_POST['u_fax']);
-        if (isset($_POST['u_sex'])) $data_users['u_sex'] = intval($_POST['u_sex']);
-        if (isset($_POST['u_online'])) $data_users['u_online'] = intval($_POST['u_online']);
-        if (isset($_POST['u_true_name'])) $data_users['u_true_name'] = trim($_POST['u_true_name']);
-        if (isset($_POST['u_idcard'])) $data_users['u_idcard'] = trim($_POST['u_idcard']);
-        if (isset($_POST['u_skills'])) $data_users['u_skills'] = trim($_POST['u_skills']);
+        if (isset($_REQUEST['u_phone'])) $data_users['u_phone'] = trim($_REQUEST['u_phone']);
+        if (isset($_REQUEST['u_fax'])) $data_users['u_fax'] = trim($_REQUEST['u_fax']);
+        if (isset($_REQUEST['u_sex'])) $data_users['u_sex'] = intval($_REQUEST['u_sex']);
+        if (isset($_REQUEST['u_online'])) $data_users['u_online'] = intval($_REQUEST['u_online']);
+        if (isset($_REQUEST['u_true_name'])) $data_users['u_true_name'] = trim($_REQUEST['u_true_name']);
+        if (isset($_REQUEST['u_idcard'])) $data_users['u_idcard'] = trim($_REQUEST['u_idcard']);
+        if (isset($_REQUEST['u_skills'])) $data_users['u_skills'] = trim($_REQUEST['u_skills']);
         /*修改users表内容*/
         $res = 0;
         if(!empty($data_users)){
@@ -370,12 +378,12 @@ class Users extends \CLASSES\WebBase
 
         /*users_ext_info*/
         $data_ext = array();
-        if (isset($_POST['uei_info'])) $data_ext['uei_info'] = deepAddslashes(trim($_POST['uei_info']));
-        if (isset($_POST['uei_address'])) $data_ext['uei_address'] = deepAddslashes(trim($_POST['uei_address']));
-        if (isset($_POST['uei_zip'])) $data_ext['uei_zip'] = trim($_POST['uei_zip']);
-        if (isset($_POST['uei_province'])) $data_ext['uei_province'] = intval($_POST['uei_province']);
-        if (isset($_POST['uei_city'])) $data_ext['uei_city'] = intval($_POST['uei_city']);
-        if (isset($_POST['uei_area'])) $data_ext['uei_area'] = intval($_POST['uei_area']);
+        if (isset($_REQUEST['uei_info'])) $data_ext['uei_info'] = deepAddslashes(trim($_REQUEST['uei_info']));
+        if (isset($_REQUEST['uei_address'])) $data_ext['uei_address'] = deepAddslashes(trim($_REQUEST['uei_address']));
+        if (isset($_REQUEST['uei_zip'])) $data_ext['uei_zip'] = trim($_REQUEST['uei_zip']);
+        if (isset($_REQUEST['uei_province'])) $data_ext['uei_province'] = intval($_REQUEST['uei_province']);
+        if (isset($_REQUEST['uei_city'])) $data_ext['uei_city'] = intval($_REQUEST['uei_city']);
+        if (isset($_REQUEST['uei_area'])) $data_ext['uei_area'] = intval($_REQUEST['uei_area']);
         if(isset($data_ext['uei_zip']) && strlen($data_ext['uei_zip']) > 6) $this->exportData( array('msg'=>'邮编的最大字符长度为6'),0);
         if(isset($data_ext['uei_info']) && mb_strlen($data_ext['uei_info'],'utf8') > 250) $this->exportData( array('msg'=>'个人简介的最大字符长度为250'),0);
         if(isset($data_ext['uei_address']) && mb_strlen($data_ext['uei_address'],'utf8') > 75) $this->exportData( array('msg'=>'个人简介的最大字符长度为75'),0);
@@ -386,7 +394,7 @@ class Users extends \CLASSES\WebBase
             if(!empty($ext_u_id)){
                 $res_ext = $dao_users_ext ->updateData($data_ext,array('u_id'=>$u_id));
             }else{
-                $data_ext['u_id']= intval($_POST['u_id']);
+                $data_ext['u_id']= intval($_REQUEST['u_id']);
                 $res_ext = $dao_users_ext ->addData($data_ext);
             }
 
@@ -512,34 +520,60 @@ class Users extends \CLASSES\WebBase
                 }
             }
         }
+        $data2['where'] .= " and users.u_idcard != '' and users.u_true_name != '' and users.u_sex != -1 and users_ext_info.uei_info != '' and users_ext_info.uei_address != '' and  users_ext_info.uei_province != 0 and users_ext_info.uei_city != 0 and users_ext_info.uei_area != 0";
         $data2['fields'] = 'users.u_id,users.u_mobile,users.u_idcard,users.u_sex,users.u_true_name as u_name,u_skills,users_ext_info.uei_info,u_task_status,u_true_name,ucp_posit_x,ucp_posit_y,users_ext_info.uei_address';
 
         $list = $dao_info ->listData($data2);
 
         if(!empty($list['data'])){
-        /*获取收藏列表*/
+
             $favorate_id_arr = array();
+            $order_id_arr['data'] = array();
             if (isset($_REQUEST['fu_id']) && intval($_REQUEST['fu_id']) > 0) {
                 $fu_id = intval($_REQUEST['fu_id']);
-                if($fu_id > 0){
-                    $dao_users_favorate = new \WDAO\Users(array('table'=>'users_favorate'));
-                    $favorate_arr = $dao_users_favorate -> listData(array('u_id' => $fu_id,'f_type' => 1,'fields'=>'u_id,f_type_id','pager'=>false));
-                    foreach ($favorate_arr['data'] as $key => $value) {
-                       $favorate_id_arr[] = $value['f_type_id'];
-                    }
+
+                /*获取收藏列表*/
+                $dao_users_favorate = new \WDAO\Users(array('table'=>'users_favorate'));
+                $favorate_arr = $dao_users_favorate -> listData(array('u_id' => $fu_id,'f_type' => 1,'fields'=>'u_id,f_type_id','pager'=>false));
+                foreach ($favorate_arr['data'] as $key => $value) {
+                   $favorate_id_arr[] = $value['f_type_id'];
                 }
+
+                /*获取用户订单列表*/
+                $dao_order = new \WDAO\Users(array('table'=>'orders'));
+                $order_id_arr = $dao_order -> listData(array('u_id' => $fu_id,'o_status' => array('key'=>'in','value'=>array(1,-3)),'fields'=>'o_worker,o_confirm','pager'=>false));
+
+
             }
 
-            foreach ($list['data'] as  &$v) {
-                if(isset($v['u_id'])){
-                    $v['u_img'] = $this -> getHeadById($v['u_id']);
+
+
+
+            foreach ($list['data']  as $k => &$v) {
+                    if(isset($v['u_id'])){
+                        $v['u_img'] = $this -> getHeadById($v['u_id']);
+                    }
+                    if(in_array($v['u_id'],$favorate_id_arr)){
+                        $v['is_fav'] = 1;
+                    }else{
+                        $v['is_fav'] = 0;
+                    }
+                /*订单联系情况*/
+                $v['relation'] = 0;
+                foreach ($order_id_arr['data'] as $key => $value) {
+                    if($v['u_id'] == $value['o_worker']){
+                        $v['relation'] = 1;
+                        if(in_array($value['o_confirm'],array(0,2))){
+                            $v['relation_type'] = 0;
+                        }elseif($value['o_confirm'] == 1){
+                            $v['relation_type'] = 1;
+                        }
+                    }
+
                 }
-                if(in_array($v['u_id'],$favorate_id_arr)){
-                    $v['is_fav'] = 1;
-                }else{
-                    $v['is_fav'] = 0;
-                }
+
             }
+            // var_dump($list['data']);die;
 
         }
         $this->exportData($list,1);
