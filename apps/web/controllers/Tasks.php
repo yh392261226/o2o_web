@@ -23,21 +23,21 @@ class Tasks extends \CLASSES\WebBase
     }
 
     private function worked()
-    {
+    {$this->db->debug = 1;
         $list = $data = array();
         $data['o_worker'] = intval($_REQUEST['o_worker']);
         if ($data['o_worker'] > 0)
         {
             $this->orders_dao = new \WDAO\Orders();
             if (isset($_REQUEST['o_id'])) $data['o_id'] = array('type' => 'in', 'value' => $_REQUEST['o_id']);
-            if (isset($_REQUEST['t_id'])) $data['t_id'] = intval($_REQUEST['t_id']);
-            if (isset($_REQUEST['u_id'])) $data['u_id'] = intval($_REQUEST['u_id']);
-
-            if (isset($_REQUEST['o_status']) && is_numeric($_REQUEST['o_status'])) $data['o_status'] = intval($_REQUEST['o_status']);
             $data['where'] = '1';
+            if (isset($_REQUEST['t_id'])) $data['where'] .= ' and orders.t_id = ' . intval($_REQUEST['t_id']);
+            if (isset($_REQUEST['u_id'])) $data['where'] .= ' and orders.u_id = ' . intval($_REQUEST['u_id']);
+
+            if (isset($_REQUEST['o_status']) && is_numeric($_REQUEST['o_status'])) $data['where'] .= 'and orders.o_status = ' . intval($_REQUEST['o_status']);
             if (isset($_REQUEST['o_confirm'])) $data['where'] .= ' and orders.o_confirm in (' . trim($_REQUEST['o_confirm'] . ')');
-            if (isset($_REQUEST['s_id'])) $data['s_id'] = intval($_REQUEST['s_id']);
-            if (isset($_REQUEST['tew_id'])) $data['tew_id'] = intval($_REQUEST['tew_id']);
+            if (isset($_REQUEST['s_id'])) $data['where'] .= ' and orders.s_id = ' . intval($_REQUEST['s_id']);
+            if (isset($_REQUEST['tew_id'])) $data['where'] .= ' and orders.tew_id = ' . intval($_REQUEST['tew_id']);
             //区间值
             if (isset($_REQUEST['ge_amount']) && floatval($_REQUEST['ge_amount']) > 0) $data['o_amount'][0] = array('type' => 'ge', 'ge_value' => floatval($_REQUEST['ge_amount']));
             if (isset($_REQUEST['le_amount']) && floatval($_REQUEST['le_amount']) > 0) $data['o_amount'][1] = array('type' => 'le', 'le_value' => floatval($_REQUEST['le_amount']));
@@ -46,9 +46,11 @@ class Tasks extends \CLASSES\WebBase
             if (isset($_REQUEST['ge_in_time']) && intval($_REQUEST['ge_in_time']) > 0) $data['o_last_edit_time'][0] = array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['ge_in_time']));
             if (isset($_REQUEST['le_in_time']) && intval($_REQUEST['le_in_time']) > 0) $data['o_last_edit_time'][1] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['le_in_time']));
 
-            $data['leftjoin'] = array('tasks', ' orders.t_id = tasks.t_id ');
+            $data['join'] = array('tasks', ' orders.t_id = tasks.t_id ');
+            $data['walk']['_join'] = array('join' => array('task_ext_worker', 'orders.tew_id = task_ext_worker.tew_id'));
             $data['fields'] = 'orders.o_id, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_last_edit_time, orders.o_status, orders.tew_id, orders.s_id, orders.o_confirm, orders.unbind_time,
-            tasks.t_id, tasks.t_title, tasks.t_info, tasks.t_status, tasks.t_author, tasks.t_phone, tasks.t_phone_status, tasks.t_amount, tasks.t_edit_amount, tasks.t_duration, tasks.t_amount_edit_times, tasks.t_posit_x, tasks.t_posit_y, tasks.t_in_time';
+            tasks.t_id, tasks.t_title, tasks.t_info, tasks.t_status, tasks.t_author, tasks.t_phone, tasks.t_phone_status, tasks.t_amount, tasks.t_edit_amount, tasks.t_duration, tasks.t_amount_edit_times, tasks.t_posit_x, tasks.t_posit_y, tasks.t_in_time,
+            task_ext_worker.tew_skills, task_ext_worker.tew_worker_num, task_ext_worker.tew_price, task_ext_worker.tew_start_time, task_ext_worker.tew_end_time, task_ext_worker.r_province, task_ext_worker.r_city, task_ext_worker.r_area, task_ext_worker.tew_address';
             //$data['where'] = ' orders.o_worker = "' . intval($_REQUEST['o_worker']) . '"';
             $data['pager'] = 0;
             $data['order'] = 'orders.o_in_time, orders.o_id desc';
@@ -195,6 +197,19 @@ class Tasks extends \CLASSES\WebBase
 
         if (!empty($info))
         {
+            $user_dao = new \WDAO\Users(array('table' => 'users'));
+            $author_info = $user_dao->infoData(array('key' => 'u_id', 'val' => $info['t_author'], 'fields' => 'u_id, u_mobile, u_sex, u_true_name'));
+            if (!empty($author_info))
+            {
+                $info += $author_info;
+            }
+            unset($user_dao, $author_info);
+            $info['u_img'] = $this->getHeadById($info['t_author']);
+            $info['r_province'] = 0;
+            $info['r_city'] = 0;
+            $info['r_area'] = 0;
+            $info['tew_address'] = '';
+
             $info['t_workers'] = $info['t_desc'] = $desc = $workers = array();
             $desc = $this->task_ext_info_dao->infoData(intval($_REQUEST['t_id']));
             if (!empty($desc))
@@ -204,16 +219,76 @@ class Tasks extends \CLASSES\WebBase
             unset($desc);
             $workers_param = array(
                 'pager' => 0,
-                'fields' => 'orders.*, task_ext_worker.*',
                 'where' => 'task_ext_worker.t_id =' . intval($_REQUEST['t_id']),
-                'leftjoin' => array('orders', 'orders.t_id = task_ext_worker.t_id'),
                 );
             $workers = $this->task_ext_worker_dao->listData($workers_param);
+
             if (!empty($workers['data']))
             {
-                $info['t_workers'] = $workers['data'];
+                $orders_param = $tew_ids = array();
+                foreach ($workers['data'] as $key => $val)
+                {
+                    $workers['data'][$key]['remaining'] = $val['tew_worker_num'];
+                    $tew_ids[] = isset($val['tew_id']) && $val['tew_id'] > 0 ? $val['tew_id'] : 0;
+                    if ($key == 0)
+                    {
+                        $info['r_province'] = $val['r_province'];
+                        $info['r_city'] = $val['r_city'];
+                        $info['r_area'] = $val['r_area'];
+                        $info['tew_address'] = $val['tew_address'];
+                    }
+                }
+                unset($key, $val);
+                if (!empty($tew_ids))
+                {
+                    $orders_param['tew_id'] = array('type' => 'in', 'value' => $tew_ids);
+                    $orders_param['pager'] = 0;
+                    $orders_dao = new \WDAO\Orders();
+                    $orders_data = $orders_dao->listData($orders_param);
+                    if (!empty($orders_data['data']))
+                    {
+                        foreach ($workers['data'] as $key => $val)
+                        {
+                            $order_count = 0;
+                            foreach ($orders_data['data'] as $k => $v)
+                            {
+                                if ($val['tew_id'] == $v['tew_id'])
+                                {
+                                    if ($v['o_confirm'] == 1)
+                                    {
+                                        $order_count += 1;
+                                    }
+                                    $workers['data'][$key]['orders'][] = $v;
+                                }
+                                if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0 && $v['o_worker'] == intval($_REQUEST['o_worker']))
+                                {
+                                    $info['relation'] = '1';
+                                    if ($v['o_status'] == 0)
+                                    {
+                                        if ($v['o_confirm'] == 0 || $v['o_confirm'] == 2)
+                                        {
+                                            $info['relation_type'] = '0'; //洽谈中
+                                        }
+                                        if ($v['o_confirm'] == 1)
+                                        {
+                                            $info['relation_type'] = '1'; //已开工
+                                        }
+                                    }
+                                }
+                            }
+                            $workers['data'][$key]['remaining'] = $val['tew_worker_num'] - $order_count;
+                            unset($k, $v);
+                        }
+                        unset($key, $val, $order_count, $orders_data);
+                    }
+                }
+
+                if (!empty($workers['data']))
+                {
+                    $info['t_workers'] = $workers['data'];
+                }
+                unset($workers);
             }
-            unset($workers);
             $this->exportData($info);
         }
         else
