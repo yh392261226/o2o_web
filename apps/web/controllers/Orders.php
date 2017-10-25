@@ -151,14 +151,13 @@ class Orders extends \CLASSES\WebBase
         {
             $this->exportData('数据异常,请稍后重试');
         }
-//print_r($worker_result);exit;
 
+        //传参是否已经存储成功
+        $orders_count = $this->orders_dao->countData(array('t_id' => $worker_result['t_id'], 'u_id' => $worker_result['t_author'], 'o_worker' => $data['o_worker'], 'tew_id' => $worker_result['tew_id'], 's_id' => $worker_result['tew_skills']));
+        if ($orders_count > 0) $this->exportData('已经成功邀约，无需再次邀约。');
         //已成单数量判断
         $orders_count = $this->orders_dao->countData(array('u_id' => $worker_result['t_author'], 't_id' => $worker_result['t_id'], 'tew_id' => $worker_result['tew_id'], 's_id' => $worker_result['tew_skills'], 'where' => 'o_confirm > 0 and o_status in (0,1)'));
-        if ($orders_count >= $worker_result['tew_worker_num'])
-        {
-            $this->exportData('来晚咯，已经被人捷足先登。');
-        }
+        if ($orders_count >= $worker_result['tew_worker_num']) $this->exportData('来晚咯，已经被人捷足先登。');
 
         $curtime = time();
         $result = $this->orders_dao->addData(array(

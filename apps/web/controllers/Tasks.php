@@ -243,7 +243,6 @@ class Tasks extends \CLASSES\WebBase
                 {
                     $orders_param['tew_id'] = array('type' => 'in', 'value' => $tew_ids);
                     $orders_param['pager'] = 0;
-                    $orders_param['o_confirm'] = 1;
                     $orders_dao = new \WDAO\Orders();
                     $orders_data = $orders_dao->listData($orders_param);
                     if (!empty($orders_data['data']))
@@ -255,8 +254,26 @@ class Tasks extends \CLASSES\WebBase
                             {
                                 if ($val['tew_id'] == $v['tew_id'])
                                 {
-                                    $order_count += 1;
+                                    if ($v['o_confirm'] == 1)
+                                    {
+                                        $order_count += 1;
+                                    }
                                     $workers['data'][$key]['orders'][] = $v;
+                                }
+                                if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0 && $v['o_worker'] == intval($_REQUEST['o_worker']))
+                                {
+                                    $info['relation'] = '1';
+                                    if ($v['o_status'] == 0)
+                                    {
+                                        if ($v['o_confirm'] == 0 || $v['o_confirm'] == 2)
+                                        {
+                                            $info['relation_type'] = '0'; //洽谈中
+                                        }
+                                        if ($v['o_confirm'] == 1)
+                                        {
+                                            $info['relation_type'] = '1'; //已开工
+                                        }
+                                    }
                                 }
                             }
                             $workers['data'][$key]['remaining'] = $val['tew_worker_num'] - $order_count;
