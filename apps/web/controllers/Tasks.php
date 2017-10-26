@@ -304,20 +304,25 @@ class Tasks extends \CLASSES\WebBase
     {
         //$this->db->debug = 1;
         $data = $info = $worker = $fields = $message = $tmp = array();
-        echo json_encode($_REQUEST);exit;
-        error_log($_REQUEST['basic'], 3, './log.log');
-        if (!empty($_REQUEST['basic']))  $_REQUEST['basic'] = json_decode($_REQUEST['basic'], true);
+
+        if (!isset($_POST['data']) || empty($_POST['data']))
+        {
+            $this->exportData('参数错误');
+        }
+        $request_data = json_decode(base64_decode($_POST['data']), true);
+        error_log(var_export($request_data, true) . '\n', 3, 'request.log');
+
         $data['t_storage'] = $tmp['t_storage'] = 1;
-        if (isset($_REQUEST['basic']['t_storage']) && is_numeric($_REQUEST['basic']['t_storage'])) $data['t_storage'] = intval($_REQUEST['basic']['t_storage']);
+        if (isset($request_data['t_storage']) && is_numeric($request_data['t_storage'])) $data['t_storage'] = intval($request_data['t_storage']);
         $data['t_title'] = '未命名任务';
-        if (isset($_REQUEST['basic'][0][0]['data']) && '' != trim($_REQUEST['basic'][0][0]['data'])) $data['t_title'] = trim($_REQUEST['basic'][0][0]['data']);
-        if (isset($_REQUEST['basic'][0][1]['data']) && '' != trim($_REQUEST['basic'][0][1]['data'])) $data['t_info'] = trim($_REQUEST['basic'][0][1]['data']);
-        if (isset($_REQUEST['basic']['t_amount']) && 0 < floatval($_REQUEST['basic']['t_amount'])) $data['t_amount'] = $data['t_edit_amount'] = floatval($_REQUEST['basic']['t_amount']);
-        if (!isset($_REQUEST['basic']['t_duration'])) $_REQUEST['basic']['t_duration'] = 1;
-        if (isset($_REQUEST['basic']['t_duration']) && 1 <= intval($_REQUEST['basic']['t_duration'])) $data['t_duration'] = intval($_REQUEST['basic']['t_duration']);
-        if (isset($_REQUEST['basic']['t_posit_x'])) $data['t_posit_x'] = floatval($_REQUEST['basic']['t_posit_x']);
-        if (isset($_REQUEST['basic']['t_posit_y'])) $data['t_posit_y'] = floatval($_REQUEST['basic']['t_posit_y']);
-        if (isset($_REQUEST['basic'][5]['t_author']) && 0 < intval($_REQUEST['basic'][5]['t_author'])) $data['t_author'] = $data['t_last_editor'] = intval($_REQUEST['basic'][5]['t_author']);
+        if (isset($request_data['t_title']) && '' != trim($request_data['t_title'])) $data['t_title'] = trim($request_data['t_title']);
+        if (isset($request_data['t_info']) && '' != trim($request_data['t_info'])) $data['t_info'] = trim($request_data['t_info']);
+        if (isset($request_data['t_amount']) && 0 < floatval($request_data['t_amount'])) $data['t_amount'] = $data['t_edit_amount'] = floatval($request_data['t_amount']);
+        if (!isset($request_data['t_duration'])) $request_data['t_duration'] = 1;
+        if (isset($request_data['t_duration']) && 1 <= intval($request_data['t_duration'])) $data['t_duration'] = intval($request_data['t_duration']);
+        if (isset($request_data['t_posit_x'])) $data['t_posit_x'] = floatval($request_data['t_posit_x']);
+        if (isset($request_data['t_posit_y'])) $data['t_posit_y'] = floatval($request_data['t_posit_y']);
+        if (isset($request_data['t_author']) && 0 < intval($request_data['t_author'])) $data['t_author'] = $data['t_last_editor'] = intval($request_data['t_author']);
         if ($data['t_storage'] == 0)
         {
             if (!isset($data['t_title'])) $message[] = '标题不能为空';
@@ -332,21 +337,20 @@ class Tasks extends \CLASSES\WebBase
             $this->exportData($message);
         }
 
-        //if (isset($_REQUEST['t_posit_y'])) $data['t_posit_y'] = floatval($_REQUEST['t_posit_y']);
         $data['t_type'] = 0;
-        if (isset($_REQUEST[0][2]['data']) && is_numeric($_REQUEST[0][2]['data'])) $data['t_type'] = intval($_REQUEST[0][2]['data']);
+        if (isset($request_data['t_type']) && is_numeric($request_data['t_type'])) $data['t_type'] = intval($request_data['t_type']);
         $data['t_phone_status'] = 1;
-        if (isset($_REQUEST['t_phone_status']) && in_array($_REQUEST['t_phone_status'], array(0, 1))) $data['t_phone_status'] = intval($_REQUEST['t_phone_status']);
+        if (isset($request_data['t_phone_status']) && in_array($request_data['t_phone_status'], array(0, 1))) $data['t_phone_status'] = intval($request_data['t_phone_status']);
         $data['t_in_time'] = $data['t_last_edit_time'] = time();
         $data['t_amount_edit_times'] = 0;
         $data['t_status'] = 0;
-        if (isset($_REQUEST['basic']['t_status']) && is_numeric($_REQUEST['basic']['t_status'])) $data['t_status'] = intval($_REQUEST['basic']['t_status']);
-        if (isset($_REQUEST['basic']['province']) && intval($_REQUEST['basic']['province']) > 0) $tmp['province'] = intval($_REQUEST['basic']['province']);
-        if (isset($_REQUEST['basic']['city']) && intval($_REQUEST['basic']['city']) > 0) $tmp['city'] = intval($_REQUEST['basic']['city']);
-        if (isset($_REQUEST['basic']['area']) && intval($_REQUEST['basic']['area']) > 0) $tmp['area'] = intval($_REQUEST['basic']['area']);
-        if (isset($_REQUEST[0][4]['data']) && '' != trim($_REQUEST[0][4]['data'])) $tmp['address'] = trim($_REQUEST[0][4]['data']);
-        if (isset($_REQUEST['basic']['t_id']) && intval($_REQUEST['basic']['t_id']) > 0) $tmp['id'] = intval($_REQUEST['basic']['t_id']); //任务id
-        if (isset($_REQUEST['basic']['u_pass']) && '' != trim($_REQUEST['basic']['u_pass'])) $tmp['u_pass'] = trim($_REQUEST['basic']['u_pass']); //任务id
+        if (isset($request_data['t_status']) && is_numeric($request_data['t_status'])) $data['t_status'] = intval($request_data['t_status']);
+        if (isset($request_data['province']) && intval($request_data['province']) > 0) $tmp['province'] = intval($request_data['province']);
+        if (isset($request_data['city']) && intval($request_data['city']) > 0) $tmp['city'] = intval($request_data['city']);
+        if (isset($request_data['area']) && intval($request_data['area']) > 0) $tmp['area'] = intval($request_data['area']);
+        if (isset($request_data['address']) && '' != trim($request_data['address'])) $tmp['address'] = trim($request_data['address']);
+        if (isset($request_data['t_id']) && intval($request_data['t_id']) > 0) $tmp['id'] = intval($request_data['t_id']); //任务id
+        if (isset($request_data['u_pass']) && '' != trim($request_data['u_pass'])) $tmp['u_pass'] = trim($request_data['u_pass']); //任务id
 
         //写入任务
         $task_dao = new \WDAO\Tasks();
@@ -359,7 +363,7 @@ class Tasks extends \CLASSES\WebBase
         /*tasks_ext_info*/
         $tmp['t_id'] = $info['t_id'] = $result;
         $info['t_desc'] = (isset($data['t_info']) && '' != trim($data['t_info'])) ? trim($data['t_info']) : '';
-        if (isset($_REQUEST['basic']['t_desc']) && '' != trim($_REQUEST['basic']['t_desc'])) $info['t_desc'] = trim($_REQUEST['basic']['t_desc']);
+        if (isset($request_data['t_desc']) && '' != trim($request_data['t_desc'])) $info['t_desc'] = trim($request_data['t_desc']);
         $ext_info_dao = new \WDAO\Task_ext_info();
         $info_result = $ext_info_dao->addData($info);
         if (!$info_result)
@@ -369,23 +373,25 @@ class Tasks extends \CLASSES\WebBase
 
         /*tasks_ext_worker*/
         $tmp['total'] = $tmp['total_edit'] = 0;
-        if (isset($_REQUEST['worker']) && !empty($_REQUEST['worker']))
+
+        //if (isset($request_data['worker']) && !empty($request_data['worker'])) $request_data['worker'] = json_decode($request_data['worker'], true);
+        if (isset($request_data['worker']) && !empty($request_data['worker']))
         {
             $fields = array('t_id', 'tew_skills', 'tew_worker_num', 'tew_price', 'tew_start_time', 'tew_end_time', 'r_province', 'r_city', 'r_area', 'tew_address', 'tew_lock');
-            foreach ($_REQUEST['worker'] as $key => $val)
+            foreach ($request_data['worker'] as $key => $val)
             {
-                $worker[$key][] = $tmp['t_id'];
-                $worker[$key][] = isset($val[0]['skill']) ? intval($val[0]['skill']) : 0;
-                $worker[$key][] = isset($val[1]['personNum']) ? intval($val[1]['personNum']) : 0;
-                $worker[$key][] = isset($val[1]['money']) ? floatval($val[1]['money']) : 0;
-                $worker[$key][] = isset($val[2]['startTime']) ? strtotime($val[2]['startTime']) : 0;
-                $worker[$key][] = isset($val[2]['endTime']) ? strtotime($val[2]['endTime']) : 0;
-                $worker[$key][] = isset($tmp['province']) ? $tmp['province'] : 0;
-                $worker[$key][] = isset($tmp['city']) ? $tmp['city'] : 0;
-                $worker[$key][] = isset($tmp['area']) ? $tmp['area'] : 0;
-                $worker[$key][] = isset($tmp['address']) ? $tmp['address'] : '';
-                $worker[$key][] = 0;
-                $tmp['total'] = $tmp['total_edit'] += $worker[$key][2] * $worker[$key][3] * (ceil($worker[$key][6] - $worker[$key][5]) / 3600 / 24 + 1);
+                $worker[$key][0] = $tmp['t_id'];
+                $worker[$key][1] = isset($val['skill']) ? intval($val['skill']) : 0;
+                $worker[$key][2] = isset($val['personNum']) ? intval($val['personNum']) : 0;
+                $worker[$key][3] = isset($val['money']) ? floatval($val['money']) : 0;
+                $worker[$key][4] = isset($val['startTime']) ? strtotime($val['startTime']) : 0;
+                $worker[$key][5] = isset($val['endTime']) ? strtotime($val['endTime']) : 0;
+                $worker[$key][6] = isset($tmp['province']) ? $tmp['province'] : 0;
+                $worker[$key][7] = isset($tmp['city']) ? $tmp['city'] : 0;
+                $worker[$key][8] = isset($tmp['area']) ? $tmp['area'] : 0;
+                $worker[$key][9] = isset($tmp['address']) ? $tmp['address'] : '';
+                $worker[$key][10] = 0;
+                $tmp['total'] = $tmp['total_edit'] += $worker[$key][2] * $worker[$key][3] * (ceil($worker[$key][5] - $worker[$key][4]) / 3600 / 24 + 1);
             }
         }
         else
@@ -428,16 +434,16 @@ class Tasks extends \CLASSES\WebBase
             $this->exportData('用户支付密码不能为空');
         }
         $user_dao = new \WDAO\Users(array('table' => 'users'));
-        $pass_result = $user_dao->checkUserPayPassword(array('u_id' => intval($_REQUEST['t_author']), 'u_pass' => $tmp['u_pass']));
-        if (!isset($pass_result['u_mobile']) || '' == $pass_result['u_mobile'])
+        $pass_result = $user_dao->checkUserPayPassword(array('u_id' => intval($request_data['t_author']), 'u_pass' => $tmp['u_pass']));
+        if (false == $pass_result || !isset($pass_result['u_mobile']) || '' == $pass_result['u_mobile'])
         {
             $this->exportData('用户支付密码错误');
         }
 
         //获取用户资金
         $users_ext_funds_dao = new \WDAO\Users_ext_funds(array('table'=>'users_ext_funds'));
-        $users_ext_funds_info = $users_ext_funds_dao->infoData(intval($_REQUEST['t_author']));
-        if (empty($users_ext_funds_info) || !isset($users_ext_funds_info['uef_overage']) || intval($users_ext_funds_info['uef_overage']) <= 0 || ($data['t_storage'] == 1 && $users_ext_funds_info['uef_overage'] < $tmp['total_edit']))
+        $users_ext_funds_info = $users_ext_funds_dao->infoData(intval($request_data['t_author']));
+        if (empty($users_ext_funds_info) || !isset($users_ext_funds_info['uef_overage']) || $users_ext_funds_info['uef_overage'] < $tmp['total'])
         {
             $this->exportData('用户资金不足');
         }
@@ -450,12 +456,12 @@ class Tasks extends \CLASSES\WebBase
             if ($amount_result)
             {
                 //扣除用户资金 并加入平台资金日志
-                $user_funds_result = $this->userFunds(intval($_REQUEST['t_author']), (-1 * $tmp['total_edit']), $type = 'pubtask'); //扣除用户资金
+                $user_funds_result = $this->userFunds(intval($request_data['t_author']), (-1 * $tmp['total_edit']), $type = 'pubtask'); //扣除用户资金
                 $platform_funds_result = $this->platformFundsLog($result, $tmp['total_edit'], 3, 'pubtask', 0);     //平台资金日志增加
             }
 
             //事物提交或回滚
-            if ($amount_result && $bouns_data_result && $user_funds_result && $platform_funds_result)
+            if ($amount_result && $user_funds_result && $platform_funds_result)
             {
                 $this->db->commit();
                 $this->exportData('success');
