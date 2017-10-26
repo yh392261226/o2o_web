@@ -20,10 +20,11 @@ class Tools extends \CLASSES\WebBase
     public function subTotal()
     {
         $result = 0;
-        if (!empty($_REQUEST['data']['worker']))
+        if (!empty($_REQUEST['data']))
         {
+            $request_data = json_decode(base64_decode($_REQUEST['data']), true);
             $worker = array();
-            foreach ($_REQUEST['data']['worker'] as $key => $val)
+            foreach ($request_data['worker'] as $key => $val)
             {
                 $worker[$key][0] = isset($val['personNum']) ? intval($val['personNum']) : 0;
                 $worker[$key][1] = isset($val['money']) ? floatval($val['money']) : 0;
