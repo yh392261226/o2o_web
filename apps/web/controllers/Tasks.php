@@ -304,13 +304,13 @@ class Tasks extends \CLASSES\WebBase
     {
         //$this->db->debug = 1;
         $data = $info = $worker = $fields = $message = $tmp = array();
-
+        //error_log($_POST['data'] . '\n', 3, 'request.log');
         if (!isset($_POST['data']) || empty($_POST['data']))
         {
-            $this->exportData('参数错误');
+            $this->exportData(array('msg' => '参数错误', 'status' => -1));
         }
         $request_data = json_decode(base64_decode($_POST['data']), true);
-        error_log(var_export($request_data, true) . '\n', 3, 'request.log');
+        //error_log(var_export($request_data, true) . '\n', 3, 'request.log');
 
         $data['t_storage'] = $tmp['t_storage'] = 1;
         if (isset($request_data['t_storage']) && is_numeric($request_data['t_storage'])) $data['t_storage'] = intval($request_data['t_storage']);
@@ -334,7 +334,7 @@ class Tasks extends \CLASSES\WebBase
         if (!isset($data['t_author'])) $message[] = '发布人id不正确';
         if (!empty($message))
         {
-            $this->exportData($message);
+            $this->exportData(array('msg' => $message[0], 'status' => -2));
         }
 
         $data['t_type'] = 0;
@@ -357,7 +357,7 @@ class Tasks extends \CLASSES\WebBase
         $result = $task_dao->addData($data);
         if (!$result)
         {
-            $this->exportData('failure');
+            $this->exportData(array('msg' => '发布失败', 'status' => 1));
         }
 
         /*tasks_ext_info*/
@@ -421,23 +421,23 @@ class Tasks extends \CLASSES\WebBase
             ));
             if ($del_result < 0)
             {
-                if ($del_result == -1) $this->exportData('无法完成任务覆盖或任务草稿不存在');
-                if ($del_result == -2) $this->exportData('返还用户资金失败，请联系客服人员');
-                if ($del_result == -3) $this->exportData('还原抵扣券失败，请联系客服人员');
-                if ($del_result == -9) $this->exportData('参数不正确');
+                if ($del_result == -1) $this->exportData(array('msg' => '无法完成任务覆盖或任务草稿不存在', 'status' => 4));
+                if ($del_result == -2) $this->exportData(array('msg' => '返还用户资金失败，请联系客服人员', 'status' => 4));
+                if ($del_result == -3) $this->exportData(array('msg' => '还原抵扣券失败，请联系客服人员', 'status' => 4));
+                if ($del_result == -9) $this->exportData(array('msg' => '删除旧任务参数不正确', 'status' => 4));
             }
         }
 
         //获取用户支付密码及
         if (!isset($tmp['u_pass']))
         {
-            $this->exportData('用户支付密码不能为空');
+            $this->exportData(array('msg' => '用户支付密码不能为空', 'status' => 3));
         }
         $user_dao = new \WDAO\Users(array('table' => 'users'));
         $pass_result = $user_dao->checkUserPayPassword(array('u_id' => intval($request_data['t_author']), 'u_pass' => $tmp['u_pass']));
         if (false == $pass_result || !isset($pass_result['u_mobile']) || '' == $pass_result['u_mobile'])
         {
-            $this->exportData('用户支付密码错误');
+            $this->exportData(array('msg' => '用户支付密码错误', 'status' => 3));
         }
 
         //获取用户资金
@@ -445,7 +445,7 @@ class Tasks extends \CLASSES\WebBase
         $users_ext_funds_info = $users_ext_funds_dao->infoData(intval($request_data['t_author']));
         if (empty($users_ext_funds_info) || !isset($users_ext_funds_info['uef_overage']) || $users_ext_funds_info['uef_overage'] < $tmp['total'])
         {
-            $this->exportData('用户资金不足');
+            $this->exportData(array('msg' => '用户资金不足', 'status' => 2));
         }
 
         //订单改价
@@ -464,22 +464,22 @@ class Tasks extends \CLASSES\WebBase
             if ($amount_result && $user_funds_result && $platform_funds_result)
             {
                 $this->db->commit();
-                $this->exportData('success');
+                $this->exportData(array('msg' => '发布成功', 'status' => 0));
             }
             else
             {
                 $this->db->rollback();
-                $this->exportData('failure');
+                $this->exportData(array('msg' => '发布失败', 'status' => 1));
             }
         }
 
         if ($tmp['t_storage'] == 1)
         {
-            $this->exportData('成功加入草稿箱');
+            $this->exportData(array('msg' => '成功加入草稿箱', 'status' => 0));
         }
         else
         {
-            $this->exportData('存储出错，已存入草稿箱');
+            $this->exportData(array('msg' => '存储出错，已存入草稿箱', 'status' => 0));
         }
     }
 
