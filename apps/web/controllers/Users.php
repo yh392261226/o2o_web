@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-25 16:08:15
+ * @Last Modified time: 2017-10-27 10:23:22
  */
 namespace App\Controller;
 
@@ -270,9 +270,10 @@ class Users extends \CLASSES\WebBase
         if (empty($_GET['f_type_id']) || empty($data['f_type_id'] = intval($_GET['f_type_id']))){
              $this->exportData( array('msg'=>'请输入被收藏id'),0);
         }
-        if (empty($_GET['f_type']) ||  empty($data['f_type'] = intval($_GET['f_type']))){
+        if (!isset($_GET['f_type'])){
              $this->exportData( array('msg'=>'请输入收藏类型'),0);
         }
+        $data['f_type'] = intval($_GET['f_type']);
         $dao_favorate = new \WDAO\Users_favorate(array('table'=>'users_favorate'));
         $f_id = $dao_favorate ->addData($data);
         if(intval($f_id) > 0){
