@@ -109,6 +109,9 @@ class Orders extends \CLASSES\WebBase
                     {//半开工
                         $task_dao->updateData(array('t_status' => 5), array('t_id' => intval($info['data'][0]['t_id'])));
                     }
+                    //变更工人状态为忙
+                    $user_dao = new \WDAO\Users(array('table' => 'users'));
+                    $users_dao->taskStatus($data['o_worker'], '1');
                 }
                 $this->exportData('success');
             }
@@ -449,8 +452,10 @@ class Orders extends \CLASSES\WebBase
                             //给每个工人单独发钱并单独扣除平台款项
                             $platform_result = $user_result = 0;
                             $platform_result = $this->platformFundsLog($val['o_id'], ($val['o_amount'] * -1), 0, 'payorder');
-                            $user_result = $this->userFunds($val['o_worker'], $val['o_amount'], 'overage');
-                            if (!$platform_result || !$user_result)
+                            $user_funds_result = $this->userFunds($val['o_worker'], $val['o_amount'], 'overage');
+                            $user_dao = new \WDAO\Users(array('table' => 'users'));
+                            $user_result = $user_dao->taskStatus($val['o_worker'], '0');
+                            if (!$platform_result || !$user_funds_result || !$user_result)
                             {
                                 $pay_status = 0;
                             }

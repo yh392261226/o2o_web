@@ -81,7 +81,7 @@ class Tasks extends \CLASSES\WebBase
         if (isset($_REQUEST['t_phone'])) $data['t_phone'] = intval($_REQUEST['t_phone']);
         if (isset($_REQUEST['t_phone_status'])) $data['t_phone_status'] = intval($_REQUEST['t_phone_status']);
         $data['where'] = 't_storage = 0';
-        if (isset($_REQUEST['t_storage'])) $data['t_storage'] = intval($_REQUEST['t_storage']);
+        if (isset($_REQUEST['t_storage'])) $data['where'] = 't_storage = ' . intval($_REQUEST['t_storage']);
 
         //price between
         if (isset($_REQUEST['ge_amount']) && floatval($_REQUEST['ge_amount']) > 0) $data['t_amount'][0] = array('type' => 'ge', 'ge_value' => floatval($_REQUEST['ge_amount']));
@@ -310,7 +310,7 @@ class Tasks extends \CLASSES\WebBase
             $this->exportData(array('msg' => '参数错误', 'status' => -1));
         }
         $request_data = json_decode(base64_decode($_POST['data']), true);
-        //error_log(var_export($request_data, true) . '\n', 3, 'request.log');
+        error_log(var_export($request_data, true) . '\n', 3, 'request.log');
 
         $data['t_storage'] = $tmp['t_storage'] = 1;
         if (isset($request_data['t_storage']) && is_numeric($request_data['t_storage'])) $data['t_storage'] = intval($request_data['t_storage']);
@@ -325,7 +325,6 @@ class Tasks extends \CLASSES\WebBase
         if (isset($request_data['t_author']) && 0 < intval($request_data['t_author'])) $data['t_author'] = $data['t_last_editor'] = intval($request_data['t_author']);
         if ($data['t_storage'] == 0)
         {
-            if (!isset($data['t_title'])) $message[] = '标题不能为空';
             if (!isset($data['t_info'])) $message[] = '简介不能为空';
             //if (!isset($data['t_duration'])) $message[] = '任务时长不能小于1天';
             if (!isset($data['t_posit_x'])) $message[] = 'x轴坐标不正确';
@@ -354,7 +353,10 @@ class Tasks extends \CLASSES\WebBase
 
         //写入任务
         $task_dao = new \WDAO\Tasks();
-        $result = $task_dao->addData($data);
+        $task_data = $data;
+        $task_data['t_storage'] = 1;
+        $result = $task_dao->addData($task_data);
+        unset($task_data);
         if (!$result)
         {
             $this->exportData(array('msg' => '发布失败', 'status' => 1));
