@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-27 10:23:22
+ * @Last Modified time: 2017-10-27 15:30:32
  */
 namespace App\Controller;
 
@@ -272,6 +272,9 @@ class Users extends \CLASSES\WebBase
         }
         if (!isset($_GET['f_type'])){
              $this->exportData( array('msg'=>'请输入收藏类型'),0);
+        }
+        if($_GET['f_type'] == 1 && $data['u_id'] == $data['f_type_id']){
+            $this->exportData( array('msg'=>'您不能收藏自己'),0);
         }
         $data['f_type'] = intval($_GET['f_type']);
         $dao_favorate = new \WDAO\Users_favorate(array('table'=>'users_favorate'));
@@ -1371,6 +1374,7 @@ class Users extends \CLASSES\WebBase
             $this ->exportData( array('msg'=>'密码修改失败,请联系管理员'),0);
         }
     }
+
 
 
 
