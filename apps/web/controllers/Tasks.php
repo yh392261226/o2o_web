@@ -310,7 +310,7 @@ class Tasks extends \CLASSES\WebBase
             $this->exportData(array('msg' => '参数错误', 'status' => -1));
         }
         $request_data = json_decode(base64_decode($_POST['data']), true);
-        //error_log(var_export($request_data, true) . '\n', 3, 'request.log');
+        error_log(var_export($request_data, true) . '\n', 3, 'request.log');
 
         $data['t_storage'] = $tmp['t_storage'] = 1;
         if (isset($request_data['t_storage']) && is_numeric($request_data['t_storage'])) $data['t_storage'] = intval($request_data['t_storage']);
