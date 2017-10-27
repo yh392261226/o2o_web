@@ -20,16 +20,16 @@ class Tools extends \CLASSES\WebBase
     public function subTotal()
     {
         $result = 0;
-        if (!empty($_REQUEST['worker']))
+        if (!empty($_REQUEST['data']))
         {
-            $_REQUEST = json_decode($_REQUEST, true);
+            $request_data = json_decode(base64_decode($_REQUEST['data']), true);
             $worker = array();
-            foreach ($_REQUEST['worker'] as $key => $val)
+            foreach ($request_data['worker'] as $key => $val)
             {
-                $worker[$key][0] = isset($val[1]['personNum']) ? intval($val[1]['personNum']) : 0;
-                $worker[$key][1] = isset($val[1]['money']) ? floatval($val[1]['money']) : 0;
-                $worker[$key][2] = isset($val[2]['startTime']) ? strtotime($val[2]['startTime']) : 0;
-                $worker[$key][3] = isset($val[2]['endTime']) ? strtotime($val[2]['endTime']) : 0;
+                $worker[$key][0] = isset($val['personNum']) ? intval($val['personNum']) : 0;
+                $worker[$key][1] = isset($val['money']) ? floatval($val['money']) : 0;
+                $worker[$key][2] = isset($val['startTime']) ? strtotime($val['startTime']) : 0;
+                $worker[$key][3] = isset($val['endTime']) ? strtotime($val['endTime']) : 0;
                 $result += $worker[$key][0] * $worker[$key][1] * (ceil($worker[$key][3] - $worker[$key][2]) / 3600 / 24 + 1);
             }
         }
