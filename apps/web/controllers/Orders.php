@@ -427,9 +427,9 @@ class Orders extends \CLASSES\WebBase
                 $order_param = array();
                 //获取该任务所属的全部订单信息
                 $order_param['where'] = 'orders.o_confirm = 1';
-                $order_param['join'] = array('task_ext_worker', 'task_ext_worker.tew_id = orders.tew_id and task_ext_worker.tew_skills = orders.s_id, task_ext_worker.t_id = orders.t_id');
+                $order_param['join'] = array('task_ext_worker', 'task_ext_worker.tew_id = orders.tew_id and task_ext_worker.tew_skills = orders.s_id and task_ext_worker.t_id = orders.t_id');
                 $order_param['fields'] = 'task_ext_worker.tew_id, task_ext_worker.tew_skills, task_ext_worker.tew_worker_num, task_ext_worker.tew_price, task_ext_worker.tew_start_time, task_ext_worker.tew_end_time,
-                orders.o_id, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_status';
+                orders.o_id, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_status, orders.o_pay, orders.unbind_time';
                 $order_param['where'] .= ' and orders.t_id = "' . intval($data['t_id']) . '" and orders.u_id = "' . $data['t_author'] . '"';
                 if (isset($data['tew_id']))
                 {
@@ -446,18 +446,60 @@ class Orders extends \CLASSES\WebBase
                         if (!empty($val) && isset($val['o_id']) && $val['o_id'] > 0 &&
                             isset($val['o_amount']) && $val['o_amount'] > 0 &&
                             isset($val['o_worker']) && $val['o_worker'] > 0 &&
-                            isset($val['o_status']) && $val['o_status'] == 0 &&
-                            isset($val['o_confirm']) && $val['o_confirm'] == 1)
+                            isset($val['o_status']) && in_array($val['o_status'], array(0, -1, -2)) &&
+                            isset($val['o_confirm']) && $val['o_confirm'] == 1 &&
+                            isset($val['o_pay']) && $val['o_pay'] == 0)
                         {
-                            //给每个工人单独发钱并单独扣除平台款项
-                            $platform_result = $user_result = 0;
-                            $platform_result = $this->platformFundsLog($val['o_id'], ($val['o_amount'] * -1), 0, 'payorder');
-                            $user_funds_result = $this->userFunds($val['o_worker'], $val['o_amount'], 'overage');
-                            $user_dao = new \WDAO\Users(array('table' => 'users'));
-                            $user_result = $user_dao->taskStatus($val['o_worker'], '0');
-                            if (!$platform_result || !$user_funds_result || !$user_result)
+                            //解决辞职或解雇的工人价格
+                            if ($val['o_status'] == -1) //辞职
                             {
-                                $pay_status = 0;
+                                //计算真实单价 o_amount / (ceil($val['tew_end_time'] - $val['tew_start_time']) / 3600 / 24 + 1)
+                                $real_unit = $val['o_amount'] / (ceil($val['tew_end_time'] - $val['tew_start_time']) / 3600 / 24 + 1);
+                                //实际工作天数
+                                $real_days = (ceil($val['unbind_time'] - $val['tew_start_time']) / 3600 / 24);
+                                $real_total = $real_unit * $real_days;
+                                if ($val['o_amount'] > $real_total)
+                                {
+                                    $platform_result = $this->platformFundsLog($val['o_id'], (($val['o_amount'] - $real_total) * -1), 0, 'payorder'); //平台资金支出
+                                    $user_funds_result = $this->userFunds($val['o_worker'], ($val['o_amount'] - $real_total), 'overage'); //雇主用户资金收入
+                                    if (!$platform_result || !$user_funds_result)
+                                    {
+                                        $pay_status = 0;
+                                    }
+                                    $val['o_amount'] = $real_total;
+                                }
+                            }
+                            if ($val['o_status'] == -2) //解雇
+                            {
+                                //计算真实单价 o_amount / (ceil($val['tew_end_time'] - $val['tew_start_time']) / 3600 / 24 + 1)
+                                $real_unit = $val['o_amount'] / (ceil($val['tew_end_time'] - $val['tew_start_time']) / 3600 / 24 + 1);
+                                //实际工作天数
+                                $real_days = (ceil($val['unbind_time'] - $val['tew_start_time']) / 3600 / 24 + 1);
+                                $real_total = $real_unit * $real_days;
+                                if ($val['o_amount'] > $real_total)
+                                {
+                                    $platform_result = $this->platformFundsLog($val['o_id'], (($val['o_amount'] - $real_total) * -1), 0, 'payorder'); //平台资金支出
+                                    $user_funds_result = $this->userFunds($val['o_worker'], ($val['o_amount'] - $real_total), 'overage'); //雇主用户资金收入
+                                    if (!$platform_result || !$user_funds_result)
+                                    {
+                                        $pay_status = 0;
+                                    }
+                                    $val['o_amount'] = $real_total;
+                                }
+                            }
+
+                            if ($pay_status != 0)
+                            {
+                                //给每个工人单独发钱并单独扣除平台款项
+                                $platform_result = $user_result = 0;
+                                $platform_result = $this->platformFundsLog($val['o_id'], ($val['o_amount'] * -1), 0, 'payorder'); //平台资金支出
+                                $user_funds_result = $this->userFunds($val['o_worker'], $val['o_amount'], 'overage'); //工人用户资金收入
+                                $user_dao = new \WDAO\Users(array('table' => 'users'));
+                                $user_result = $user_dao->taskStatus($val['o_worker'], '0'); //释放工人状态
+                                $pay = $this->orders_dao->payStatus($val['o_id'], '1'); //更新订单支付状态
+                                if (!$platform_result || !$user_funds_result || !$user_result || !$pay) {
+                                    $pay_status = 0;
+                                }
                             }
                         }
                     }

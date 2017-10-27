@@ -23,7 +23,7 @@ class Tasks extends \CLASSES\WebBase
     }
 
     private function worked()
-    {$this->db->debug = 1;
+    {
         $list = $data = array();
         $data['o_worker'] = intval($_REQUEST['o_worker']);
         if ($data['o_worker'] > 0)
@@ -34,7 +34,7 @@ class Tasks extends \CLASSES\WebBase
             if (isset($_REQUEST['t_id'])) $data['where'] .= ' and orders.t_id = ' . intval($_REQUEST['t_id']);
             if (isset($_REQUEST['u_id'])) $data['where'] .= ' and orders.u_id = ' . intval($_REQUEST['u_id']);
 
-            if (isset($_REQUEST['o_status']) && is_numeric($_REQUEST['o_status'])) $data['where'] .= 'and orders.o_status = ' . intval($_REQUEST['o_status']);
+            if (isset($_REQUEST['o_status']) && is_numeric($_REQUEST['o_status'])) $data['where'] .= ' and orders.o_status = ' . intval($_REQUEST['o_status']);
             if (isset($_REQUEST['o_confirm'])) $data['where'] .= ' and orders.o_confirm in (' . trim($_REQUEST['o_confirm'] . ')');
             if (isset($_REQUEST['s_id'])) $data['where'] .= ' and orders.s_id = ' . intval($_REQUEST['s_id']);
             if (isset($_REQUEST['tew_id'])) $data['where'] .= ' and orders.tew_id = ' . intval($_REQUEST['tew_id']);
@@ -310,7 +310,7 @@ class Tasks extends \CLASSES\WebBase
             $this->exportData(array('msg' => '参数错误', 'status' => -1));
         }
         $request_data = json_decode(base64_decode($_POST['data']), true);
-        error_log(var_export($request_data, true) . '\n', 3, 'request.log');
+        //error_log(var_export($request_data, true) . '\n', 3, 'request.log');
 
         $data['t_storage'] = $tmp['t_storage'] = 1;
         if (isset($request_data['t_storage']) && is_numeric($request_data['t_storage'])) $data['t_storage'] = intval($request_data['t_storage']);
