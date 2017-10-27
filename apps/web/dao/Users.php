@@ -210,4 +210,21 @@ class Users extends \MDAOBASE\DaoBase
 
     }
 
+    /*修改用户状态*/
+    public function taskStatus($uid, $status = 0)
+    {
+        if(isset($uid) && isset($status) && '' != $status  && 0 < intval($uid)){
+
+            $dao_users = new \WDAO\Users(array('table'=>'users'));
+            $res = $dao_users -> updateData(array('u_task_status' => intval($status)),array('u_id'=>intval($uid)) );
+            if($res){
+                return true;
+            }
+
+        }
+
+        return false;
+    }
+
+
 }
