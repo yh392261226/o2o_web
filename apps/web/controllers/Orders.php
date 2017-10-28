@@ -131,8 +131,11 @@ class Orders extends \CLASSES\WebBase
         if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']);
         //工人id
         if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
+        //发起人id
+        if (isset($_REQUEST['o_sponsor']) && intval($_REQUEST['o_sponsor']) > 0) $data['o_sponsor'] = intval($_REQUEST['o_sponsor']);
 
-        if (!isset($data['tew_id']) || !isset($_REQUEST['t_id']) || !isset($_REQUEST['o_worker'])) $this->exportData('failure');
+        if (!isset($data['tew_id']) || !isset($data['t_id']) || !isset($data['o_worker']) || isset($data['o_sponsor'])) $this->exportData('failure');
+
 
         //验证任务是否存在
         $worker_dao = new \WDAO\Task_ext_worker();
@@ -172,6 +175,7 @@ class Orders extends \CLASSES\WebBase
             'o_last_edit_time' => $curtime,
             'tew_id' => $worker_result['tew_id'],
             's_id' => $worker_result['tew_skills'],
+            'o_sponsor' => $data['o_sponsor'],
         ));
         if (!$result)
         {
@@ -359,6 +363,10 @@ class Orders extends \CLASSES\WebBase
             {
                 $this->exportData('failure');
             }
+
+            //释放工人
+            $user_dao = new \WDAO\Users(array('table' => 'users'));
+            $user_dao->updateData(array('u_task_status' => 0), array('u_id' => $data['o_worker']));
 
             if (!empty($tmp))
             {
