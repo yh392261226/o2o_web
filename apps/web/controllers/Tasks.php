@@ -23,39 +23,38 @@ class Tasks extends \CLASSES\WebBase
     }
 
     private function worked()
-    {$this->db->debug = 1;
+    {
         $list = $data = array();
-        $data['o_worker'] = intval($_REQUEST['o_worker']);
-        if ($data['o_worker'] > 0)
-        {
-            $this->orders_dao = new \WDAO\Orders();
-            if (isset($_REQUEST['o_id'])) $data['o_id'] = array('type' => 'in', 'value' => $_REQUEST['o_id']);
-            $data['where'] = '1';
-            if (isset($_REQUEST['t_id'])) $data['where'] .= ' and orders.t_id = ' . intval($_REQUEST['t_id']);
-            if (isset($_REQUEST['u_id'])) $data['where'] .= ' and orders.u_id = ' . intval($_REQUEST['u_id']);
+        //$this->db->debug = 1;
+        $orders_dao = new \WDAO\Orders();
+        $data['where'] = '1';
+        if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
+        if (!isset($data['o_worker'])) $this->exportData(); //工人id必须有
+        if (isset($_REQUEST['u_id'])) $data['where'] .= ' and orders.u_id = ' . intval($_REQUEST['u_id']);
+        if (isset($_REQUEST['o_id'])) $data['o_id'] = array('type' => 'in', 'value' => $_REQUEST['o_id']);
+        if (isset($_REQUEST['t_id'])) $data['where'] .= ' and orders.t_id = ' . intval($_REQUEST['t_id']);
+        if (isset($_REQUEST['o_status']) && is_numeric($_REQUEST['o_status'])) $data['where'] .= ' and orders.o_status = ' . intval($_REQUEST['o_status']);
+        if (isset($_REQUEST['o_confirm'])) $data['where'] .= ' and orders.o_confirm in (' . trim($_REQUEST['o_confirm'] . ')');
+        if (isset($_REQUEST['s_id'])) $data['where'] .= ' and orders.s_id = ' . intval($_REQUEST['s_id']);
+        if (isset($_REQUEST['tew_id'])) $data['where'] .= ' and orders.tew_id = ' . intval($_REQUEST['tew_id']);
+        //区间值
+        if (isset($_REQUEST['ge_amount']) && floatval($_REQUEST['ge_amount']) > 0) $data['o_amount'][0] = array('type' => 'ge', 'ge_value' => floatval($_REQUEST['ge_amount']));
+        if (isset($_REQUEST['le_amount']) && floatval($_REQUEST['le_amount']) > 0) $data['o_amount'][1] = array('type' => 'le', 'le_value' => floatval($_REQUEST['le_amount']));
+        if (isset($_REQUEST['ge_in_time']) && intval($_REQUEST['ge_in_time']) > 0) $data['o_in_time'][0] = array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['ge_in_time']));
+        if (isset($_REQUEST['le_in_time']) && intval($_REQUEST['le_in_time']) > 0) $data['o_in_time'][1] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['le_in_time']));
+        if (isset($_REQUEST['ge_in_time']) && intval($_REQUEST['ge_in_time']) > 0) $data['o_last_edit_time'][0] = array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['ge_in_time']));
+        if (isset($_REQUEST['le_in_time']) && intval($_REQUEST['le_in_time']) > 0) $data['o_last_edit_time'][1] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['le_in_time']));
 
-            if (isset($_REQUEST['o_status']) && is_numeric($_REQUEST['o_status'])) $data['where'] .= 'and orders.o_status = ' . intval($_REQUEST['o_status']);
-            if (isset($_REQUEST['o_confirm'])) $data['where'] .= ' and orders.o_confirm in (' . trim($_REQUEST['o_confirm'] . ')');
-            if (isset($_REQUEST['s_id'])) $data['where'] .= ' and orders.s_id = ' . intval($_REQUEST['s_id']);
-            if (isset($_REQUEST['tew_id'])) $data['where'] .= ' and orders.tew_id = ' . intval($_REQUEST['tew_id']);
-            //区间值
-            if (isset($_REQUEST['ge_amount']) && floatval($_REQUEST['ge_amount']) > 0) $data['o_amount'][0] = array('type' => 'ge', 'ge_value' => floatval($_REQUEST['ge_amount']));
-            if (isset($_REQUEST['le_amount']) && floatval($_REQUEST['le_amount']) > 0) $data['o_amount'][1] = array('type' => 'le', 'le_value' => floatval($_REQUEST['le_amount']));
-            if (isset($_REQUEST['ge_in_time']) && intval($_REQUEST['ge_in_time']) > 0) $data['o_in_time'][0] = array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['ge_in_time']));
-            if (isset($_REQUEST['le_in_time']) && intval($_REQUEST['le_in_time']) > 0) $data['o_in_time'][1] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['le_in_time']));
-            if (isset($_REQUEST['ge_in_time']) && intval($_REQUEST['ge_in_time']) > 0) $data['o_last_edit_time'][0] = array('type' => 'ge', 'ge_value' => strtotime($_REQUEST['ge_in_time']));
-            if (isset($_REQUEST['le_in_time']) && intval($_REQUEST['le_in_time']) > 0) $data['o_last_edit_time'][1] = array('type' => 'le', 'le_value' => strtotime($_REQUEST['le_in_time']));
+        $data['join'] = array('tasks', ' orders.t_id = tasks.t_id ');
+        $data['walk']['_join'] = array('join' => array('task_ext_worker', 'orders.tew_id = task_ext_worker.tew_id'));
+        $data['fields'] = 'orders.o_id, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_last_edit_time, orders.o_status, orders.tew_id, orders.s_id, orders.o_confirm, orders.unbind_time, orders.o_sponsor,
+        tasks.t_id, tasks.t_title, tasks.t_info, tasks.t_status, tasks.t_author, tasks.t_phone, tasks.t_phone_status, tasks.t_amount, tasks.t_edit_amount, tasks.t_duration, tasks.t_amount_edit_times, tasks.t_posit_x, tasks.t_posit_y, tasks.t_in_time,
+        task_ext_worker.tew_skills, task_ext_worker.tew_worker_num, task_ext_worker.tew_price, task_ext_worker.tew_start_time, task_ext_worker.tew_end_time, task_ext_worker.r_province, task_ext_worker.r_city, task_ext_worker.r_area, task_ext_worker.tew_address';
+        //$data['where'] = ' orders.o_worker = "' . intval($_REQUEST['o_worker']) . '"';
+        $data['pager'] = 0;
+        $data['order'] = 'orders.o_in_time, orders.o_id desc';
+        $list = $orders_dao->listData($data);
 
-            $data['join'] = array('tasks', ' orders.t_id = tasks.t_id ');
-            $data['walk']['_join'] = array('join' => array('task_ext_worker', 'orders.tew_id = task_ext_worker.tew_id'));
-            $data['fields'] = 'orders.o_id, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_last_edit_time, orders.o_status, orders.tew_id, orders.s_id, orders.o_confirm, orders.unbind_time,
-            tasks.t_id, tasks.t_title, tasks.t_info, tasks.t_status, tasks.t_author, tasks.t_phone, tasks.t_phone_status, tasks.t_amount, tasks.t_edit_amount, tasks.t_duration, tasks.t_amount_edit_times, tasks.t_posit_x, tasks.t_posit_y, tasks.t_in_time,
-            task_ext_worker.tew_skills, task_ext_worker.tew_worker_num, task_ext_worker.tew_price, task_ext_worker.tew_start_time, task_ext_worker.tew_end_time, task_ext_worker.r_province, task_ext_worker.r_city, task_ext_worker.r_area, task_ext_worker.tew_address';
-            //$data['where'] = ' orders.o_worker = "' . intval($_REQUEST['o_worker']) . '"';
-            $data['pager'] = 0;
-            $data['order'] = 'orders.o_in_time, orders.o_id desc';
-            $list = $this->orders_dao->listData($data);
-        }
         if (!empty($list['data']))
         {
             foreach ($list['data'] as $key => $val)
@@ -123,6 +122,7 @@ class Tasks extends \CLASSES\WebBase
                 $tasks_ids[] = isset($val['t_id']) && $val['t_id'] > 0 ? $val['t_id'] : 0;
             }
             unset($key, $val);
+
             if (!empty($tasks_ids) && !isset($data['leftjoin']))
             {
                 $tasks_ext_worker_dao = new \WDAO\Task_ext_worker();
@@ -169,6 +169,7 @@ class Tasks extends \CLASSES\WebBase
                     }
                 }
             }
+
             $this->exportData($list['data']);
         }
         else
@@ -310,7 +311,7 @@ class Tasks extends \CLASSES\WebBase
             $this->exportData(array('msg' => '参数错误', 'status' => -1));
         }
         $request_data = json_decode(base64_decode($_POST['data']), true);
-        error_log(var_export($request_data, true) . '\n', 3, 'request.log');
+        //error_log(var_export($request_data, true) . '\n', 3, 'request.log');
 
         $data['t_storage'] = $tmp['t_storage'] = 1;
         if (isset($request_data['t_storage']) && is_numeric($request_data['t_storage'])) $data['t_storage'] = intval($request_data['t_storage']);
