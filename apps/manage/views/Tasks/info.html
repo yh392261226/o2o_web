@@ -178,6 +178,11 @@
                                 <option value="-3" {{if $value.o_status == -3}}selected="selected"{{/if}} >纠纷中</option>
                                 <option value="2" {{if $value.o_status == 2}}selected="selected"{{/if}} >纠纷解决</option>
                             </select>
+
+                            <div id="pay_type_{{$value.o_id}}" {{if $value.o_status != 2}}style="display:none;"{{/if}}>
+                                <input type="button" onclick="payByType({{$value.o_id}}, 0);" class="input-sm form-control input-s-sm inline" value="按辞职支付">
+                                <input type="button" onclick="payByType({{$value.o_id}}, 1);" class="input-sm form-control input-s-sm inline" value="按解雇支付">
+                            </div>
                         </td>
                     </tr>
                     {{/if}}
@@ -247,12 +252,35 @@
                 type: 'GET',
                 success : function(result) {
                     result = eval('('+result+')');
+                    if (val == 2) {
+                        $('#pay_type_' + oid).show();
+                    }
                     alert(result.msg);return false;
                 },
                 error:function() {
                     alert('修改失败了');return false;
                 }
             })
+        }
+    }
+
+    function payByType(id, type) {
+        if (id > 0 && type != 'undefined') {
+            $.ajax({
+                url:'/Orders/payByType?is_ajax=1&o_id='+id+'&type='+type,
+                type:'GET',
+                success:function(result) {
+                    if (result == 0) {
+                        alert('操作成功');
+                    } else {
+                        alert('操作失败');
+                    }
+                    return false;
+                },
+                error:function() {
+                    alert('操作失败');return false;
+                }
+            });
         }
     }
 </script>

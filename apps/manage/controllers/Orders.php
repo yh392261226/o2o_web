@@ -26,7 +26,13 @@ class Orders extends \CLASSES\ManageBase
                 msg('操作失败:参数错误', 0);
             }
 
-            $result = $this->orders_dao->updateData(array('o_status' => $status), array('o_id' => intval($_REQUEST['o_id'])));
+            $status_data = array('o_status' => $status);
+            if ($status == -3)
+            {
+                $status_data['o_dispute_time'] = time();
+            }
+
+            $result = $this->orders_dao->updateData($status_data, array('o_id' => intval($_REQUEST['o_id'])));
 
             if (!$result)
             {
@@ -47,6 +53,26 @@ class Orders extends \CLASSES\ManageBase
             echo json_encode(array('msg' => '操作失败', 'status' => 0));exit;
         }
         msg('操作失败', 0);
+    }
+
+    public function payByType()
+    {
+        $is_ajax = isset($_REQUEST['is_ajax']) ? intval($_REQUEST['is_ajax']) : 0;
+        $o_id = isset($_REQUEST['o_id']) ? intval($_REQUEST['o_id']) : 0;
+        $type = isset($_REQUEST['type']) ? intval($_REQUEST['type']) : '';
+        if ($o_id > 0 && in_array($type, array(0, 1)))
+        {
+            $order_param['pager'] = 0;
+            $order_param['where'] = 'orders.o_id = "' . $o_id . '" and orders.o_status = 2 and orders.o_pay = 0';
+            $order_param['join'] = array('task_ext_worker', 'order.tew_id = task_ext_worker.tew_id and order.t_id = task_ext_worker.t_id');
+
+            $info = $this->orders_dao->listData($order_param);
+            if (!empty($info['data'][0]))
+            {
+                $info = $info['data'][0]; //订单详情
+            }
+        }
+        echo json_encode(1);exit;
     }
 
     //public function del()
