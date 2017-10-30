@@ -299,23 +299,32 @@ class Orders extends \CLASSES\WebBase
                 $times_update = $task_dao->queryData('update tasks set t_amount_edit_times=t_amount_edit_times+1, t_amount=t_amount + ' . ($tmp['edit_amount'] * -1) . ', t_last_edit_time = ' . time() . ', t_last_editor = ' . $data['t_author'] . ' where t_id = "' . $tmp['t_id'] . '"');
 
                 //更改该工人的订单价格
-                $orders_update = $this->orders_dao->updateData(array(
-                    'o_amount' => $data['tew_price'],
-                    'o_confirm' => 0,
-                    'o_last_edit_time' => time(),
-                    'o_start_time' => $data['start_time'],
-                    'o_end_time' => $data['end_time'],
+                $order_info = $this->orders_dao->listData(array(
+                    't_id' => $tmp['t_id'],
+                    'tew_id' => $data['tew_id'],
+                    'o_worker' => $data['o_worker'],
+                    's_id' => $task_data['tew_skills'],
+                    'o_status' => 0,
+                    'pager' => 0,
+                ));
+
+                $orders_update = false;
+                if (!empty($order_info['data'][0]))
+                {
+                    $orders_update = $this->orders_dao->updateData(array(
+                        'o_amount' => $data['tew_price'],
+                        'o_confirm' => 0,
+                        'o_last_edit_time' => time(),
+                        'o_start_time' => $data['start_time'],
+                        'o_end_time' => $data['end_time'],
                     ),array(
-                        't_id' => $tmp['t_id'],
-                        'tew_id' => $data['tew_id'],
-                        'o_worker' => $data['o_worker'],
-                        's_id' => $task_data['tew_skills'],
-                        'o_status' => 0,
+                        'o_id' => $order_info['data'][0]['o_id'],
                     ));
+                }
 
                 //4：多退少补 操作平台与用户资金
-                $user_funds_result = $this->userFunds($data['t_author'], $tmp['total_edit'], $type = 'changeprice'); //用户资金
-                $platform_funds_result = $this->platformFundsLog($tmp['t_id'], (-1 * $tmp['total_edit']), 3, 'changeprice', 0);     //平台资金日志
+                $user_funds_result = $this->userFunds($data['t_author'], $tmp['edit_amount'], $type = 'changeprice'); //用户资金
+                $platform_funds_result = $this->platformFundsLog($tmp['t_id'], (-1 * $tmp['edit_amount']), 3, 'changeprice');     //平台资金日志
 
                 if ($times_update && $orders_update && $user_funds_result && $platform_funds_result)
                 {

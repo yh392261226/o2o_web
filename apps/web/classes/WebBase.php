@@ -119,6 +119,7 @@ class WebBase extends Swoole\Controller
                 case 'pubtask':
                 case 'withdraw':
                 case 'recharge':
+                case 'changeprice':
                     $sets = ' uef_overage = uef_overage + ' . $amount;
                     break;
                 case 'ticket':
@@ -218,7 +219,7 @@ class WebBase extends Swoole\Controller
      */
     public function platformFundsLog($type_id, $amount, $type = 0, $reason = '', $status = 0)
     {
-        if (intval($type_id) < 1 || floatval($amount) <= 0)
+        if (intval($type_id) < 1)
         {
             return false;
         }
