@@ -61,6 +61,7 @@ class Orders extends \CLASSES\WebBase
                 {
                     $this->exportData('failure');
                 }
+                $this->exportData('success');
             }
         }
         $this->exportData('failure');
@@ -217,14 +218,15 @@ class Orders extends \CLASSES\WebBase
         if (isset($_REQUEST['end_time']) && intval($_REQUEST['end_time']) > 0) $data['end_time'] = strtotime($_REQUEST['end_time']);
         //工人id
         if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
-
+        //print_r($data);exit;
         if (!empty($data) && isset($data['tew_id']) && $data['tew_id'] > 0 &&
             isset($tmp['t_id']) && $tmp['t_id'] > 0 &&
             isset($data['t_author']) && $data['t_author'] > 0 &&
-            isset($data['amount']) && $data['amount'] > 0 &&
+            isset($data['tew_price']) && $data['tew_price'] > 0 &&
             isset($data['worker_num']) && $data['worker_num'] > 0 &&
             isset($data['o_worker']) && $data['o_worker'] > 0)
         {
+            //print_r($data);exit;
             //1：根据条件 获取该条订单信息
             $task_dao = new \WDAO\Task_ext_worker();
             $task_param['join'] = array('tasks', 'tasks.t_id = task_ext_worker.t_id');
@@ -259,7 +261,9 @@ class Orders extends \CLASSES\WebBase
                     {
                         $tmp['confirm'][$key] = $val['confirm'];
                     }
-                    if (isset($val['o_amount']) && $val['o_worker'] == $data['o_worker'] && $data['tew_id'] == $val['tew_id'] && $data['t_id'] == $val['t_id'])
+                    if (isset($val['o_amount']) && $val['o_worker'] == $data['o_worker'] &&
+                        isset($val['tew_id']) && $data['tew_id'] == $val['tew_id'] &&
+                        isset($val['t_id']) && $tmp['t_id'] == $val['t_id'])
                     {
                         $tmp['original_amount'] = $val['o_amount'];
                     }
@@ -295,21 +299,32 @@ class Orders extends \CLASSES\WebBase
                 $times_update = $task_dao->queryData('update tasks set t_amount_edit_times=t_amount_edit_times+1, t_amount=t_amount + ' . ($tmp['edit_amount'] * -1) . ', t_last_edit_time = ' . time() . ', t_last_editor = ' . $data['t_author'] . ' where t_id = "' . $tmp['t_id'] . '"');
 
                 //更改该工人的订单价格
-                $orders_update = $this->orders_dao->updateData(array(
-                    'o_amount' => $data['tew_price'],
-                    'o_confirm' => 0,
-                    'o_last_edit_time' => time()),
-                    array(
-                        't_id' => $tmp['t_id'],
-                        'tew_id' => $data['tew_id'],
-                        'o_worker' => $data['o_worker'],
-                        's_id' => $task_data['tew_skills'],
-                        'o_status' => 0,
+                $order_info = $this->orders_dao->listData(array(
+                    't_id' => $tmp['t_id'],
+                    'tew_id' => $data['tew_id'],
+                    'o_worker' => $data['o_worker'],
+                    's_id' => $task_data['tew_skills'],
+                    'o_status' => 0,
+                    'pager' => 0,
+                ));
+
+                $orders_update = false;
+                if (!empty($order_info['data'][0]))
+                {
+                    $orders_update = $this->orders_dao->updateData(array(
+                        'o_amount' => $data['tew_price'],
+                        'o_confirm' => 0,
+                        'o_last_edit_time' => time(),
+                        'o_start_time' => $data['start_time'],
+                        'o_end_time' => $data['end_time'],
+                    ),array(
+                        'o_id' => $order_info['data'][0]['o_id'],
                     ));
+                }
 
                 //4：多退少补 操作平台与用户资金
-                $user_funds_result = $this->userFunds($data['t_author'], $tmp['total_edit'], $type = 'changeprice'); //用户资金
-                $platform_funds_result = $this->platformFundsLog($tmp['t_id'], (-1 * $tmp['total_edit']), 3, 'changeprice', 0);     //平台资金日志
+                $user_funds_result = $this->userFunds($data['t_author'], $tmp['edit_amount'], $type = 'changeprice'); //用户资金
+                $platform_funds_result = $this->platformFundsLog($tmp['t_id'], (-1 * $tmp['edit_amount']), 3, 'changeprice');     //平台资金日志
 
                 if ($times_update && $orders_update && $user_funds_result && $platform_funds_result)
                 {
@@ -386,9 +401,9 @@ class Orders extends \CLASSES\WebBase
     }
 
     /**
-     * 删除订单
+     * 取消订单
      */
-    private function del()
+    private function cancel()
     {
         $data = $task_param = array();
         if (isset($_REQUEST['o_id']) && intval($_REQUEST['o_id']) > 0) $data['o_id'] = $task_param['o_id'] = intval($_REQUEST['o_id']);
@@ -400,15 +415,27 @@ class Orders extends \CLASSES\WebBase
         if (isset($_REQUEST['o_confirm']) && is_numeric($_REQUEST['o_confirm'])) $data['o_confirm'] = intval($_REQUEST['o_confirm']);
         if (isset($_REQUEST['o_status']) && is_numeric($_REQUEST['o_status'])) $data['o_status'] = intval($_REQUEST['o_status']);
 
-        if (!empty($data) && isset($data['tew_id']) && $data['t_id'] && $data['u_id'] && $data['o_worker'] && $data['s_id'])
+        if (!empty($data) && (isset($data['o_id']) || (isset($data['tew_id']) && isset($data['t_id']) && isset($data['u_id']) && isset($data['o_worker']) && isset($data['s_id']))))
         {
-            $result = $this->orders_dao->delData($data);
-            if (!$result)
+            if (!isset($data['o_id']) || $data['o_id'] < 0)
             {
-                $this->exportData('failure');
+                $data['pager'] = 0;
+                $data['limit'] = 1;
+                $data['order'] = 'o_id desc';
+                $orders = $this->orders_dao->listData($data);
+                if (!empty($orders['data'][0]))
+                {
+                    $data['o_id'] = $orders['data'][0]['o_id'];
+                }
             }
-            $this->exportData('success');
+
+            $result = $this->orders_dao->updateData(array('o_status' => -4), $data);
+            if ($result)
+            {
+                $this->exportData('success');
+            }
         }
+        $this->exportData('failure');
     }
 
     /**
