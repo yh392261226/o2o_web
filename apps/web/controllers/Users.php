@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-29 11:08:36
+ * @Last Modified time: 2017-10-30 17:32:46
  */
 namespace App\Controller;
 
@@ -525,7 +525,7 @@ class Users extends \CLASSES\WebBase
             }
         }
         $data2['where'] .= " and users.u_idcard != '' and users.u_true_name != '' and users.u_sex != -1 and users_ext_info.uei_info != '' and users_ext_info.uei_address != '' and  users_ext_info.uei_province != 0 and users_ext_info.uei_city != 0 and users_ext_info.uei_area != 0";
-        $data2['fields'] = 'users.u_id,users.u_mobile,users.u_idcard,users.u_sex,users.u_true_name as u_name,u_skills,users_ext_info.uei_info,u_task_status,u_true_name,ucp_posit_x,ucp_posit_y,users_ext_info.uei_address';
+        $data2['fields'] = 'users.u_id,users.u_mobile,users.u_idcard,users.u_sex,users.u_true_name as u_name,u_skills,users_ext_info.uei_info,u_task_status,u_true_name,ucp_posit_x,ucp_posit_y,users_ext_info.uei_address,users.u_in_time,users.u_last_edit_time,users.u_online,users.u_start,users.u_credit,users.u_top,users.u_recommend,users.u_jobs_num,users.u_worked_num,users.u_high_opinions,users.u_low_opinions,users.u_middle_opinions,users.u_dissensions';
 
         $list = $dao_info ->listData($data2);
 
