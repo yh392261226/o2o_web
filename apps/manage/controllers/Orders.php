@@ -84,8 +84,11 @@ class Orders extends \CLASSES\ManageBase
                 $info = $info['data'][0]; //订单详情
 
                 //获取平台手续费
-                $platform_rate = 0.05;
-
+                $platform_rate = $this->web_config['charge_rate'];
+                if ($platform_rate <= 0)
+                {
+                    $platform_rate = 0;
+                }
                 $pay_amount = 0;
                 switch ($type)
                 {
