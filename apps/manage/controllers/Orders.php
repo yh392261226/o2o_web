@@ -84,7 +84,7 @@ class Orders extends \CLASSES\ManageBase
                 $info = $info['data'][0]; //订单详情
 
                 //获取平台手续费
-                $platform_rate = $this->web_config['charge_rate'];
+                $platform_rate = isset($this->web_config['charge_rate_m']) && $this->web_config['charge_rate_m'] > 0 ? $this->web_config['charge_rate_m'] : 0;
                 if ($platform_rate <= 0)
                 {
                     $platform_rate = 0;
@@ -104,6 +104,7 @@ class Orders extends \CLASSES\ManageBase
                 }
                 $pay_amount = $pay_amount - $pay_amount * $platform_rate; //实际总价(扣除手续费后)
 
+                $this->db->start();
                 //扣除平台资金
                 $platform_dao = new \MDAO\Platform_funds_log();
                 $platform_result = $platform_dao->addData(array(
@@ -121,9 +122,11 @@ class Orders extends \CLASSES\ManageBase
                     $pay_result = $this->orders_dao->updateData(array('o_pay' => 1, 'o_pay_time' => time()), array('o_id' => $o_id));
                     if ($user_result && $pay_result)
                     {
+                        $this->db->commit();
                         echo json_encode(0);exit;
                     }
                 }
+                $this->db->rollback();
             }
         }
         echo json_encode(1);exit;

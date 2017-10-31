@@ -507,7 +507,7 @@ class Orders extends \CLASSES\WebBase
                             isset($val['o_confirm']) && $val['o_confirm'] == 1 &&
                             isset($val['o_pay']) && $val['o_pay'] == 0)
                         {
-                            $platform_rate = $this->web_config['charge_rate'];
+                            $platform_rate = isset($this->web_config['charge_rate']) && $this->web_config['charge_rate'] > 0 ? $this->web_config['charge_rate'] : 0;
                             if ($platform_rate <= 0)
                             {
                                 $platform_rate = 0;
