@@ -23,8 +23,11 @@ class WebBase extends Swoole\Controller
             $data = $dao_Web_config ->listData(array('pager'=>false,'fields'=>'wc_name,wc_value','wc_status'=>1,'web_id'=>1));
 
             $res = array();
-            foreach ($data['data'] as  $v) {
-                $res["{$v['wc_name']}"] = $v['wc_value'];
+            if (!empty($data['data']))
+            {
+                foreach ($data['data'] as  $v) {
+                    $res["{$v['wc_name']}"] = $v['wc_value'];
+                }
             }
             file_put_contents(WEBPATH . '/configs/web_config.php','<?php $web_config='.var_export($res,true).'?>');
             if (file_exists(WEBPATH . '/configs/web_config.php')){

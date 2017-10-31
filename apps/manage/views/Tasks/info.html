@@ -168,21 +168,30 @@
                             {{if $value.o_status == 0}}工作中{{/if}}
                             {{if $value.o_status == 1}}工作完成{{/if}}
                             {{if $value.o_status == 2}}纠纷解决{{/if}}
+                            {{if $value.o_pay == 1}}&已支付{{/if}}
 
                         </td>
                         <td>
                             <!-- <a href="/Orders/status?o_id={{$value.o_id}}">详情</a> -->
-                            <select class="input-sm form-control input-s-sm inline" name="" id="" onchange="changeStatus(this.value,{{$value.o_id}});">
+                            <select class="input-sm col-md-4 input-s-sm inline" name="" id="" onchange="changeStatus(this.value,{{$value.o_id}});">
                                 <option value="0">请选择</option>
                                 <option value="-4" {{if $value.o_status == -4}}selected="selected"{{/if}} >取消</option>
                                 <option value="-3" {{if $value.o_status == -3}}selected="selected"{{/if}} >纠纷中</option>
                                 <option value="2" {{if $value.o_status == 2}}selected="selected"{{/if}} >纠纷解决</option>
                             </select>
-
-                            <div id="pay_type_{{$value.o_id}}" {{if $value.o_status != 2}}style="display:none;"{{/if}}>
-                                <input type="button" onclick="payByType({{$value.o_id}}, 0);" class="input-sm form-control input-s-sm inline" value="按辞职支付">
-                                <input type="button" onclick="payByType({{$value.o_id}}, 1);" class="input-sm form-control input-s-sm inline" value="按解雇支付">
+                            {{if $value.o_status eq 2 && $value.o_pay eq 0}}
+                            <div id="pay_type_{{$value.o_id}}">
+                                <div class="col-md-3">
+                                    <input type="button" onclick="payByType({{$value.o_id}}, 0);" class="input-sm form-control input-s-sm inline" value="按辞职支付">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="button" onclick="payByType({{$value.o_id}}, 1);" class="input-sm form-control input-s-sm inline" value="按解雇支付">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="button" onclick="payByType({{$value.o_id}}, 2);" class="input-sm form-control input-s-sm inline" value="按全款支付">
+                                </div>
                             </div>
+                            {{/if}}
                         </td>
                     </tr>
                     {{/if}}

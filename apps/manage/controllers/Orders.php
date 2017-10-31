@@ -13,7 +13,6 @@ class Orders extends \CLASSES\ManageBase
     public function cStatus()
     {
         $is_ajax = isset($_REQUEST['is_ajax']) ? intval($_REQUEST['is_ajax']) : 0;
-        //print_r($_REQUEST);exit;
         if (isset($_REQUEST['o_id']) && intval($_REQUEST['o_id']) > 0)
         {
             $status = isset($_REQUEST['status']) ? intval($_REQUEST['status']) : '';
@@ -42,6 +41,18 @@ class Orders extends \CLASSES\ManageBase
                 }
                 msg('操作失败', 0);
             }
+            //判断该任务是否还有其他纠纷订单 没有就把该任务的状态设置为纠纷解决
+            $orders_info = $this->orders_dao->infoData(intval($_REQUEST['o_id']));
+            if (!empty($orders_info))
+            {
+                $dispute_orders = $this->orders_dao->countData(array('t_id' => $orders_info['t_id'], 'o_status' => -3));
+                if ($dispute_orders <= 0)
+                {
+                    $task_dao = new \MDAO\Tasks();
+                    $task_dao->updateData(array('t_status' => '4'), array('t_id' => $orders_info['t_id']));
+                }
+            }
+
             if ($is_ajax)
             {
                 echo json_encode(array('msg' => '操作成功', 'status' => 1));exit;
@@ -63,13 +74,53 @@ class Orders extends \CLASSES\ManageBase
         if ($o_id > 0 && in_array($type, array(0, 1)))
         {
             $order_param['pager'] = 0;
+            $order_param['fields'] = 'orders.*, task_ext_worker.*';
             $order_param['where'] = 'orders.o_id = "' . $o_id . '" and orders.o_status = 2 and orders.o_pay = 0';
-            $order_param['join'] = array('task_ext_worker', 'order.tew_id = task_ext_worker.tew_id and order.t_id = task_ext_worker.t_id');
+            $order_param['join'] = array('task_ext_worker', 'orders.tew_id = task_ext_worker.tew_id and orders.t_id = task_ext_worker.t_id');
 
             $info = $this->orders_dao->listData($order_param);
             if (!empty($info['data'][0]))
             {
                 $info = $info['data'][0]; //订单详情
+
+                //获取平台手续费
+                $platform_rate = 0.05;
+
+                $pay_amount = 0;
+                switch ($type)
+                {
+                    case '0': //辞职
+                        $pay_amount = $info['o_amount'] / (ceil($val['unbind_time'] - $val['tew_start_time']) / 3600 / 24);
+                        break;
+                    case '1': //解雇
+                        $pay_amount = $info['o_amount'] / (ceil($val['unbind_time'] - $val['tew_start_time']) / 3600 / 24 + 1);
+                        break;
+                    case '2': //全款
+                        $pay_amount = $info['o_amount'] / (ceil($info['tew_end_time'] - $info['tew_start_time']) / 3600 / 24 + 1);
+                        break;
+                }
+                $pay_amount = $pay_amount - $pay_amount * $platform_rate; //实际总价(扣除手续费后)
+
+                //扣除平台资金
+                $platform_dao = new \MDAO\Platform_funds_log();
+                $platform_result = $platform_dao->addData(array(
+                    'pfl_type' => 4,
+                    'pfl_type_id' => $o_id,
+                    'pfl_amount' => (-1 * $pay_amount),
+                    'pfl_in_time' => time(),
+                    'pfl_reason' => 'payworker',
+                    'pfl_status' => 0,
+                ));
+                if ($platform_result)
+                {
+                    $user_dao = new \MDAO\Users();
+                    $user_result = $user_dao->queryData('update users_ext_funds set uef_overage = uef_overage + ' . $pay_amount . ' where u_id = "' . $info['o_worker'] . '"');
+                    $pay_result = $this->orders_dao->updateData(array('o_pay' => 1, 'o_pay_time' => time()), array('o_id' => $o_id));
+                    if ($user_result && $pay_result)
+                    {
+                        echo json_encode(0);exit;
+                    }
+                }
             }
         }
         echo json_encode(1);exit;
