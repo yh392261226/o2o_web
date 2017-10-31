@@ -125,6 +125,7 @@ class Orders extends \CLASSES\WebBase
      */
     private function create()
     {
+        //$this->db->debug = 1;
         $data = array();
         //任务工人关系id
         if (isset($_REQUEST['tew_id']) && intval($_REQUEST['tew_id']) > 0) $data['tew_id'] = intval($_REQUEST['tew_id']);
@@ -134,8 +135,8 @@ class Orders extends \CLASSES\WebBase
         if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
         //发起人id
         if (isset($_REQUEST['o_sponsor']) && intval($_REQUEST['o_sponsor']) > 0) $data['o_sponsor'] = intval($_REQUEST['o_sponsor']);
-
-        if (!isset($data['tew_id']) || !isset($data['t_id']) || !isset($data['o_worker']) || isset($data['o_sponsor'])) $this->exportData('failure');
+//print_r($_REQUEST);exit;
+        if (!isset($data['tew_id']) || !isset($data['t_id']) || !isset($data['o_worker']) || !isset($data['o_sponsor'])) $this->exportData('failure');
 
 
         //验证任务是否存在
@@ -359,6 +360,8 @@ class Orders extends \CLASSES\WebBase
         if (isset($_REQUEST['u_id']) && intval($_REQUEST['u_id']) > 0) $data['u_id'] = intval($_REQUEST['u_id']);
         //技能id
         if (isset($_REQUEST['s_id']) && intval($_REQUEST['s_id']) > 0) $data['s_id'] = intval($_REQUEST['s_id']);
+        //订单id
+        if (isset($_REQUEST['o_id']) && intval($_REQUEST['o_id']) > 0) $data['o_id'] = intval($_REQUEST['o_id']);
         //星级
         if (isset($_REQUEST['start']) && intval($_REQUEST['start']) >= 0) $tmp['start'] = intval($_REQUEST['start']);
         //评价内容
@@ -367,12 +370,22 @@ class Orders extends \CLASSES\WebBase
         if (!empty($data) && isset($data['tew_id']) && isset($data['t_id']) && isset($data['o_worker']) && isset($data['s_id']) && isset($data['u_id']))
         {
             //根据参数获取订单信息
-            $order_data = $this->orders_dao->listData($data + array('pager' => 0));
+            $order_param = $data;
+            $order_param['pager'] = 0;
+            $order_data = $this->orders_dao->listData($order_param);
+            unset($order_param);
+            //比对订单数量
             if (count($order_data['data']) < 1)
             {
                 $this->exportData('订单不存在');
             }
+            $data['o_id'] = isset($order_data['data'][0]['o_id']) ? $order_data['data'][0]['o_id'] : 0; //赋值订单id
+            if ($data['o_id'] < 1)
+            {
+                $this->exportData('数据异常');
+            }
 
+            //更新订单状态
             $result = $this->orders_dao->updateData(array('o_status' => ($tmp['type'] == 'fire') ? -2 : -1, 'unbind_time' => time()), $data);
             if (!$result)
             {
@@ -383,7 +396,11 @@ class Orders extends \CLASSES\WebBase
             $user_dao = new \WDAO\Users(array('table' => 'users'));
             $user_dao->updateData(array('u_task_status' => 0), array('u_id' => $data['o_worker']));
 
-            if (!empty($tmp))
+            //变更任务状态
+            $tasks_dao = new \WDAO\Tasks();
+            $tasks_dao->resetTaskToWait($data['t_id']);
+
+            if (!empty($tmp)) //添加评价
             {
                 $comment_dao = new \WDAO\Task_comment();
                 $comment_dao->addComment(array(
@@ -432,6 +449,11 @@ class Orders extends \CLASSES\WebBase
             $result = $this->orders_dao->updateData(array('o_status' => -4), $data);
             if ($result)
             {
+                //任务状态变更
+                $tasks_dao = new \WDAO\Tasks();
+                $tid = isset($data['t_id']) ? $data['t_id'] : $orders['data'][0]['t_id'];
+                $tasks_dao->resetTaskToWait($tid);
+
                 $this->exportData('success');
             }
         }

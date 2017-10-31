@@ -52,4 +52,31 @@ class Tasks extends \MDAOBASE\DaoBase
         }
         return false;
     }
+
+    /**
+     * 重置任务状态到等待接受
+     *  如果该任务有其他正常订单 则不变动
+     */
+    public function resetTaskToWait($t_id)
+    {
+        if (intval($t_id) > 0)
+        {
+            //获取该任务全部正常订单数
+            $orders_dao = new \WDAO\Orders();
+            $task_orders_count = $orders_dao->countData(array(
+                't_id' => intval($t_id),
+                'where' => 'o_confirm in (0, 2) and o_status in (0)',
+            ));
+            //如果订单数小于等于0  则将任务重置为待领取
+            if ($task_orders_count <= 0)
+            {
+                return $this->updateData(array(
+                    't_status' => 0,
+                ), array(
+                    't_id' => intval($t_id),
+                ));
+            }
+        }
+        return false;
+    }
 }
