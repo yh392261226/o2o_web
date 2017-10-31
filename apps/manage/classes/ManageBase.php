@@ -16,6 +16,30 @@ class ManageBase extends Swoole\Controller
         parent::__construct($swoole);
         // $this->db->debug = 1;
 
+        /*后台配置文件读取*/
+        $web_config = array();
+        if (file_exists(WEBPATH . '/configs/web_config.php')){
+            require WEBPATH . '/configs/web_config.php';
+        }else{
+            $dao_Web_config = new \MDAO\Web_config(array('table'=>'web_config'));
+            $data = $dao_Web_config ->listData(array('pager'=>false,'fields'=>'wc_name,wc_value','wc_status'=>1,'web_id'=>0));
+
+            $res = array();
+            if(!empty($data['data'])){
+               foreach ($data['data'] as  $v) {
+                $res["{$v['wc_name']}"] = $v['wc_value'];
+            }
+            }
+
+            file_put_contents(WEBPATH . '/configs/web_config.php','<?php $web_config='.var_export($res,true).'?>');
+            if (file_exists(WEBPATH . '/configs/web_config.php')){
+                require WEBPATH . '/configs/web_config.php';
+            }else{
+                $this->exportData(0,array('msg'=>'系统错误请联系管理员'));
+            }
+        }
+        $this->web_config = isset($web_config) ? $web_config : array();
+
         $this->session->start();
 
         $this->clearTemplateC(APPPATH . '/manage/cache/templates_c/');
