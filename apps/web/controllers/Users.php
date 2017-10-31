@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-30 17:32:46
+ * @Last Modified time: 2017-10-31 11:39:21
  */
 namespace App\Controller;
 
@@ -899,6 +899,8 @@ class Users extends \CLASSES\WebBase
                                 $ext_data['c_img'] = $res;
                                 break;
                         }
+                    }else{
+                        $ext_data['c_img'] = $res;
                     }
                 }
                 $dao_complaints_ext = new \WDAO\Users(array('table'=>'complaints_ext'));
@@ -930,7 +932,10 @@ class Users extends \CLASSES\WebBase
                             $img_path = $res;
                             break;
                     }
+                }else{
+                    $img_path = $res;
                 }
+
 
                 if(!empty($img_path) && intval($res) >= 0){
                     if(!empty($complaints_ext_info['c_img'])){
