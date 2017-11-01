@@ -243,6 +243,7 @@ class Orders extends \CLASSES\WebBase
                     't_id' => $tmp['t_id'],
                     'u_id' => $data['t_author'],
                     's_id' => $task_data['tew_skills'],
+                    'where' => 'o_status != -4',
                     'pager' => 0,
                 ));
 
@@ -254,14 +255,21 @@ class Orders extends \CLASSES\WebBase
                 $tmp['workers'] = $tmp['confirm'] = array();
                 foreach ($orders_data['data'] as $key => $val)
                 {
+                    if (isset($data['o_worker']) && isset($val['o_worker']) && $val['o_worker'] == $data['o_worker'] && $val['o_confirm'] == 1)
+                    {
+                        $this->exportData('工作中不能改价');
+                    }
+
                     if (isset($val['o_worker']) && $val['o_worker'] > 0)
                     {
                         $tmp['workers'][$key] = $val['o_worker'];
                     }
+
                     if (isset($val['o_confirm']) && $val['o_confirm'] == 1)
                     {
                         $tmp['confirm'][$key] = $val['confirm'];
                     }
+
                     if (isset($val['o_amount']) && $val['o_worker'] == $data['o_worker'] &&
                         isset($val['tew_id']) && $data['tew_id'] == $val['tew_id'] &&
                         isset($val['t_id']) && $tmp['t_id'] == $val['t_id'])
