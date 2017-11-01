@@ -79,7 +79,7 @@ class Tasks extends \CLASSES\WebBase
         if (isset($_REQUEST['t_author'])) $data['t_author'] = intval($_REQUEST['t_author']);
         if (isset($_REQUEST['t_phone'])) $data['t_phone'] = intval($_REQUEST['t_phone']);
         if (isset($_REQUEST['t_phone_status'])) $data['t_phone_status'] = intval($_REQUEST['t_phone_status']);
-        $data['where'] = 't_storage = 0';
+        $data['where'] = 't_storage = 0 and t_status != -9';
         if (isset($_REQUEST['t_storage'])) $data['where'] = 't_storage = ' . intval($_REQUEST['t_storage']);
 
         //price between
