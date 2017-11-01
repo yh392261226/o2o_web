@@ -243,7 +243,7 @@ class Tasks extends \CLASSES\WebBase
                 if (!empty($tew_ids))
                 {
                     $orders_param['where'] = ' orders.tew_id in ('. implode(',', $tew_ids) .')';
-                    $orders_param['where'] .= ' and orders.o_status > -4';
+                    $orders_param['where'] .= ' and orders.o_status != -4';
                     $orders_param['pager'] = 0;
                     $orders_param['leftjoin'] = array('users', 'users.u_id = orders.o_worker');
                     $orders_param['fields'] = 'orders.o_id,orders.t_id,orders.u_id,orders.o_worker,orders.o_amount,orders.o_in_time,orders.o_last_edit_time,orders.o_status,orders.tew_id,orders.s_id,orders.o_confirm,orders.unbind_time,orders.o_pay,orders.o_pay_time,orders.o_sponsor, orders.o_dispute_time, orders.o_start_time, orders.o_end_time,
