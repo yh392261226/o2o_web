@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-31 11:39:21
+ * @Last Modified time: 2017-11-01 14:27:08
  */
 namespace App\Controller;
 
@@ -1141,6 +1141,7 @@ class Users extends \CLASSES\WebBase
         }
 
         $data_c['tc_start'] = $data_c['tc_first_start'] = isset($_REQUEST['tc_start']) ? intval($_REQUEST['tc_start']) : 3;
+        $data_c['tc_type'] = isset($_REQUEST['tc_type']) ? intval($_REQUEST['tc_type']) : 0;
         $data_c['tc_last_edit_time'] = time();
         $data_c['tc_in_time'] = time();
         $dao_task_comment = new \WDAO\Users(array('table'=>'task_comment'));
@@ -1175,6 +1176,8 @@ class Users extends \CLASSES\WebBase
         }
         if(intval($tc_id) > 0){
            $this->exportData( array('data'=>array('tc_id'=>$tc_id)),1);
+        }else{
+           $this->exportData( array('msg'=>"评价失败"),0);
         }
     }
     /**********************************************************添加好评次数**********************************************************/
