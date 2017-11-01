@@ -246,7 +246,7 @@ class Tasks extends \CLASSES\WebBase
                     $orders_param['where'] .= ' and orders.o_status > -4';
                     $orders_param['pager'] = 0;
                     $orders_param['leftjoin'] = array('users', 'users.u_id = orders.o_worker');
-                    $orders_param['fields'] = 'orders.o_id,orders.t_id,orders.u_id,orders.o_worker,orders.o_amount,orders.o_in_time,orders.o_last_edit_time,orders.o_status,orders.tew_id,orders.s_id,orders.o_confirm,orders.unbind_time,orders.o_pay,orders.o_pay_time,orders.o_sponsor,
+                    $orders_param['fields'] = 'orders.o_id,orders.t_id,orders.u_id,orders.o_worker,orders.o_amount,orders.o_in_time,orders.o_last_edit_time,orders.o_status,orders.tew_id,orders.s_id,orders.o_confirm,orders.unbind_time,orders.o_pay,orders.o_pay_time,orders.o_sponsor, orders.o_dispute_time, orders.o_start_time, orders.o_end_time,
                     users.u_name, users.u_mobile, users.u_sex, users.u_online, users.u_status, users.u_task_status, users.u_start, users.u_credit, users.u_jobs_num, users.u_recommend, users.u_worked_num, users.u_high_opinions, users.u_low_opinions, users.u_middle_opinions, users.u_dissensions, users.u_true_name';
                     $orders_dao = new \WDAO\Orders();
                     $orders_data = $orders_dao->listData($orders_param);

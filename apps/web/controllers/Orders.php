@@ -342,33 +342,6 @@ class Orders extends \CLASSES\WebBase
     }
 
     /**
-     * 被发起方应答订单
-     */
-    private function react()
-    {
-        //$this->db->debug = 1;
-        $data = $order_param = array();
-        if (isset($_REQUEST['tew_id']) && intval($_REQUEST['tew_id']) > 0) $data['tew_id'] = intval($_REQUEST['tew_id']);
-        if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']);
-        if (isset($_REQUEST['o_id']) && intval($_REQUEST['o_id']) > 0) $data['o_id'] = intval($_REQUEST['o_id']);
-        if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
-        if (isset($_REQUEST['u_id']) && intval($_REQUEST['u_id']) > 0) $data['u_id'] = intval($_REQUEST['u_id']);
-        $order_param = $data;
-        $order_param['pager'] = 0;
-        $order_param['o_react_status'] = 0;
-        $order_data = $this->orders_dao->listData($order_param);
-        if (!empty($order_data['data'][0]))
-        {
-            $result = $this->orders_dao->updateData(array('o_react_status' => 1), $data);
-            if ($result)
-            {
-                $this->exportData('success');
-            }
-        }
-        $this->exportData('failure');
-    }
-
-    /**
      * 解雇工人或工人辞职
      */
     private function unbind()
