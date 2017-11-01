@@ -94,6 +94,7 @@ class Tasks extends \CLASSES\ManageBase
 
     public function list()
     {
+        //$this->db->debug =1;
         $list = $data = array();
         if (isset($_REQUEST['t_id'])) $data['t_id'] = array('type' => 'in', value => $_REQUEST['t_id']);
         if (isset($_REQUEST['t_title'])) $data['t_title'] = array('type'=>'like', 'value' => trim($_REQUEST['t_title']));
@@ -106,6 +107,7 @@ class Tasks extends \CLASSES\ManageBase
         if (isset($_REQUEST['t_phone'])) $data['t_phone'] = trim($_REQUEST['t_phone']);
         $data['page'] = isset($_REQUEST['page']) ? intval($_REQUEST['page']) : 1;
         $data['t_storage'] = 0;
+        if (isset($_REQUEST['t_storage'])) $data['t_storage'] = intval($_REQUEST['t_storage']);
 
         //可以区间值
         if (isset($_REQUEST['t_in_time'])) $data['t_in_time'] = strtotime(trim($_REQUEST['t_in_time']));
