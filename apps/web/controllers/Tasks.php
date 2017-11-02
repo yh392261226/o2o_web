@@ -267,18 +267,24 @@ class Tasks extends \CLASSES\WebBase
                                     }
                                     $workers['data'][$key]['orders'][] = $v;
                                 }
-                                if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0 && $v['o_worker'] == intval($_REQUEST['o_worker']))
+                                if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0)
                                 {
-                                    $info['relation'] = '1';
-                                    if ($v['o_status'] == 0)
+                                    $info['relation'] = '0';
+                                    $info['relation_type'] = '0';
+                                    
+                                    if ($v['o_worker'] == intval($_REQUEST['o_worker']))
                                     {
-                                        if ($v['o_confirm'] == 0 || $v['o_confirm'] == 2)
+                                        $info['relation'] = '1';
+                                        if ($v['o_status'] == 0)
                                         {
-                                            $info['relation_type'] = '0'; //洽谈中
-                                        }
-                                        if ($v['o_confirm'] == 1)
-                                        {
-                                            $info['relation_type'] = '1'; //已开工
+                                            if ($v['o_confirm'] == 0 || $v['o_confirm'] == 2)
+                                            {
+                                                $info['relation_type'] = '0'; //洽谈中
+                                            }
+                                            if ($v['o_confirm'] == 1)
+                                            {
+                                                $info['relation_type'] = '1'; //已开工
+                                            }
                                         }
                                     }
                                 }
