@@ -517,6 +517,12 @@ class Tasks extends \CLASSES\WebBase
             $result = $this->tasks_dao->updateData(array('t_status' => -9), array('t_id' => $data['t_id'], 't_author' => $data['t_author']));
             if ($result)
             {
+                $orders_dao = new \WDAO\Orders();
+                $orders_data = $orders_dao->listData(array('t_id' => $data['t_id'], 'u_id' => $data['t_author'], 'pager' => 0));
+                if (!empty($orders_data['data'][0]))
+                {
+
+                }
                 $this->exportData('success');
             }
         }
@@ -591,6 +597,10 @@ class Tasks extends \CLASSES\WebBase
                 return -1;
                 //$this->exportData('无法完成任务覆盖或任务草稿不存在');
             }
+
+            //删除该任务下的全部订单
+            $order_dao = new \WDAO\Orders();
+            $order_dao->delOrders(array('t_id' => $data['t_id'], 't_author' => $data['t_author']));
 
             //归还已经扣除资金
             $platform_funds_dao = new \WDAO\Platform_funds_log();
