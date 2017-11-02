@@ -41,15 +41,18 @@ class Orders extends \CLASSES\ManageBase
                 }
                 msg('操作失败', 0);
             }
-            //判断该任务是否还有其他纠纷订单 没有就把该任务的状态设置为纠纷解决
-            $orders_info = $this->orders_dao->infoData(intval($_REQUEST['o_id']));
-            if (!empty($orders_info))
+            //判断该任务是否还有其他纠纷订单 没有就把该任务的状态设置为纠纷解决或纠纷中
+            if (in_array(intval($_REQUEST['status']), array(2, -3)))
             {
-                $dispute_orders = $this->orders_dao->countData(array('t_id' => $orders_info['t_id'], 'o_status' => -3));
-                if ($dispute_orders <= 0)
+                $orders_info = $this->orders_dao->infoData(intval($_REQUEST['o_id']));
+                if (!empty($orders_info))
                 {
-                    $task_dao = new \MDAO\Tasks();
-                    $task_dao->updateData(array('t_status' => '4'), array('t_id' => $orders_info['t_id']));
+                    $dispute_orders = $this->orders_dao->countData(array('t_id' => $orders_info['t_id'], 'o_status' => intval($_REQUEST['status'])));
+                    if ($dispute_orders <= 0)
+                    {
+                        $task_dao = new \MDAO\Tasks();
+                        $task_dao->updateData(array('t_status' => '4'), array('t_id' => $orders_info['t_id']));
+                    }
                 }
             }
 
@@ -118,9 +121,10 @@ class Orders extends \CLASSES\ManageBase
                 if ($platform_result)
                 {
                     $user_dao = new \MDAO\Users();
-                    $user_result = $user_dao->queryData('update users_ext_funds set uef_overage = uef_overage + ' . $pay_amount . ' where u_id = "' . $info['o_worker'] . '"');
+                    $user_funds_result = $user_dao->queryData('update users_ext_funds set uef_overage = uef_overage + ' . $pay_amount . ' where u_id = "' . $info['o_worker'] . '"');
                     $pay_result = $this->orders_dao->updateData(array('o_pay' => 1, 'o_pay_time' => time()), array('o_id' => $o_id));
-                    if ($user_result && $pay_result)
+                    $user_result = $user_dao->updateData(array('u_task_status' => 0), array('u_id' => $info['o_worker'])); //释放工人
+                    if ($user_funds_result && $user_result && $pay_result)
                     {
                         $this->db->commit();
                         echo json_encode(0);exit;

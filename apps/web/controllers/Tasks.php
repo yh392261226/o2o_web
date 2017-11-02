@@ -199,7 +199,10 @@ class Tasks extends \CLASSES\WebBase
         if (!empty($info))
         {
             $user_dao = new \WDAO\Users(array('table' => 'users'));
-            $author_info = $user_dao->infoData(array('key' => 'u_id', 'val' => $info['t_author'], 'fields' => 'u_id, u_mobile, u_sex, u_true_name'));
+            $author_info = $user_dao->infoData(array(
+                'key' => 'u_id',
+                'val' => $info['t_author'],
+                'fields' => 'users.u_id, users.u_name, users.u_mobile, users.u_sex, users.u_online, users.u_status, users.u_task_status, users.u_start, users.u_credit, users.u_jobs_num, users.u_recommend, users.u_worked_num, users.u_high_opinions, users.u_low_opinions, users.u_middle_opinions, users.u_dissensions, users.u_true_name'));
             if (!empty($author_info))
             {
                 $info += $author_info;
@@ -271,7 +274,7 @@ class Tasks extends \CLASSES\WebBase
                                 {
                                     $info['relation'] = '0';
                                     $info['relation_type'] = '0';
-                                    
+
                                     if ($v['o_worker'] == intval($_REQUEST['o_worker']))
                                     {
                                         $info['relation'] = '1';
