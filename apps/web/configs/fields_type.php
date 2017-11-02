@@ -1,7 +1,7 @@
 <?php
 $fields_type = array(
     //主键类型 =, !=, in, not in
-    'primary' => array('solutauthor', 'skills', 'worker', 'against', 'manager', 'pid', 'lasteditor', 'author', 'id', 'province', 'city', 'area'),
+    'primary' => array('solutauthor', 'skills', 'worker', 'against', 'manager', 'pid', 'lasteditor', 'author', 'id', 'province', 'city', 'area', 'status'),
     //时间 <= >= < >
     // 'time' => array('soluttime', 'lastedittime', 'starttime', 'endtime', 'intime', 'usetime'),
     //模糊搜索 like %String%

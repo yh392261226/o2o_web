@@ -243,6 +243,7 @@ class Orders extends \CLASSES\WebBase
                     't_id' => $tmp['t_id'],
                     'u_id' => $data['t_author'],
                     's_id' => $task_data['tew_skills'],
+                    'where' => 'o_status != -4',
                     'pager' => 0,
                 ));
 
@@ -254,14 +255,21 @@ class Orders extends \CLASSES\WebBase
                 $tmp['workers'] = $tmp['confirm'] = array();
                 foreach ($orders_data['data'] as $key => $val)
                 {
+                    if (isset($data['o_worker']) && isset($val['o_worker']) && $val['o_worker'] == $data['o_worker'] && $val['o_confirm'] == 1)
+                    {
+                        $this->exportData('工作中不能改价');
+                    }
+
                     if (isset($val['o_worker']) && $val['o_worker'] > 0)
                     {
                         $tmp['workers'][$key] = $val['o_worker'];
                     }
+
                     if (isset($val['o_confirm']) && $val['o_confirm'] == 1)
                     {
                         $tmp['confirm'][$key] = $val['confirm'];
                     }
+
                     if (isset($val['o_amount']) && $val['o_worker'] == $data['o_worker'] &&
                         isset($val['tew_id']) && $data['tew_id'] == $val['tew_id'] &&
                         isset($val['t_id']) && $tmp['t_id'] == $val['t_id'])
@@ -336,33 +344,6 @@ class Orders extends \CLASSES\WebBase
                 {
                     $this->db->rollback();
                 }
-            }
-        }
-        $this->exportData('failure');
-    }
-
-    /**
-     * 被发起方应答订单
-     */
-    private function react()
-    {
-        //$this->db->debug = 1;
-        $data = $order_param = array();
-        if (isset($_REQUEST['tew_id']) && intval($_REQUEST['tew_id']) > 0) $data['tew_id'] = intval($_REQUEST['tew_id']);
-        if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']);
-        if (isset($_REQUEST['o_id']) && intval($_REQUEST['o_id']) > 0) $data['o_id'] = intval($_REQUEST['o_id']);
-        if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
-        if (isset($_REQUEST['u_id']) && intval($_REQUEST['u_id']) > 0) $data['u_id'] = intval($_REQUEST['u_id']);
-        $order_param = $data;
-        $order_param['pager'] = 0;
-        $order_param['o_react_status'] = 0;
-        $order_data = $this->orders_dao->listData($order_param);
-        if (!empty($order_data['data'][0]))
-        {
-            $result = $this->orders_dao->updateData(array('o_react_status' => 1), $data);
-            if ($result)
-            {
-                $this->exportData('success');
             }
         }
         $this->exportData('failure');
