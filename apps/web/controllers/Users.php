@@ -427,7 +427,8 @@ class Users extends \CLASSES\WebBase
     public function getUsers()
     {
         /**/
-        $data = array();
+        //$this->db->debug = 1;
+        $data = $tmp = array();
         if (isset($_REQUEST['u_id']) && intval($_REQUEST['u_id']) > 0) $data['u_id'] = intval($_REQUEST['u_id']);
         if(isset($_REQUEST['u_mobile']) && intval($_REQUEST['u_mobile']) > 0) $data['u_mobile'] = intval($_REQUEST['u_mobile']);
         if(isset($_REQUEST['u_sex']) && intval($_REQUEST['u_sex']) > 0) $data['u_sex'] = intval($_REQUEST['u_sex']);
@@ -440,7 +441,7 @@ class Users extends \CLASSES\WebBase
         if(isset($_REQUEST['u_true_name']) && trim($_REQUEST['u_true_name'])) $data['u_true_name'] = trim($_REQUEST['u_true_name']);
         if(isset($_REQUEST['u_skills']) && trim($_REQUEST['u_skills'])) $data['u_skills'] = trim($_REQUEST['u_skills']);
         if(isset($_REQUEST['u_name']) && trim($_REQUEST['u_name'])) $data['u_name'] = trim($_REQUEST['u_name']);
-        if(isset($_REQUEST['o_status']) && trim($_REQUEST['o_status'])) $data['o_status'] = trim($_REQUEST['o_status']); //多个用逗号联合
+        if(isset($_REQUEST['o_status']) && trim($_REQUEST['o_status'])) $tmp['o_status'] = trim($_REQUEST['o_status']); //多个用逗号联合
 
         /*区间值*/
 
@@ -545,13 +546,13 @@ class Users extends \CLASSES\WebBase
                 }
 
                 $order_id_arr = array();
-                if (isset($data['o_status']))
+                if (isset($tmp['o_status']))
                 {
                 /*获取用户订单列表*/
                     $dao_order = new \WDAO\Users(array('table'=>'orders'));
                     $order_id_arr = $dao_order -> listData(array(
                         'u_id' => $fu_id,
-                        'o_status' => array('key'=>'in','value'=>trim($data['o_status'])),
+                        'o_status' => array('type'=>'in','value'=>trim($tmp['o_status'])),
                         'fields'=>'o_worker,o_confirm',
                         'pager'=>false));
                 }
