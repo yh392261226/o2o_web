@@ -592,4 +592,25 @@ class Orders extends \CLASSES\WebBase
         $this->exportData('failure');
     }
 
+    /**
+     * 工人删除订单
+     */
+    private function del2()
+    {
+        $data = array();
+        //订单id
+        if (isset($_REQUEST['o_id']) && intval($_REQUEST['o_id']) > 0) $data['o_id'] = intval($_REQUEST['o_id']);
+        //工人id
+        if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
+        if (!empty($data) && isset($data['o_id']) && isset($data['o_worker']))
+        {
+            $result = $this->orders_dao->updateData(array('o_status' => -9), $data);
+            if ($result)
+            {
+                $this->exportData('success');
+            }
+        }
+        $this->exportData('failure');
+    }
+
 }

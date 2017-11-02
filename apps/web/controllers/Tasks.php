@@ -30,6 +30,7 @@ class Tasks extends \CLASSES\WebBase
         $data['where'] = '1';
         if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
         if (!isset($data['o_worker'])) $this->exportData(); //工人id必须有
+        $data['where'] .= ' and orders.o_status != -9';
         if (isset($_REQUEST['u_id'])) $data['where'] .= ' and orders.u_id = ' . intval($_REQUEST['u_id']);
         if (isset($_REQUEST['o_id'])) $data['o_id'] = array('type' => 'in', 'value' => $_REQUEST['o_id']);
         if (isset($_REQUEST['t_id'])) $data['where'] .= ' and orders.t_id = ' . intval($_REQUEST['t_id']);
@@ -72,6 +73,7 @@ class Tasks extends \CLASSES\WebBase
     //列表及搜索
     private function list()
     {
+        //$this->db->debug = 1;
         $list = $data = array();
         if (isset($_REQUEST['t_id'])) $data['t_id'] = array('type' => 'in', 'value' => $_REQUEST['t_id']);
         if (isset($_REQUEST['t_title'])) $data['t_title'] = array('type'=>'like', 'value' => trim($_REQUEST['t_title']));
@@ -506,11 +508,11 @@ class Tasks extends \CLASSES\WebBase
      */
     private function del2()
     {
-        $data = array();
+        $data = $tmp = array();
         if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']);
         if (isset($_REQUEST['t_author']) && intval($_REQUEST['t_author']) > 0) $data['t_author'] = intval($_REQUEST['t_author']);
 
-        if (!empty($data) && isset($data['t_id']) && isset($data['t_author']))
+        if (!empty($data) && isset($data['t_id']) && isset($data['t_author']) && isset($tmp['t_status']))
         {
             $result = $this->tasks_dao->updateData(array('t_status' => -9), array('t_id' => $data['t_id'], 't_author' => $data['t_author']));
             if ($result)
