@@ -105,7 +105,10 @@ class Orders extends \CLASSES\WebBase
                 {
                     $worker_dao = new \WDAO\Task_ext_worker();
                     $workers_result = $worker_dao->countData(array('t_id' => intval($info['data'][0]['t_id'])));
-                    $orders_result  = $this->orders_dao->countData(array('t_id' => intval($info['data'][0]['t_id']), 'o_confirm' => 1));
+                    $orders_result  = $this->orders_dao->countData(array(
+                        't_id' => intval($info['data'][0]['t_id']),
+                        'o_confirm' => 1,
+                        'o_status' => 0));
                     $task_dao = new \WDAO\Tasks();
                     if ($workers_result == $orders_result)
                     {//全开工
@@ -117,7 +120,7 @@ class Orders extends \CLASSES\WebBase
                     }
                     //变更工人状态为忙
                     $user_dao = new \WDAO\Users(array('table' => 'users'));
-                    $users_dao->taskStatus($data['o_worker'], '1');
+                    $user_dao->taskStatus($data['o_worker'], '1');
                 }
                 $this->exportData('success');
             }
