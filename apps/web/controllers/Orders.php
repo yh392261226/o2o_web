@@ -161,10 +161,21 @@ class Orders extends \CLASSES\WebBase
         }
 
         //传参是否已经存储成功
-        $orders_count = $this->orders_dao->countData(array('t_id' => $worker_result['t_id'], 'u_id' => $worker_result['t_author'], 'o_worker' => $data['o_worker'], 'tew_id' => $worker_result['tew_id'], 's_id' => $worker_result['tew_skills']));
+        $orders_count = $this->orders_dao->countData(array(
+            't_id' => $worker_result['t_id'],
+            'u_id' => $worker_result['t_author'],
+            'o_worker' => $data['o_worker'],
+            'tew_id' => $worker_result['tew_id'],
+            's_id' => $worker_result['tew_skills'],
+            'where' => 'o_status != -4'));
         if ($orders_count > 0) $this->exportData('已经成功邀约，无需再次邀约。');
         //已成单数量判断
-        $orders_count = $this->orders_dao->countData(array('u_id' => $worker_result['t_author'], 't_id' => $worker_result['t_id'], 'tew_id' => $worker_result['tew_id'], 's_id' => $worker_result['tew_skills'], 'where' => 'o_confirm > 0 and o_status in (0,1)'));
+        $orders_count = $this->orders_dao->countData(array(
+            'u_id' => $worker_result['t_author'],
+            't_id' => $worker_result['t_id'],
+            'tew_id' => $worker_result['tew_id'],
+            's_id' => $worker_result['tew_skills'],
+            'where' => 'o_confirm > 0 and o_status in (0,1)'));
         if ($orders_count >= $worker_result['tew_worker_num']) $this->exportData('来晚咯，已经被人捷足先登。');
 
         $curtime = time();
@@ -497,7 +508,7 @@ class Orders extends \CLASSES\WebBase
                 $order_param['where'] .= ' and orders.t_id = "' . intval($data['t_id']) . '" and orders.u_id = "' . $data['t_author'] . '"';
                 if (isset($data['tew_id']))
                 {
-                    $order_param['where'] .= ' and orders.tew_id = "' . $data['tew_id'] . '" and orders.o_status != 1';
+                    $order_param['where'] .= ' and orders.tew_id = "' . $data['tew_id'] . '" and orders.o_status not in (1, -4) ';
                 }
                 $order_param['pager'] = 0;
                 $orders_data = $this->orders_dao->listData($order_param);
