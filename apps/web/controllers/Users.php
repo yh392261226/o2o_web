@@ -440,6 +440,7 @@ class Users extends \CLASSES\WebBase
         if(isset($_REQUEST['u_true_name']) && trim($_REQUEST['u_true_name'])) $data['u_true_name'] = trim($_REQUEST['u_true_name']);
         if(isset($_REQUEST['u_skills']) && trim($_REQUEST['u_skills'])) $data['u_skills'] = trim($_REQUEST['u_skills']);
         if(isset($_REQUEST['u_name']) && trim($_REQUEST['u_name'])) $data['u_name'] = trim($_REQUEST['u_name']);
+        if(isset($_REQUEST['o_status']) && trim($_REQUEST['o_status'])) $data['o_status'] = trim($_REQUEST['o_status']); //多个用逗号联合
 
         /*区间值*/
 
@@ -543,15 +544,19 @@ class Users extends \CLASSES\WebBase
                    $favorate_id_arr[] = $value['f_type_id'];
                 }
 
+                $order_id_arr = array();
+                if (isset($data['o_status']))
+                {
                 /*获取用户订单列表*/
-                $dao_order = new \WDAO\Users(array('table'=>'orders'));
-                $order_id_arr = $dao_order -> listData(array('u_id' => $fu_id,'o_status' => array('key'=>'in','value'=>array(1,-3)),'fields'=>'o_worker,o_confirm','pager'=>false));
-
+                    $dao_order = new \WDAO\Users(array('table'=>'orders'));
+                    $order_id_arr = $dao_order -> listData(array(
+                        'u_id' => $fu_id,
+                        'o_status' => array('key'=>'in','value'=>trim($data['o_status'])),
+                        'fields'=>'o_worker,o_confirm',
+                        'pager'=>false));
+                }
 
             }
-
-
-
 
             foreach ($list['data']  as $k => &$v) {
                     if(isset($v['u_id'])){
@@ -564,16 +569,19 @@ class Users extends \CLASSES\WebBase
                     }
                 /*订单联系情况*/
                 $v['relation'] = 0;
-                foreach ($order_id_arr['data'] as $key => $value) {
-                    if($v['u_id'] == $value['o_worker']){
-                        $v['relation'] = 1;
-                        if(in_array($value['o_confirm'],array(0,2))){
-                            $v['relation_type'] = 0;
-                        }elseif($value['o_confirm'] == 1){
-                            $v['relation_type'] = 1;
+                if (!empty($order_id_arr['data']))
+                {
+                    foreach ($order_id_arr['data'] as $key => $value) {
+                        if($v['u_id'] == $value['o_worker']){
+                            $v['relation'] = 1;
+                            if(in_array($value['o_confirm'],array(0,2))){
+                                $v['relation_type'] = 0;
+                            }elseif($value['o_confirm'] == 1){
+                                $v['relation_type'] = 1;
+                            }
                         }
-                    }
 
+                    }
                 }
 
             }
