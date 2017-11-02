@@ -42,19 +42,19 @@ class Orders extends \CLASSES\ManageBase
                 msg('操作失败', 0);
             }
             //判断该任务是否还有其他纠纷订单 没有就把该任务的状态设置为纠纷解决或纠纷中
-            if (in_array(intval($_REQUEST['status']), array(2, -3)))
-            {
-                $orders_info = $this->orders_dao->infoData(intval($_REQUEST['o_id']));
-                if (!empty($orders_info))
-                {
-                    $dispute_orders = $this->orders_dao->countData(array('t_id' => $orders_info['t_id'], 'o_status' => intval($_REQUEST['status'])));
-                    if ($dispute_orders <= 0)
-                    {
-                        $task_dao = new \MDAO\Tasks();
-                        $task_dao->updateData(array('t_status' => '4'), array('t_id' => $orders_info['t_id']));
-                    }
-                }
-            }
+            //if (in_array(intval($_REQUEST['status']), array(2, -3)))
+            //{
+            //    $orders_info = $this->orders_dao->infoData(intval($_REQUEST['o_id']));
+            //    if (!empty($orders_info))
+            //    {
+            //        $dispute_orders = $this->orders_dao->countData(array('t_id' => $orders_info['t_id'], 'o_status' => intval($_REQUEST['status'])));
+            //        if ($dispute_orders <= 0)
+            //        {
+            //            $task_dao = new \MDAO\Tasks();
+            //            $task_dao->updateData(array('t_status' => '4'), array('t_id' => $orders_info['t_id']));
+            //        }
+            //    }
+            //}
 
             if ($is_ajax)
             {
