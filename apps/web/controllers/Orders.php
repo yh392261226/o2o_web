@@ -471,6 +471,10 @@ class Orders extends \CLASSES\WebBase
                 $data['o_id'] = $orders['data'][0]['o_id'];
                 $data['t_id'] = $orders['data'][0]['t_id'];
             }
+            else
+            {
+                $this->exportData('failure');
+            }
 
             $result = $this->orders_dao->updateData(array('o_status' => -4), $data);
             if ($result)
