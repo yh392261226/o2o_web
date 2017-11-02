@@ -79,7 +79,12 @@ class Orders extends \CLASSES\WebBase
 
         if (!empty($data) && isset($data['o_id']) && isset($data['t_id']) && isset($data['o_worker']))
         {
-            $info = $this->orders_dao->listData($data + array('pager' => 0, 'limit' => 1, 'order' => 'o_id desc'));
+            $orders_param = $data;
+            $orders_param['pager'] = 0;
+            $orders_param['limit'] = 1;
+            $orders_param['where'] = 'o_status = 0';
+            $orders_param['order'] = 'o_id desc';
+            $info = $this->orders_dao->listData($orders_param);
 
             if (isset($info['data'][0]) && !empty($info['data'][0]))
             {
