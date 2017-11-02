@@ -430,6 +430,7 @@ class Orders extends \CLASSES\WebBase
      */
     private function cancel()
     {
+        //$this->db->debug = 1;
         $data = $task_param = array();
         if (isset($_REQUEST['o_id']) && intval($_REQUEST['o_id']) > 0) $data['o_id'] = $task_param['o_id'] = intval($_REQUEST['o_id']);
         if (isset($_REQUEST['tew_id']) && intval($_REQUEST['tew_id']) > 0) $data['tew_id'] = $task_param['tew_id'] = intval($_REQUEST['tew_id']);
@@ -442,16 +443,14 @@ class Orders extends \CLASSES\WebBase
 
         if (!empty($data) && (isset($data['o_id']) || (isset($data['tew_id']) && isset($data['t_id']) && isset($data['u_id']) && isset($data['o_worker']) && isset($data['s_id']))))
         {
-            if (!isset($data['o_id']) || $data['o_id'] < 0)
+            $data['pager'] = 0;
+            $data['limit'] = 1;
+            $data['order'] = 'o_id desc';
+            $orders = $this->orders_dao->listData($data);
+            if (!empty($orders['data'][0]))
             {
-                $data['pager'] = 0;
-                $data['limit'] = 1;
-                $data['order'] = 'o_id desc';
-                $orders = $this->orders_dao->listData($data);
-                if (!empty($orders['data'][0]))
-                {
-                    $data['o_id'] = $orders['data'][0]['o_id'];
-                }
+                $data['o_id'] = $orders['data'][0]['o_id'];
+                $data['t_id'] = $orders['data'][0]['t_id'];
             }
 
             $result = $this->orders_dao->updateData(array('o_status' => -4), $data);
@@ -459,8 +458,7 @@ class Orders extends \CLASSES\WebBase
             {
                 //任务状态变更
                 $tasks_dao = new \WDAO\Tasks();
-                $tid = isset($data['t_id']) ? $data['t_id'] : $orders['data'][0]['t_id'];
-                $tasks_dao->resetTaskToWait($tid);
+                $tasks_dao->resetTaskToWait($data['t_id']);
 
                 $this->exportData('success');
             }

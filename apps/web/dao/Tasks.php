@@ -65,7 +65,7 @@ class Tasks extends \MDAOBASE\DaoBase
             $orders_dao = new \WDAO\Orders();
             $task_orders_count = $orders_dao->countData(array(
                 't_id' => intval($t_id),
-                'where' => 'o_confirm in (0, 2) and o_status in (0)',
+                'where' => 'o_confirm in (0, 2) and o_status in (0, -3)',
             ));
             //如果订单数小于等于0  则将任务重置为待领取
             if ($task_orders_count <= 0)
