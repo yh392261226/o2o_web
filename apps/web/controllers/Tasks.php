@@ -82,7 +82,7 @@ class Tasks extends \CLASSES\WebBase
         if (isset($_REQUEST['t_author'])) $data['t_author'] = intval($_REQUEST['t_author']);
         if (isset($_REQUEST['t_phone'])) $data['t_phone'] = intval($_REQUEST['t_phone']);
         if (isset($_REQUEST['t_phone_status'])) $data['t_phone_status'] = intval($_REQUEST['t_phone_status']);
-        if (isset($_REQUEST['t_storage'])) $data['where'] = 't_storage = ' . intval($_REQUEST['t_storage']);
+        if (isset($_REQUEST['t_storage'])) $data['where'] .= ' and t_storage = ' . intval($_REQUEST['t_storage']);
 
         //price between
         if (isset($_REQUEST['ge_amount']) && floatval($_REQUEST['ge_amount']) > 0) $data['t_amount'][0] = array('type' => 'ge', 'ge_value' => floatval($_REQUEST['ge_amount']));
@@ -111,6 +111,7 @@ class Tasks extends \CLASSES\WebBase
         }
         $data['pager'] = 0;
         $data['order'] = 'tasks.t_id desc';
+        //print_r($data);
         $list = $this->tasks_dao->listData($data);
 
         if (!empty($list))

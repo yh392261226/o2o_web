@@ -183,8 +183,8 @@ class Orders extends \CLASSES\WebBase
             't_id' => $worker_result['t_id'],
             'tew_id' => $worker_result['tew_id'],
             's_id' => $worker_result['tew_skills'],
-            'where' => 'o_confirm > 0 and o_status in (0,1)'));
-        if ($orders_count >= $worker_result['tew_worker_num']) $this->exportData('来晚咯，已经被人捷足先登。');
+            'where' => 'o_confirm > 0 and o_status in (0,1,-1,-2,-3)'));
+        if ($orders_count >= $worker_result['tew_worker_num']) $this->exportData('工人数量已足，无法成单。');
 
         $curtime = time();
         $result = $this->orders_dao->addData(array(
@@ -385,6 +385,7 @@ class Orders extends \CLASSES\WebBase
         if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
         //雇主id
         if (isset($_REQUEST['u_id']) && intval($_REQUEST['u_id']) > 0) $data['u_id'] = intval($_REQUEST['u_id']);
+        if (isset($data['u_id'])) $_REQUEST['t_author'] = $data['u_id'];
         //技能id
         if (isset($_REQUEST['s_id']) && intval($_REQUEST['s_id']) > 0) $data['s_id'] = intval($_REQUEST['s_id']);
         //订单id
@@ -419,13 +420,22 @@ class Orders extends \CLASSES\WebBase
                 $this->exportData('failure');
             }
 
-            //释放工人
-            $user_dao = new \WDAO\Users(array('table' => 'users'));
-            $user_dao->updateData(array('u_task_status' => 0), array('u_id' => $data['o_worker']));
-
-            //变更任务状态
-            $tasks_dao = new \WDAO\Tasks();
-            $tasks_dao->resetTaskToWait($data['t_id']);
+            //获取该任务下该工种是否唯一
+            $task_worker_dao = new \WDAO\Task_ext_worker();
+            $task_worker_count = $task_worker_dao->countData(array('t_id' => $data['t_id'], 'tew_worker_num' => 1));
+            if ($task_worker_count == 1)
+            {
+                $this->payout();
+            }
+            else
+            {
+                //释放工人
+                $user_dao = new \WDAO\Users(array('table' => 'users'));
+                $user_dao->updateData(array('u_task_status' => 0), array('u_id' => $data['o_worker']));
+                //变更任务状态
+                //$tasks_dao = new \WDAO\Tasks();
+                //$tasks_dao->resetTaskToWait($data['t_id']);
+            }
 
             if (!empty($tmp)) //添加评价
             {
