@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-01 14:27:08
+ * @Last Modified time: 2017-11-03 11:31:05
  */
 namespace App\Controller;
 
@@ -311,7 +311,7 @@ class Users extends \CLASSES\WebBase
         $dao_ext_info = new \WDAO\Users(array('table'=>'users_ext_info'));
         $ext_info = $dao_ext_info -> infoData(array('fields'=>'uei_info,u_id,uei_province,uei_city,uei_area,uei_address','key'=>'u_id','val' => $u_id,'pager'=>false));
 
-        $user_area_name = '请选择';
+        $user_area_name = '';
         if(!empty($ext_info['uei_city'])){
             $dao_regions = new \WDAO\Users(array('table'=>'regions'));
             $city_name = $dao_regions ->infoData(array('fields'=>'r_id,r_name','key'=>'r_id','val' => $ext_info['uei_city'],'pager'=>false));
@@ -330,11 +330,6 @@ class Users extends \CLASSES\WebBase
         $dao_funds = new \WDAO\Users(array('table'=>'users'));
         $res = $dao_funds -> infoData(array('fields'=>'u_id,u_pass
         u_name,u_mobile,u_phone,u_fax,u_sex,u_in_time,u_online,u_status,u_type,u_task_status,u_skills,u_start,u_credit,u_top,u_recommend,u_jobs_num,u_worked_num,u_high_opinions,u_low_opinions,u_middle_opinions,u_dissensions,u_true_name,u_idcard','key'=>'u_id','val' => $u_id,'pager'=>false));
-        // $skills_id = array();
-        // if($res['u_skills'] != 0){
-        //     $skills_id = explode(',',$res['u_skills']);
-        // }
-        // $res['u_skills'] = $skills_id;
 
         $res['u_info'] = isset($ext_info['uei_info']) ? $ext_info['uei_info'] : '';
         unset($ext_info['uei_info']);
@@ -350,7 +345,7 @@ class Users extends \CLASSES\WebBase
     public function usersInfoEdit()
     {
         $data_users = array();
-        if(!empty($_REQUEST['u_online']) && !empty($_REQUEST['u_id'])){
+        if(isset($_REQUEST['u_online']) && !empty($_REQUEST['u_id'])){
 
             $data_r = array();
             $data_r['u_online'] = $_REQUEST['u_online'] ;
@@ -433,7 +428,9 @@ class Users extends \CLASSES\WebBase
         if(isset($_REQUEST['u_mobile']) && intval($_REQUEST['u_mobile']) > 0) $data['u_mobile'] = intval($_REQUEST['u_mobile']);
         if(isset($_REQUEST['u_sex']) && intval($_REQUEST['u_sex']) > 0) $data['u_sex'] = intval($_REQUEST['u_sex']);
         if(isset($_REQUEST['u_bind_mobile']) && intval($_REQUEST['u_bind_mobile']) > 0) $data['u_bind_mobile'] = intval($_REQUEST['u_bind_mobile']);
-        if(isset($_REQUEST['u_online']) && intval($_REQUEST['u_online']) > 0) $data['u_online'] = intval($_REQUEST['u_online']);
+        if(isset($_REQUEST['u_online']) && $_REQUEST['u_online'] !== "") $data['u_online'] = intval($_REQUEST['u_online']);
+        /*搜索在线条件不为为隐身状态*/
+        $not_invisible = isset($_REQUEST['not_invisible']) ? intval($_REQUEST['not_invisible']): 1;
         if(isset($_REQUEST['u_status']) && intval($_REQUEST['u_status']) > 0) $data['u_status'] = intval($_REQUEST['u_status']);
         if(isset($_REQUEST['u_type']) && intval($_REQUEST['u_type']) > 0) $data['u_type'] = intval($_REQUEST['u_type']);
         if(isset($_REQUEST['u_task_status']) && intval($_REQUEST['u_task_status']) >=0) $data['u_task_status'] = intval($_REQUEST['u_task_status']);
@@ -527,6 +524,9 @@ class Users extends \CLASSES\WebBase
             }
         }
         $data2['where'] .= " and users.u_idcard != '' and users.u_true_name != '' and users.u_sex != -1 and users_ext_info.uei_info != '' and users_ext_info.uei_address != '' and  users_ext_info.uei_province != 0 and users_ext_info.uei_city != 0 and users_ext_info.uei_area != 0";
+        if($not_invisible){
+            $data2['where'] .= " and users.u_online != -1";
+        }
         $data2['fields'] = 'users.u_id,users.u_mobile,users.u_idcard,users.u_sex,users.u_true_name as u_name,u_skills,users_ext_info.uei_info,u_task_status,u_true_name,ucp_posit_x,ucp_posit_y,users_ext_info.uei_address,users.u_in_time,users.u_last_edit_time,users.u_online,users.u_start,users.u_credit,users.u_top,users.u_recommend,users.u_jobs_num,users.u_worked_num,users.u_high_opinions,users.u_low_opinions,users.u_middle_opinions,users.u_dissensions';
 
         $list = $dao_info ->listData($data2);
@@ -583,6 +583,9 @@ class Users extends \CLASSES\WebBase
                         }
 
                     }
+                }
+                if($v['relation'] == 0){
+                    $v['relation_type'] = 0;
                 }
 
             }
