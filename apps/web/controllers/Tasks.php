@@ -51,7 +51,7 @@ class Tasks extends \CLASSES\WebBase
         $data['fields'] = 'orders.o_id, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_last_edit_time, orders.o_status, orders.tew_id, orders.s_id, orders.o_confirm, orders.unbind_time, orders.o_sponsor,
         tasks.t_id, tasks.t_title, tasks.t_info, tasks.t_status, tasks.t_author, tasks.t_phone, tasks.t_phone_status, tasks.t_amount, tasks.t_edit_amount, tasks.t_duration, tasks.t_amount_edit_times, tasks.t_posit_x, tasks.t_posit_y, tasks.t_in_time,
         task_ext_worker.tew_skills, task_ext_worker.tew_worker_num, task_ext_worker.tew_price, task_ext_worker.tew_start_time, task_ext_worker.tew_end_time, task_ext_worker.r_province, task_ext_worker.r_city, task_ext_worker.r_area, task_ext_worker.tew_address';
-        $data['where'] .= ' orders.o_status not in (-1, -2, -4)';
+        $data['where'] .= ' and orders.o_status not in (-1, -2, -4)';
         $data['pager'] = 0;
         $data['order'] = 'orders.o_in_time, orders.o_id desc';
         $list = $orders_dao->listData($data);
@@ -73,7 +73,7 @@ class Tasks extends \CLASSES\WebBase
     //列表及搜索
     private function list()
     {
-        $this->db->debug = 1;
+        //$this->db->debug = 1;
         $list = $data = array();
         $data['where'] = ' t_storage = 0 and t_status != -9 ';
         if (isset($_REQUEST['t_id'])) $data['t_id'] = array('type' => 'in', 'value' => $_REQUEST['t_id']);
@@ -147,7 +147,6 @@ class Tasks extends \CLASSES\WebBase
 
             if (isset($_REQUEST['u_id']) && intval($_REQUEST['u_id']) > 0)
             {
-
                 $this->users_favorate_dao = new \WDAO\Users_favorate(array('table' => 'Users_favorate'));
                 $favorates = $marked = array();
                 $favorates = $this->users_favorate_dao->listData(array('f_type' => 0, 'u_id' => intval($_REQUEST['u_id']), 'pager' => 0));
