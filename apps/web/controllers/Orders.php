@@ -600,13 +600,29 @@ class Orders extends \CLASSES\WebBase
 
                     if ($pay_status == 1)
                     {
-                        $this->db->commit();
-                        $this->exportData('success');
+                        $task_worker_dao = new \WDAO\Task_ext_worker();
+                        $task_worker_result = $task_worker_dao->updateData(array('tew_status' => 1), $data); //任务的工种状态变更
+                        if ($task_worker_result)
+                        {
+                            //获取该任务下的全部工种状态
+                            $task_result = 1;
+                            $task_worker_count = $task_worker_dao->countData(array(
+                                't_id' => $data['t_id'],
+                                'tew_status' => 0
+                                ));
+                            if ($task_worker_count == 0) //如果全部工种都完成了 那么将任务设置为完成
+                            {
+                                $task_result = $task_dao->updateData(array('t_status' => 3), $data);
+                            }
+
+                            if ($task_result)
+                            {
+                                $this->db->commit();
+                                $this->exportData('success');
+                            }
+                        }
                     }
-                    else
-                    {
-                        $this->db->rollback();
-                    }
+                    $this->db->rollback();
                 }
             }
         }
