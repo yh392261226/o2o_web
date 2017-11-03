@@ -30,10 +30,11 @@ class Tasks extends \CLASSES\WebBase
         $data['where'] = '1';
         if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
         if (!isset($data['o_worker'])) $this->exportData(); //工人id必须有
+        $data['where'] .= ' and orders.o_status != -9';
         if (isset($_REQUEST['u_id'])) $data['where'] .= ' and orders.u_id = ' . intval($_REQUEST['u_id']);
         if (isset($_REQUEST['o_id'])) $data['o_id'] = array('type' => 'in', 'value' => $_REQUEST['o_id']);
         if (isset($_REQUEST['t_id'])) $data['where'] .= ' and orders.t_id = ' . intval($_REQUEST['t_id']);
-        if (isset($_REQUEST['o_status']) && is_numeric($_REQUEST['o_status'])) $data['where'] .= ' and orders.o_status = ' . intval($_REQUEST['o_status']);
+        if (isset($_REQUEST['o_status']) && trim($_REQUEST['o_status']) != '') $data['where'] .= ' and orders.o_status in (' . trim($_REQUEST['o_status']) . ')';
         if (isset($_REQUEST['o_confirm'])) $data['where'] .= ' and orders.o_confirm in (' . trim($_REQUEST['o_confirm'] . ')');
         if (isset($_REQUEST['s_id'])) $data['where'] .= ' and orders.s_id = ' . intval($_REQUEST['s_id']);
         if (isset($_REQUEST['tew_id'])) $data['where'] .= ' and orders.tew_id = ' . intval($_REQUEST['tew_id']);
@@ -50,7 +51,7 @@ class Tasks extends \CLASSES\WebBase
         $data['fields'] = 'orders.o_id, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_last_edit_time, orders.o_status, orders.tew_id, orders.s_id, orders.o_confirm, orders.unbind_time, orders.o_sponsor,
         tasks.t_id, tasks.t_title, tasks.t_info, tasks.t_status, tasks.t_author, tasks.t_phone, tasks.t_phone_status, tasks.t_amount, tasks.t_edit_amount, tasks.t_duration, tasks.t_amount_edit_times, tasks.t_posit_x, tasks.t_posit_y, tasks.t_in_time,
         task_ext_worker.tew_skills, task_ext_worker.tew_worker_num, task_ext_worker.tew_price, task_ext_worker.tew_start_time, task_ext_worker.tew_end_time, task_ext_worker.r_province, task_ext_worker.r_city, task_ext_worker.r_area, task_ext_worker.tew_address';
-        //$data['where'] = ' orders.o_worker = "' . intval($_REQUEST['o_worker']) . '"';
+        $data['where'] .= ' and orders.o_status not in (-1, -2, -4)';
         $data['pager'] = 0;
         $data['order'] = 'orders.o_in_time, orders.o_id desc';
         $list = $orders_dao->listData($data);
@@ -72,14 +73,15 @@ class Tasks extends \CLASSES\WebBase
     //列表及搜索
     private function list()
     {
+        //$this->db->debug = 1;
         $list = $data = array();
+        $data['where'] = ' t_storage = 0 and t_status != -9 ';
         if (isset($_REQUEST['t_id'])) $data['t_id'] = array('type' => 'in', 'value' => $_REQUEST['t_id']);
         if (isset($_REQUEST['t_title'])) $data['t_title'] = array('type'=>'like', 'value' => trim($_REQUEST['t_title']));
-        if (isset($_REQUEST['t_status'])) $data['t_status'] = intval($_REQUEST['t_status']);
+        if (isset($_REQUEST['t_status']) && trim($_REQUEST['t_status']) != '') $data['where'] .= ' and t_status in (' . trim($_REQUEST['t_status']) . ')';
         if (isset($_REQUEST['t_author'])) $data['t_author'] = intval($_REQUEST['t_author']);
         if (isset($_REQUEST['t_phone'])) $data['t_phone'] = intval($_REQUEST['t_phone']);
         if (isset($_REQUEST['t_phone_status'])) $data['t_phone_status'] = intval($_REQUEST['t_phone_status']);
-        $data['where'] = 't_storage = 0 and t_status != -9';
         if (isset($_REQUEST['t_storage'])) $data['where'] = 't_storage = ' . intval($_REQUEST['t_storage']);
 
         //price between
@@ -145,7 +147,6 @@ class Tasks extends \CLASSES\WebBase
 
             if (isset($_REQUEST['u_id']) && intval($_REQUEST['u_id']) > 0)
             {
-
                 $this->users_favorate_dao = new \WDAO\Users_favorate(array('table' => 'Users_favorate'));
                 $favorates = $marked = array();
                 $favorates = $this->users_favorate_dao->listData(array('f_type' => 0, 'u_id' => intval($_REQUEST['u_id']), 'pager' => 0));
@@ -199,7 +200,10 @@ class Tasks extends \CLASSES\WebBase
         if (!empty($info))
         {
             $user_dao = new \WDAO\Users(array('table' => 'users'));
-            $author_info = $user_dao->infoData(array('key' => 'u_id', 'val' => $info['t_author'], 'fields' => 'u_id, u_mobile, u_sex, u_true_name'));
+            $author_info = $user_dao->infoData(array(
+                'key' => 'u_id',
+                'val' => $info['t_author'],
+                'fields' => 'users.u_id, users.u_name, users.u_mobile, users.u_sex, users.u_online, users.u_status, users.u_task_status, users.u_start, users.u_credit, users.u_jobs_num, users.u_recommend, users.u_worked_num, users.u_high_opinions, users.u_low_opinions, users.u_middle_opinions, users.u_dissensions, users.u_true_name'));
             if (!empty($author_info))
             {
                 $info += $author_info;
@@ -271,7 +275,7 @@ class Tasks extends \CLASSES\WebBase
                                 {
                                     $info['relation'] = '0';
                                     $info['relation_type'] = '0';
-                                    
+
                                     if ($v['o_worker'] == intval($_REQUEST['o_worker']))
                                     {
                                         $info['relation'] = '1';
@@ -503,15 +507,21 @@ class Tasks extends \CLASSES\WebBase
      */
     private function del2()
     {
-        $data = array();
+        $data = $tmp = array();
         if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']);
         if (isset($_REQUEST['t_author']) && intval($_REQUEST['t_author']) > 0) $data['t_author'] = intval($_REQUEST['t_author']);
 
-        if (!empty($data) && isset($data['t_id']) && isset($data['t_author']))
+        if (!empty($data) && isset($data['t_id']) && isset($data['t_author']) && isset($tmp['t_status']))
         {
             $result = $this->tasks_dao->updateData(array('t_status' => -9), array('t_id' => $data['t_id'], 't_author' => $data['t_author']));
             if ($result)
             {
+                $orders_dao = new \WDAO\Orders();
+                $orders_data = $orders_dao->listData(array('t_id' => $data['t_id'], 'u_id' => $data['t_author'], 'pager' => 0));
+                if (!empty($orders_data['data'][0]))
+                {
+
+                }
                 $this->exportData('success');
             }
         }
@@ -586,6 +596,10 @@ class Tasks extends \CLASSES\WebBase
                 return -1;
                 //$this->exportData('无法完成任务覆盖或任务草稿不存在');
             }
+
+            //删除该任务下的全部订单
+            $order_dao = new \WDAO\Orders();
+            $order_dao->delOrders(array('t_id' => $data['t_id'], 't_author' => $data['t_author']));
 
             //归还已经扣除资金
             $platform_funds_dao = new \WDAO\Platform_funds_log();

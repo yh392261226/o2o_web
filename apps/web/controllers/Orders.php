@@ -79,7 +79,12 @@ class Orders extends \CLASSES\WebBase
 
         if (!empty($data) && isset($data['o_id']) && isset($data['t_id']) && isset($data['o_worker']))
         {
-            $info = $this->orders_dao->listData($data + array('pager' => 0, 'limit' => 1, 'order' => 'o_id desc'));
+            $orders_param = $data;
+            $orders_param['pager'] = 0;
+            $orders_param['limit'] = 1;
+            $orders_param['where'] = 'o_status = 0';
+            $orders_param['order'] = 'o_id desc';
+            $info = $this->orders_dao->listData($orders_param);
 
             if (isset($info['data'][0]) && !empty($info['data'][0]))
             {
@@ -100,7 +105,10 @@ class Orders extends \CLASSES\WebBase
                 {
                     $worker_dao = new \WDAO\Task_ext_worker();
                     $workers_result = $worker_dao->countData(array('t_id' => intval($info['data'][0]['t_id'])));
-                    $orders_result  = $this->orders_dao->countData(array('t_id' => intval($info['data'][0]['t_id']), 'o_confirm' => 1));
+                    $orders_result  = $this->orders_dao->countData(array(
+                        't_id' => intval($info['data'][0]['t_id']),
+                        'o_confirm' => 1,
+                        'o_status' => 0));
                     $task_dao = new \WDAO\Tasks();
                     if ($workers_result == $orders_result)
                     {//全开工
@@ -112,7 +120,7 @@ class Orders extends \CLASSES\WebBase
                     }
                     //变更工人状态为忙
                     $user_dao = new \WDAO\Users(array('table' => 'users'));
-                    $users_dao->taskStatus($data['o_worker'], '1');
+                    $user_dao->taskStatus($data['o_worker'], '1');
                 }
                 $this->exportData('success');
             }
@@ -161,10 +169,21 @@ class Orders extends \CLASSES\WebBase
         }
 
         //传参是否已经存储成功
-        $orders_count = $this->orders_dao->countData(array('t_id' => $worker_result['t_id'], 'u_id' => $worker_result['t_author'], 'o_worker' => $data['o_worker'], 'tew_id' => $worker_result['tew_id'], 's_id' => $worker_result['tew_skills']));
+        $orders_count = $this->orders_dao->countData(array(
+            't_id' => $worker_result['t_id'],
+            'u_id' => $worker_result['t_author'],
+            'o_worker' => $data['o_worker'],
+            'tew_id' => $worker_result['tew_id'],
+            's_id' => $worker_result['tew_skills'],
+            'where' => 'o_status != -4'));
         if ($orders_count > 0) $this->exportData('已经成功邀约，无需再次邀约。');
         //已成单数量判断
-        $orders_count = $this->orders_dao->countData(array('u_id' => $worker_result['t_author'], 't_id' => $worker_result['t_id'], 'tew_id' => $worker_result['tew_id'], 's_id' => $worker_result['tew_skills'], 'where' => 'o_confirm > 0 and o_status in (0,1)'));
+        $orders_count = $this->orders_dao->countData(array(
+            'u_id' => $worker_result['t_author'],
+            't_id' => $worker_result['t_id'],
+            'tew_id' => $worker_result['tew_id'],
+            's_id' => $worker_result['tew_skills'],
+            'where' => 'o_confirm > 0 and o_status in (0,1)'));
         if ($orders_count >= $worker_result['tew_worker_num']) $this->exportData('来晚咯，已经被人捷足先登。');
 
         $curtime = time();
@@ -430,6 +449,7 @@ class Orders extends \CLASSES\WebBase
      */
     private function cancel()
     {
+        //$this->db->debug = 1;
         $data = $task_param = array();
         if (isset($_REQUEST['o_id']) && intval($_REQUEST['o_id']) > 0) $data['o_id'] = $task_param['o_id'] = intval($_REQUEST['o_id']);
         if (isset($_REQUEST['tew_id']) && intval($_REQUEST['tew_id']) > 0) $data['tew_id'] = $task_param['tew_id'] = intval($_REQUEST['tew_id']);
@@ -442,16 +462,18 @@ class Orders extends \CLASSES\WebBase
 
         if (!empty($data) && (isset($data['o_id']) || (isset($data['tew_id']) && isset($data['t_id']) && isset($data['u_id']) && isset($data['o_worker']) && isset($data['s_id']))))
         {
-            if (!isset($data['o_id']) || $data['o_id'] < 0)
+            $data['pager'] = 0;
+            $data['limit'] = 1;
+            $data['order'] = 'o_id desc';
+            $orders = $this->orders_dao->listData($data);
+            if (!empty($orders['data'][0]))
             {
-                $data['pager'] = 0;
-                $data['limit'] = 1;
-                $data['order'] = 'o_id desc';
-                $orders = $this->orders_dao->listData($data);
-                if (!empty($orders['data'][0]))
-                {
-                    $data['o_id'] = $orders['data'][0]['o_id'];
-                }
+                $data['o_id'] = $orders['data'][0]['o_id'];
+                $data['t_id'] = $orders['data'][0]['t_id'];
+            }
+            else
+            {
+                $this->exportData('failure');
             }
 
             $result = $this->orders_dao->updateData(array('o_status' => -4), $data);
@@ -459,8 +481,7 @@ class Orders extends \CLASSES\WebBase
             {
                 //任务状态变更
                 $tasks_dao = new \WDAO\Tasks();
-                $tid = isset($data['t_id']) ? $data['t_id'] : $orders['data'][0]['t_id'];
-                $tasks_dao->resetTaskToWait($tid);
+                $tasks_dao->resetTaskToWait($data['t_id']);
 
                 $this->exportData('success');
             }
@@ -499,7 +520,7 @@ class Orders extends \CLASSES\WebBase
                 $order_param['where'] .= ' and orders.t_id = "' . intval($data['t_id']) . '" and orders.u_id = "' . $data['t_author'] . '"';
                 if (isset($data['tew_id']))
                 {
-                    $order_param['where'] .= ' and orders.tew_id = "' . $data['tew_id'] . '" and orders.o_status != 1';
+                    $order_param['where'] .= ' and orders.tew_id = "' . $data['tew_id'] . '" and orders.o_status not in (1, -4) ';
                 }
                 $order_param['pager'] = 0;
                 $orders_data = $this->orders_dao->listData($order_param);
@@ -579,14 +600,51 @@ class Orders extends \CLASSES\WebBase
 
                     if ($pay_status == 1)
                     {
-                        $this->db->commit();
-                        $this->exportData('success');
+                        $task_worker_dao = new \WDAO\Task_ext_worker();
+                        $task_worker_result = $task_worker_dao->updateData(array('tew_status' => 1), $data); //任务的工种状态变更
+                        if ($task_worker_result)
+                        {
+                            //获取该任务下的全部工种状态
+                            $task_result = 1;
+                            $task_worker_count = $task_worker_dao->countData(array(
+                                't_id' => $data['t_id'],
+                                'tew_status' => 0
+                                ));
+                            if ($task_worker_count == 0) //如果全部工种都完成了 那么将任务设置为完成
+                            {
+                                $task_result = $task_dao->updateData(array('t_status' => 3), $data);
+                            }
+
+                            if ($task_result)
+                            {
+                                $this->db->commit();
+                                $this->exportData('success');
+                            }
+                        }
                     }
-                    else
-                    {
-                        $this->db->rollback();
-                    }
+                    $this->db->rollback();
                 }
+            }
+        }
+        $this->exportData('failure');
+    }
+
+    /**
+     * 工人删除订单
+     */
+    private function del2()
+    {
+        $data = array();
+        //订单id
+        if (isset($_REQUEST['o_id']) && intval($_REQUEST['o_id']) > 0) $data['o_id'] = intval($_REQUEST['o_id']);
+        //工人id
+        if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
+        if (!empty($data) && isset($data['o_id']) && isset($data['o_worker']))
+        {
+            $result = $this->orders_dao->updateData(array('o_status' => -9), $data);
+            if ($result)
+            {
+                $this->exportData('success');
             }
         }
         $this->exportData('failure');
