@@ -22,4 +22,33 @@ class Orders extends \MDAOBASE\DaoBase
         return false;
     }
 
+    /**
+     *  删除多个订单 即更改多个订单的状态
+     */
+    public function delOrders($data = array())
+    {
+        if (!empty($data))
+        {
+            $param = $data;
+            $param['pager'] = 0;
+            $orders_data = $this->listData($param);
+            if (!empty($orders_data['data']))
+            {
+                $tmp_ids = array();
+                foreach ($orders_data['data'] as $key => $val)
+                {
+                    if (isset($val['o_id']) && $val['o_id'] > 0)
+                    {
+                        $tmp_ids[] = $val['o_id'];
+                    }
+                }
+                if (!empty($tmp_ids))
+                {
+                    return $this->updateData(array('o_status' => -4), array('where' => 'o_id in (' . implode(',', $tmp_ids) . ')'));
+                }
+            }
+        }
+        return false;
+    }
+
 }
