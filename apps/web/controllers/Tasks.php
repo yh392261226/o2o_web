@@ -295,6 +295,15 @@ class Tasks extends \CLASSES\WebBase
                                 }
                             }
                             $workers['data'][$key]['remaining'] = $val['tew_worker_num'] - $order_count;
+                            //邀约工人时候，用所需的技能工种数据 即去除不含该工种的工种信息
+                            if (isset($_REQUEST['skills']) && intval($_REQUEST['skills']) > 0)
+                            {
+                                if (!isset($val['tew_skills']) || $val['tew_skills'] != intval($_REQUEST['skills']))
+                                {
+                                    unset($workers['data'][$key]);
+                                }
+                            }
+
                             unset($k, $v);
                         }
                         unset($key, $val, $order_count, $orders_data);
