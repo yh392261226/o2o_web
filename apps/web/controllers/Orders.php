@@ -103,14 +103,57 @@ class Orders extends \CLASSES\WebBase
                 //更新任务状态
                 if (isset($info['data'][0]['t_id']) && 0 < intval($info['data'][0]['t_id']))
                 {
-                    $worker_dao = new \WDAO\Task_ext_worker();
-                    $workers_result = $worker_dao->countData(array('t_id' => intval($info['data'][0]['t_id'])));
-                    $orders_result  = $this->orders_dao->countData(array(
+                    $begin_status = 'all'; //默认开工状态为全开工
+                    $order_counts = $worker_counts = 0; //数量初始值
+                    $orders_skills_counts = array(); //工种数量数组
+                    //全部订单数量 (含有已开工或未开工)
+                    $orders_result  = $this->orders_dao->listData(array(
                         't_id' => intval($info['data'][0]['t_id']),
                         'o_confirm' => 1,
-                        'o_status' => 0));
+                        'pager' => 0,
+                        'o_status' => array('type' => 'in', 'value' => array(0, -1, -2, -3, 1, 2))));
+                    if (!empty($orders_result['data']))
+                    {
+                        foreach ($orders_result['data'] as $key => $val)
+                        {
+                            if (isset($val['s_id']) && $val['s_id'] > 0)
+                            {
+                                $order_counts += 1;
+                                $orders_skills_counts[$val['s_id']] += 1;
+                            }
+                        }
+                        unset($key, $val);
+                    }
+                    //工人总数
+                    $workers_skills_counts = array();
+                    $worker_dao = new \WDAO\Task_ext_worker();
+                    $workers_result = $worker_dao->listData(array('t_id' => intval($info['data'][0]['t_id']))); //工种数据
+                    if (!empty($workers_result['data']))
+                    {
+                        foreach ($workers_result['data'] as $key => $val)
+                        {
+                            if (isset($val['tew_skills']) && $val['tew_skills'] > 0 && isset($val['tew_worker_num']) && $val['tew_worker_num'] > 0)
+                            {
+                                $workers_skills_counts[$val['tew_skills']] += $val['tew_worker_num'];
+                                $worker_counts += $val['tew_worker_num'];
+                            }
+                        }
+                    }
+                    //当前工种所需工人总数, 当前工种订单总数
+                    if ($orders_skills_counts[$info['data'][0]['s_id']] >= $workers_skills_counts[$info['data'][0]['s_id']])
+                    {
+                        //任务所需工人技能块开工
+                        $worker_dao->updateData(array('tew_type' => 1), array('tew_id' => $info['data'][0]['tew_id']));
+                    }
+
+                    if ($worker_counts > $order_counts) //所需工人总数大于订单工人总数 = 半开工
+                    {
+                        $begin_status = 'half';
+                    }
+
+                    //任务开工状态修改
                     $task_dao = new \WDAO\Tasks();
-                    if ($workers_result == $orders_result)
+                    if ($begin_status == 'all')
                     {//全开工
                         $task_dao->updateData(array('t_status' => 2), array('t_id' => intval($info['data'][0]['t_id'])));
                     }
@@ -521,15 +564,15 @@ class Orders extends \CLASSES\WebBase
             if (!empty($task_data['data'][0]))
             {
                 $order_param = array();
-                //获取该任务所属的全部订单信息
-                $order_param['where'] = 'orders.o_confirm = 1 and task_ext_worker.tew_status = 0';
+                //获取该任务所属的全部需要支付订单信息
+                $order_param['where'] = 'orders.o_confirm = 1 and task_ext_worker.tew_status = 0 and orders.opay = 0';
                 $order_param['join'] = array('task_ext_worker', 'task_ext_worker.tew_id = orders.tew_id and task_ext_worker.tew_skills = orders.s_id and task_ext_worker.t_id = orders.t_id');
                 $order_param['fields'] = 'task_ext_worker.tew_id, task_ext_worker.tew_skills, task_ext_worker.tew_worker_num, task_ext_worker.tew_price, task_ext_worker.tew_start_time, task_ext_worker.tew_end_time,
                 orders.o_id, orders.o_confirm, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_status, orders.o_pay, orders.unbind_time';
                 $order_param['where'] .= ' and orders.t_id = "' . intval($data['t_id']) . '" and orders.u_id = "' . $data['t_author'] . '"';
                 if (isset($data['tew_id']))
                 {
-                    $order_param['where'] .= ' and orders.tew_id = "' . $data['tew_id'] . '" and orders.o_status not in (1, -4) ';
+                    $order_param['where'] .= ' and orders.tew_id = "' . $data['tew_id'] . '" and orders.o_status not in (1, -4, -8, -9) ';
                 }
                 $order_param['pager'] = 0;
                 $orders_data = $this->orders_dao->listData($order_param);
