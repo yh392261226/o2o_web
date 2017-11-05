@@ -430,8 +430,7 @@ class Orders extends \CLASSES\WebBase
             else
             {
                 //释放工人
-                $user_dao = new \WDAO\Users(array('table' => 'users'));
-                $user_dao->updateData(array('u_task_status' => 0), array('u_id' => $data['o_worker']));
+                $this->_resetWorker($data['o_worker']);
                 //变更任务状态
                 //$tasks_dao = new \WDAO\Tasks();
                 //$tasks_dao->resetTaskToWait($data['t_id']);
@@ -597,8 +596,7 @@ class Orders extends \CLASSES\WebBase
                                 $platform_result = $user_result = 0;
                                 $platform_result = $this->platformFundsLog($val['o_id'], ($original_amount * -1), 0, 'payorder'); //平台资金支出
                                 $user_funds_result = $this->userFunds($val['o_worker'], $original_amount, 'overage'); //工人用户资金收入
-                                $user_dao = new \WDAO\Users(array('table' => 'users'));
-                                $user_result = $user_dao->taskStatus($val['o_worker'], '0'); //释放工人状态
+                                $user_result = $this->_resetWorker($val['o_worker']); //释放工人状态
                                 $pay = $this->orders_dao->payStatus($val['o_id'], '1'); //更新订单支付状态
                                 if (!$platform_result || !$user_funds_result || !$user_result || !$pay) {
                                     $pay_status = 0;
@@ -658,6 +656,21 @@ class Orders extends \CLASSES\WebBase
             }
         }
         $this->exportData('failure');
+    }
+
+
+    /**
+     * 释放工人
+     *
+     */
+    protected function _resetWorker($worker_id)
+    {
+        if ($worker_id > 0)
+        {
+            $user_dao = new \WDAO\Users(array('table' => 'users'));
+            return $user_dao->taskStatus($worker_id, '0');
+        }
+        return false;
     }
 
 }
