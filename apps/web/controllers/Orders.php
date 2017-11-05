@@ -522,10 +522,10 @@ class Orders extends \CLASSES\WebBase
             {
                 $order_param = array();
                 //获取该任务所属的全部订单信息
-                $order_param['where'] = 'orders.o_confirm = 1';
+                $order_param['where'] = 'orders.o_confirm = 1 and task_ext_worker.tew_status = 0';
                 $order_param['join'] = array('task_ext_worker', 'task_ext_worker.tew_id = orders.tew_id and task_ext_worker.tew_skills = orders.s_id and task_ext_worker.t_id = orders.t_id');
                 $order_param['fields'] = 'task_ext_worker.tew_id, task_ext_worker.tew_skills, task_ext_worker.tew_worker_num, task_ext_worker.tew_price, task_ext_worker.tew_start_time, task_ext_worker.tew_end_time,
-                orders.o_id, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_status, orders.o_pay, orders.unbind_time';
+                orders.o_id, orders.o_confirm, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_status, orders.o_pay, orders.unbind_time';
                 $order_param['where'] .= ' and orders.t_id = "' . intval($data['t_id']) . '" and orders.u_id = "' . $data['t_author'] . '"';
                 if (isset($data['tew_id']))
                 {
@@ -590,7 +590,7 @@ class Orders extends \CLASSES\WebBase
                                 }
                             }
 
-                            if ($pay_status != 0)
+                            if ($pay_status == 1)
                             {
                                 //给每个工人单独发钱并单独扣除平台款项
                                 $platform_result = $user_result = 0;
