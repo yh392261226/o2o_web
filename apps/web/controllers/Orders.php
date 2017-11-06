@@ -468,7 +468,10 @@ class Orders extends \CLASSES\WebBase
             $task_worker_count = $task_worker_dao->countData(array('t_id' => $data['t_id'], 'tew_worker_num' => 1));
             if ($task_worker_count == 1)
             {
-                $this->payout();
+                //$this->payout();
+                $pay_param = $data;
+                $pay_param['t_author'] = $data['u_id'];
+                $this->_payOut($pay_param);
             }
             else
             {
@@ -555,6 +558,51 @@ class Orders extends \CLASSES\WebBase
         //雇主id
         if (isset($_REQUEST['t_author']) && intval($_REQUEST['t_author']) > 0) $data['t_author'] = intval($_REQUEST['t_author']);
 
+        if (!$this->_payOut($data))
+        {
+            $this->exportData('failure');
+        }
+        $this->exportData('successs');
+    }
+
+    /**
+     * 工人删除订单
+     */
+    private function del2()
+    {
+        $data = array();
+        //订单id
+        if (isset($_REQUEST['o_id']) && intval($_REQUEST['o_id']) > 0) $data['o_id'] = intval($_REQUEST['o_id']);
+        //工人id
+        if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
+        if (!empty($data) && isset($data['o_id']) && isset($data['o_worker']))
+        {
+            $result = $this->orders_dao->updateData(array('o_status' => -9), $data);
+            if ($result)
+            {
+                $this->exportData('success');
+            }
+        }
+        $this->exportData('failure');
+    }
+
+
+    /**
+     * 释放工人
+     *
+     */
+    protected function _resetWorker($worker_id)
+    {
+        if ($worker_id > 0)
+        {
+            $user_dao = new \WDAO\Users(array('table' => 'users'));
+            return $user_dao->taskStatus($worker_id, '0');
+        }
+        return false;
+    }
+
+    protected function _payOut($data = array())
+    {
         if (!empty($data) && isset($data['t_author']) && isset($data['t_id']) && isset($data['tew_id']))
         {
             //先获取任务信息
@@ -674,7 +722,7 @@ class Orders extends \CLASSES\WebBase
                             $task_worker_count = $task_worker_dao->countData(array(
                                 't_id' => $data['t_id'],
                                 'tew_status' => 0
-                                ));
+                            ));
                             if ($task_worker_count == 0) //如果全部工种都完成了 那么将任务设置为完成
                             {
                                 $task_result = $task_dao->updateData(array('t_status' => 3), $data);
@@ -683,7 +731,7 @@ class Orders extends \CLASSES\WebBase
                             if ($task_result)
                             {
                                 $this->db->commit();
-                                $this->exportData('success');
+                                return true;
                             }
                         }
                     }
@@ -691,43 +739,6 @@ class Orders extends \CLASSES\WebBase
                 }
             }
         }
-        $this->exportData('failure');
-    }
-
-    /**
-     * 工人删除订单
-     */
-    private function del2()
-    {
-        $data = array();
-        //订单id
-        if (isset($_REQUEST['o_id']) && intval($_REQUEST['o_id']) > 0) $data['o_id'] = intval($_REQUEST['o_id']);
-        //工人id
-        if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
-        if (!empty($data) && isset($data['o_id']) && isset($data['o_worker']))
-        {
-            $result = $this->orders_dao->updateData(array('o_status' => -9), $data);
-            if ($result)
-            {
-                $this->exportData('success');
-            }
-        }
-        $this->exportData('failure');
-    }
-
-
-    /**
-     * 释放工人
-     *
-     */
-    protected function _resetWorker($worker_id)
-    {
-        if ($worker_id > 0)
-        {
-            $user_dao = new \WDAO\Users(array('table' => 'users'));
-            return $user_dao->taskStatus($worker_id, '0');
-        }
         return false;
     }
-
 }

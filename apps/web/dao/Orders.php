@@ -16,6 +16,7 @@ class Orders extends \MDAOBASE\DaoBase
             $data = array(
                 'o_pay' => intval($status),
                 'o_pay_time' => time(),
+                'o_status' => 1,
             );
             return $this->updateData($data, array('o_id' => intval($oid)));
         }
