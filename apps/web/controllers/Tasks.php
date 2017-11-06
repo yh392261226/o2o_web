@@ -82,7 +82,7 @@ class Tasks extends \CLASSES\WebBase
         if (isset($_REQUEST['t_author'])) $data['t_author'] = intval($_REQUEST['t_author']);
         if (isset($_REQUEST['t_phone'])) $data['t_phone'] = intval($_REQUEST['t_phone']);
         if (isset($_REQUEST['t_phone_status'])) $data['t_phone_status'] = intval($_REQUEST['t_phone_status']);
-        if (isset($_REQUEST['t_storage'])) $data['where'] = 't_storage = ' . intval($_REQUEST['t_storage']);
+        if (isset($_REQUEST['t_storage'])) $data['where'] .= ' and t_storage = ' . intval($_REQUEST['t_storage']);
 
         //price between
         if (isset($_REQUEST['ge_amount']) && floatval($_REQUEST['ge_amount']) > 0) $data['t_amount'][0] = array('type' => 'ge', 'ge_value' => floatval($_REQUEST['ge_amount']));
@@ -111,6 +111,7 @@ class Tasks extends \CLASSES\WebBase
         }
         $data['pager'] = 0;
         $data['order'] = 'tasks.t_id desc';
+        //print_r($data);
         $list = $this->tasks_dao->listData($data);
 
         if (!empty($list))
@@ -242,15 +243,26 @@ class Tasks extends \CLASSES\WebBase
                         $info['r_area'] = $val['r_area'];
                         $info['tew_address'] = $val['tew_address'];
                     }
+
+                    //邀约工人时候，用所需的技能工种数据 即去除不含该工种的工种信息
+                    if (isset($_REQUEST['skills']) && intval($_REQUEST['skills']) > 0)
+                    {
+                        if (!isset($val['tew_skills']) || $val['tew_skills'] != intval($_REQUEST['skills']))
+                        {
+                            unset($workers['data'][$key]);
+                        }
+                    }
                 }
                 unset($key, $val);
+                $workers['data'] = array_values($workers['data']); //重置数组键名
+
                 if (!empty($tew_ids))
                 {
                     $orders_param['where'] = ' orders.tew_id in ('. implode(',', $tew_ids) .')';
                     $orders_param['where'] .= ' and orders.o_status != -4';
                     $orders_param['pager'] = 0;
                     $orders_param['leftjoin'] = array('users', 'users.u_id = orders.o_worker');
-                    $orders_param['fields'] = 'orders.o_id,orders.t_id,orders.u_id,orders.o_worker,orders.o_amount,orders.o_in_time,orders.o_last_edit_time,orders.o_status,orders.tew_id,orders.s_id,orders.o_confirm,orders.unbind_time,orders.o_pay,orders.o_pay_time,orders.o_sponsor, orders.o_dispute_time, orders.o_start_time, orders.o_end_time,
+                    $orders_param['fields'] = 'orders.o_id,orders.t_id,orders.u_id,orders.o_worker,orders.o_amount,orders.o_in_time,orders.o_last_edit_time,orders.o_status,orders.tew_id,orders.s_id,orders.o_confirm,orders.unbind_time,orders.o_pay,orders.o_pay_time,orders.o_sponsor, orders.o_dispute_time, orders.o_start_time, orders.o_end_time, 
                     users.u_name, users.u_mobile, users.u_sex, users.u_online, users.u_status, users.u_task_status, users.u_start, users.u_credit, users.u_jobs_num, users.u_recommend, users.u_worked_num, users.u_high_opinions, users.u_low_opinions, users.u_middle_opinions, users.u_dissensions, users.u_true_name';
                     $orders_dao = new \WDAO\Orders();
                     $orders_data = $orders_dao->listData($orders_param);

@@ -103,14 +103,57 @@ class Orders extends \CLASSES\WebBase
                 //更新任务状态
                 if (isset($info['data'][0]['t_id']) && 0 < intval($info['data'][0]['t_id']))
                 {
-                    $worker_dao = new \WDAO\Task_ext_worker();
-                    $workers_result = $worker_dao->countData(array('t_id' => intval($info['data'][0]['t_id'])));
-                    $orders_result  = $this->orders_dao->countData(array(
+                    $begin_status = 'all'; //默认开工状态为全开工
+                    $order_counts = $worker_counts = 0; //数量初始值
+                    $orders_skills_counts = array(); //工种数量数组
+                    //全部订单数量 (含有已开工或未开工)
+                    $orders_result  = $this->orders_dao->listData(array(
                         't_id' => intval($info['data'][0]['t_id']),
                         'o_confirm' => 1,
-                        'o_status' => 0));
+                        'pager' => 0,
+                        'o_status' => array('type' => 'in', 'value' => array(0, -1, -2, -3, 1, 2))));
+                    if (!empty($orders_result['data']))
+                    {
+                        foreach ($orders_result['data'] as $key => $val)
+                        {
+                            if (isset($val['s_id']) && $val['s_id'] > 0)
+                            {
+                                $order_counts += 1;
+                                $orders_skills_counts[$val['s_id']] += 1;
+                            }
+                        }
+                        unset($key, $val);
+                    }
+                    //工人总数
+                    $workers_skills_counts = array();
+                    $worker_dao = new \WDAO\Task_ext_worker();
+                    $workers_result = $worker_dao->listData(array('t_id' => intval($info['data'][0]['t_id']))); //工种数据
+                    if (!empty($workers_result['data']))
+                    {
+                        foreach ($workers_result['data'] as $key => $val)
+                        {
+                            if (isset($val['tew_skills']) && $val['tew_skills'] > 0 && isset($val['tew_worker_num']) && $val['tew_worker_num'] > 0)
+                            {
+                                $workers_skills_counts[$val['tew_skills']] += $val['tew_worker_num'];
+                                $worker_counts += $val['tew_worker_num'];
+                            }
+                        }
+                    }
+                    //当前工种所需工人总数, 当前工种订单总数
+                    if ($orders_skills_counts[$info['data'][0]['s_id']] >= $workers_skills_counts[$info['data'][0]['s_id']])
+                    {
+                        //任务所需工人技能块开工
+                        $worker_dao->updateData(array('tew_type' => 1), array('tew_id' => $info['data'][0]['tew_id']));
+                    }
+
+                    if ($worker_counts > $order_counts) //所需工人总数大于订单工人总数 = 半开工
+                    {
+                        $begin_status = 'half';
+                    }
+
+                    //任务开工状态修改
                     $task_dao = new \WDAO\Tasks();
-                    if ($workers_result == $orders_result)
+                    if ($begin_status == 'all')
                     {//全开工
                         $task_dao->updateData(array('t_status' => 2), array('t_id' => intval($info['data'][0]['t_id'])));
                     }
@@ -183,8 +226,8 @@ class Orders extends \CLASSES\WebBase
             't_id' => $worker_result['t_id'],
             'tew_id' => $worker_result['tew_id'],
             's_id' => $worker_result['tew_skills'],
-            'where' => 'o_confirm > 0 and o_status in (0,1)'));
-        if ($orders_count >= $worker_result['tew_worker_num']) $this->exportData('来晚咯，已经被人捷足先登。');
+            'where' => 'o_confirm > 0 and o_status in (0,1,-1,-2,-3)'));
+        if ($orders_count >= $worker_result['tew_worker_num']) $this->exportData('工人数量已足，无法成单。');
 
         $curtime = time();
         $result = $this->orders_dao->addData(array(
@@ -385,6 +428,7 @@ class Orders extends \CLASSES\WebBase
         if (isset($_REQUEST['o_worker']) && intval($_REQUEST['o_worker']) > 0) $data['o_worker'] = intval($_REQUEST['o_worker']);
         //雇主id
         if (isset($_REQUEST['u_id']) && intval($_REQUEST['u_id']) > 0) $data['u_id'] = intval($_REQUEST['u_id']);
+        if (isset($data['u_id'])) $_REQUEST['t_author'] = $data['u_id'];
         //技能id
         if (isset($_REQUEST['s_id']) && intval($_REQUEST['s_id']) > 0) $data['s_id'] = intval($_REQUEST['s_id']);
         //订单id
@@ -419,13 +463,21 @@ class Orders extends \CLASSES\WebBase
                 $this->exportData('failure');
             }
 
-            //释放工人
-            $user_dao = new \WDAO\Users(array('table' => 'users'));
-            $user_dao->updateData(array('u_task_status' => 0), array('u_id' => $data['o_worker']));
-
-            //变更任务状态
-            $tasks_dao = new \WDAO\Tasks();
-            $tasks_dao->resetTaskToWait($data['t_id']);
+            //获取该任务下该工种是否唯一
+            $task_worker_dao = new \WDAO\Task_ext_worker();
+            $task_worker_count = $task_worker_dao->countData(array('t_id' => $data['t_id'], 'tew_worker_num' => 1));
+            if ($task_worker_count == 1)
+            {
+                $this->payout();
+            }
+            else
+            {
+                //释放工人
+                $this->_resetWorker($data['o_worker']);
+                //变更任务状态
+                //$tasks_dao = new \WDAO\Tasks();
+                //$tasks_dao->resetTaskToWait($data['t_id']);
+            }
 
             if (!empty($tmp)) //添加评价
             {
@@ -512,15 +564,15 @@ class Orders extends \CLASSES\WebBase
             if (!empty($task_data['data'][0]))
             {
                 $order_param = array();
-                //获取该任务所属的全部订单信息
-                $order_param['where'] = 'orders.o_confirm = 1';
+                //获取该任务所属的全部需要支付订单信息
+                $order_param['where'] = 'orders.o_confirm in (1, 2) and task_ext_worker.tew_status = 0 and orders.o_pay = 0';
                 $order_param['join'] = array('task_ext_worker', 'task_ext_worker.tew_id = orders.tew_id and task_ext_worker.tew_skills = orders.s_id and task_ext_worker.t_id = orders.t_id');
                 $order_param['fields'] = 'task_ext_worker.tew_id, task_ext_worker.tew_skills, task_ext_worker.tew_worker_num, task_ext_worker.tew_price, task_ext_worker.tew_start_time, task_ext_worker.tew_end_time,
-                orders.o_id, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_status, orders.o_pay, orders.unbind_time';
+                orders.o_id, orders.o_confirm, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_status, orders.o_pay, orders.unbind_time';
                 $order_param['where'] .= ' and orders.t_id = "' . intval($data['t_id']) . '" and orders.u_id = "' . $data['t_author'] . '"';
                 if (isset($data['tew_id']))
                 {
-                    $order_param['where'] .= ' and orders.tew_id = "' . $data['tew_id'] . '" and orders.o_status not in (1, -4) ';
+                    $order_param['where'] .= ' and orders.tew_id = "' . $data['tew_id'] . '" and orders.o_status in (0, -1, -2) ';
                 }
                 $order_param['pager'] = 0;
                 $orders_data = $this->orders_dao->listData($order_param);
@@ -538,6 +590,8 @@ class Orders extends \CLASSES\WebBase
                             isset($val['o_confirm']) && $val['o_confirm'] == 1 &&
                             isset($val['o_pay']) && $val['o_pay'] == 0)
                         {
+                            //print_r($val);
+                            //continue;
                             $platform_rate = isset($this->web_config['charge_rate']) && $this->web_config['charge_rate'] > 0 ? $this->web_config['charge_rate'] : 0;
                             if ($platform_rate <= 0)
                             {
@@ -581,18 +635,29 @@ class Orders extends \CLASSES\WebBase
                                 }
                             }
 
-                            if ($pay_status != 0)
+                            if ($pay_status == 1)
                             {
                                 //给每个工人单独发钱并单独扣除平台款项
                                 $platform_result = $user_result = 0;
                                 $platform_result = $this->platformFundsLog($val['o_id'], ($original_amount * -1), 0, 'payorder'); //平台资金支出
                                 $user_funds_result = $this->userFunds($val['o_worker'], $original_amount, 'overage'); //工人用户资金收入
-                                $user_dao = new \WDAO\Users(array('table' => 'users'));
-                                $user_result = $user_dao->taskStatus($val['o_worker'], '0'); //释放工人状态
+                                $user_result = $this->_resetWorker($val['o_worker']); //释放工人状态
                                 $pay = $this->orders_dao->payStatus($val['o_id'], '1'); //更新订单支付状态
                                 if (!$platform_result || !$user_funds_result || !$user_result || !$pay) {
                                     $pay_status = 0;
                                 }
+                            }
+                        }
+                        else
+                        {//正在洽谈中的 直接取消用户
+                            if (!empty($val) && isset($val['o_id']) && $val['o_id'] > 0 &&
+                                isset($val['o_amount']) && $val['o_amount'] > 0 &&
+                                isset($val['o_worker']) && $val['o_worker'] > 0 &&
+                                isset($val['o_status']) && in_array($val['o_status'], array(0, -1, -2)) &&
+                                isset($val['o_confirm']) && $val['o_confirm'] == 2 &&
+                                isset($val['o_pay']) && $val['o_pay'] == 0)
+                            {
+                                $this->orders_dao->updateData(array('o_status' => -4), $val);
                             }
                         }
                     }
@@ -648,6 +713,21 @@ class Orders extends \CLASSES\WebBase
             }
         }
         $this->exportData('failure');
+    }
+
+
+    /**
+     * 释放工人
+     *
+     */
+    protected function _resetWorker($worker_id)
+    {
+        if ($worker_id > 0)
+        {
+            $user_dao = new \WDAO\Users(array('table' => 'users'));
+            return $user_dao->taskStatus($worker_id, '0');
+        }
+        return false;
     }
 
 }
