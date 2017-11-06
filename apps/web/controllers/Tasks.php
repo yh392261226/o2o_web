@@ -523,7 +523,7 @@ class Tasks extends \CLASSES\WebBase
         if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']);
         if (isset($_REQUEST['t_author']) && intval($_REQUEST['t_author']) > 0) $data['t_author'] = intval($_REQUEST['t_author']);
 
-        if (!empty($data) && isset($data['t_id']) && isset($data['t_author']) && isset($tmp['t_status']))
+        if (!empty($data) && isset($data['t_id']) && isset($data['t_author']))
         {
             $result = $this->tasks_dao->updateData(array('t_status' => -9), array('t_id' => $data['t_id'], 't_author' => $data['t_author']));
             if ($result)
