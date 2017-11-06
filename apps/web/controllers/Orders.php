@@ -565,14 +565,14 @@ class Orders extends \CLASSES\WebBase
             {
                 $order_param = array();
                 //获取该任务所属的全部需要支付订单信息
-                $order_param['where'] = 'orders.o_confirm = 1 and task_ext_worker.tew_status = 0 and orders.opay = 0';
+                $order_param['where'] = 'orders.o_confirm in (1, 2) and task_ext_worker.tew_status = 0 and orders.o_pay = 0';
                 $order_param['join'] = array('task_ext_worker', 'task_ext_worker.tew_id = orders.tew_id and task_ext_worker.tew_skills = orders.s_id and task_ext_worker.t_id = orders.t_id');
                 $order_param['fields'] = 'task_ext_worker.tew_id, task_ext_worker.tew_skills, task_ext_worker.tew_worker_num, task_ext_worker.tew_price, task_ext_worker.tew_start_time, task_ext_worker.tew_end_time,
                 orders.o_id, orders.o_confirm, orders.t_id, orders.u_id, orders.o_worker, orders.o_amount, orders.o_in_time, orders.o_status, orders.o_pay, orders.unbind_time';
                 $order_param['where'] .= ' and orders.t_id = "' . intval($data['t_id']) . '" and orders.u_id = "' . $data['t_author'] . '"';
                 if (isset($data['tew_id']))
                 {
-                    $order_param['where'] .= ' and orders.tew_id = "' . $data['tew_id'] . '" and orders.o_status not in (1, -4, -8, -9) ';
+                    $order_param['where'] .= ' and orders.tew_id = "' . $data['tew_id'] . '" and orders.o_status in (0, -1, -2) ';
                 }
                 $order_param['pager'] = 0;
                 $orders_data = $this->orders_dao->listData($order_param);
@@ -590,6 +590,8 @@ class Orders extends \CLASSES\WebBase
                             isset($val['o_confirm']) && $val['o_confirm'] == 1 &&
                             isset($val['o_pay']) && $val['o_pay'] == 0)
                         {
+                            //print_r($val);
+                            //continue;
                             $platform_rate = isset($this->web_config['charge_rate']) && $this->web_config['charge_rate'] > 0 ? $this->web_config['charge_rate'] : 0;
                             if ($platform_rate <= 0)
                             {
@@ -644,6 +646,18 @@ class Orders extends \CLASSES\WebBase
                                 if (!$platform_result || !$user_funds_result || !$user_result || !$pay) {
                                     $pay_status = 0;
                                 }
+                            }
+                        }
+                        else
+                        {//正在洽谈中的 直接取消用户
+                            if (!empty($val) && isset($val['o_id']) && $val['o_id'] > 0 &&
+                                isset($val['o_amount']) && $val['o_amount'] > 0 &&
+                                isset($val['o_worker']) && $val['o_worker'] > 0 &&
+                                isset($val['o_status']) && in_array($val['o_status'], array(0, -1, -2)) &&
+                                isset($val['o_confirm']) && $val['o_confirm'] == 2 &&
+                                isset($val['o_pay']) && $val['o_pay'] == 0)
+                            {
+                                $this->orders_dao->updateData(array('o_status' => -4), $val);
                             }
                         }
                     }
