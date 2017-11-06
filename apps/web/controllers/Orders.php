@@ -72,6 +72,7 @@ class Orders extends \CLASSES\WebBase
      */
     private function workerConfirm()
     {
+        //$this->db->debug = 1;
         $data = array();
         if (isset($_REQUEST['o_id']) && intval($_REQUEST['o_id']) > 0) $data['o_id'] = intval($_REQUEST['o_id']); //订单id
         if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']); //任务id
@@ -85,6 +86,7 @@ class Orders extends \CLASSES\WebBase
             $orders_param['where'] = 'o_status = 0';
             $orders_param['order'] = 'o_id desc';
             $info = $this->orders_dao->listData($orders_param);
+            //print_r($info);
 
             if (isset($info['data'][0]) && !empty($info['data'][0]))
             {
@@ -477,6 +479,8 @@ class Orders extends \CLASSES\WebBase
             {
                 //释放工人
                 $this->_resetWorker($data['o_worker']);
+                $this->_resetTask($data['t_id']);
+
                 //变更任务状态
                 //$tasks_dao = new \WDAO\Tasks();
                 //$tasks_dao->resetTaskToWait($data['t_id']);
@@ -535,9 +539,7 @@ class Orders extends \CLASSES\WebBase
             if ($result)
             {
                 //任务状态变更
-                $tasks_dao = new \WDAO\Tasks();
-                $tasks_dao->resetTaskToWait($data['t_id']);
-
+                $this->_resetTask($data['t_id']);
                 $this->exportData('success');
             }
         }
@@ -562,6 +564,7 @@ class Orders extends \CLASSES\WebBase
         {
             $this->exportData('failure');
         }
+        $this->_resetTask($data['t_id']);
         $this->exportData('successs');
     }
 
@@ -589,7 +592,6 @@ class Orders extends \CLASSES\WebBase
 
     /**
      * 释放工人
-     *
      */
     protected function _resetWorker($worker_id)
     {
@@ -601,6 +603,9 @@ class Orders extends \CLASSES\WebBase
         return false;
     }
 
+    /**
+     * 支付
+     */
     protected function _payOut($data = array())
     {
         if (!empty($data) && isset($data['t_author']) && isset($data['t_id']) && isset($data['tew_id']))
@@ -719,6 +724,7 @@ class Orders extends \CLASSES\WebBase
                         {
                             //获取该任务下的全部工种状态
                             $task_result = 1;
+
                             $task_worker_count = $task_worker_dao->countData(array(
                                 't_id' => $data['t_id'],
                                 'tew_status' => 0
@@ -737,6 +743,25 @@ class Orders extends \CLASSES\WebBase
                     }
                     $this->db->rollback();
                 }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 任务置空
+     */
+    protected function _resetTask($t_id)
+    {
+        if (intval($t_id) > 0)
+        {
+            //获取该任务其他未开工的工种信息
+            $workers_dao = new \WDAO\Task_ext_worker();
+            $workers_count = $workers_dao->countData(array('t_id' => $t_id, 'pager' => 0, 'tew_type' => 0));
+            if ($workers_count > 0)
+            {
+                $tasks_dao = new \WDAO\Tasks();
+                return $tasks_dao->resetTaskToWait($data['t_id']);
             }
         }
         return false;
