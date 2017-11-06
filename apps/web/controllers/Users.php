@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-03 11:31:05
+ * @Last Modified time: 2017-11-06 10:09:22
  */
 namespace App\Controller;
 
@@ -93,7 +93,7 @@ class Users extends \CLASSES\WebBase
 
             if($u_id){
                 $token = $this->createToken($data['u_name'],$data['u_pass']);
-                $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.$this->head_format,'u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>-1,'u_id'=>$u_id),1);
+                $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>-1,'u_id'=>$u_id),1);
             }
 
 
@@ -353,7 +353,7 @@ class Users extends \CLASSES\WebBase
             unset($_REQUEST);
             $_REQUEST = $data_r;
 
-        }elseif (empty($_REQUEST['u_id']) || empty($_REQUEST['u_sex']) || empty($_REQUEST['u_true_name']) || empty($_REQUEST['u_idcard']) || empty($_REQUEST['uei_info']) || empty($_REQUEST['uei_address']) || empty($_REQUEST['uei_province']) || empty($_REQUEST['uei_city']) || empty($_REQUEST['uei_area'])){
+        }elseif (empty($_REQUEST['u_id']) || isset($_REQUEST['u_sex']) || empty($_REQUEST['u_true_name']) || empty($_REQUEST['u_idcard']) || empty($_REQUEST['uei_info']) || empty($_REQUEST['uei_address']) || empty($_REQUEST['uei_province']) || empty($_REQUEST['uei_city']) || empty($_REQUEST['uei_area'])){
              $this->exportData( array('msg'=>'参数不足'),0);
         }
         $u_id= intval($_REQUEST['u_id']);
@@ -620,12 +620,15 @@ class Users extends \CLASSES\WebBase
         $withdraw_list = $dao_withdraw_log ->listData(array('u_id'=>$u_id,'pager'=>false,'where' => 'uwl_status > -1', 'fields'=>'uwl_id as id,uwl_amount as amount,uwl_in_time as time,uwl_overage as balances,"withdraw"'));
         }
 
-
+        $time = array();
+        $arr = array();
+        $data = array();
         $data = array_merge($recharge_list['data'],$withdraw_list['data']);
         foreach ($data as $k => $v) {
             $time[$k]  = $v['time'];
             $arr[$k] = $v;
         }
+
         $res = array_multisort($time, SORT_DESC, $arr, SORT_ASC, $data);
 
 
