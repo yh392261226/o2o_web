@@ -180,7 +180,9 @@ class Tasks extends \CLASSES\WebBase
         }
     }
 
-    //详情
+    /**
+     * 详情
+     */
     private function info()
     {
         $info = array();

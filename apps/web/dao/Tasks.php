@@ -62,16 +62,61 @@ class Tasks extends \MDAOBASE\DaoBase
         if (intval($t_id) > 0)
         {
             //获取该任务全部正常订单数
-            $orders_dao = new \WDAO\Orders();
-            $task_orders_count = $orders_dao->countData(array(
+            $task_orders_count = array(
+                'negotiate' => 0, //洽谈中
+                'wait' => 0, //待联系
+            );
+
+            //全部所需工种
+            $task_worker_dao = new \WDAO\Task_ext_worker();
+            $workers_data = $task_worker_dao->listData(array(
                 't_id' => intval($t_id),
-                'o_status' => 0,
+                'tew_type' => 0,
+                'tew_status' => 0,
+                'pager' => 0,
             ));
-            //如果订单数小于等于0  则将任务重置为待领取
-            if ($task_orders_count <= 0)
+
+            if (!empty($workers_data['data']))
             {
+                //全部可用订单信息
+                $orders_dao = new \WDAO\Orders();
+                $orders_data = $orders_dao->listData(array(
+                    't_id' => intval($t_id),
+                    'pager' => 0,
+                    'where' => 'o_status != -4',
+                ));
+
+                if (!empty($orders_data['data']))
+                {
+                    //说明有订单
+                    foreach ($workers_data['data'] as $key => $val)
+                    {
+                        foreach ($orders_data['data'] as $k => $v)
+                        {//订单与可用工种关联且订单在洽谈中状态
+                            if ($val['tew_id'] == $v['tew_id'] && $v['o_status'] = 0 && in_array($v['o_confirm'], array(0, 2)))
+                            {
+                                $task_orders_count['negotiate'] += 1;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    //无订单 直接待联系
+                    $task_orders_count['wait'] += 1;
+                }
+            }
+            else
+            {
+                return false; //无可用工种
+            }
+
+            //如果有待联系或洽谈中 才修改
+            if ($task_orders_count['wait'] > 0 || $task_orders_count['negotiate'] > 0)
+            {
+                $status = ($task_orders_count['negotiate'] > 0) ? 1 : 0;
                 return $this->updateData(array(
-                    't_status' => 0,
+                    't_status' => $status,
                 ), array(
                     't_id' => intval($t_id),
                 ));

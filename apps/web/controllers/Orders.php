@@ -760,14 +760,8 @@ class Orders extends \CLASSES\WebBase
     {
         if (intval($t_id) > 0)
         {
-            //获取该任务其他未开工的工种信息
-            $workers_dao = new \WDAO\Task_ext_worker();
-            $workers_count = $workers_dao->countData(array('t_id' => $t_id, 'pager' => 0, 'tew_type' => 0, 'tew_status' => 0));
-            if ($workers_count > 0)
-            {
-                $tasks_dao = new \WDAO\Tasks();
-                return $tasks_dao->resetTaskToWait($t_id);
-            }
+            $tasks_dao = new \WDAO\Tasks();
+            return $tasks_dao->resetTaskToWait($t_id);
         }
         return false;
     }
