@@ -54,8 +54,8 @@ class Tasks extends \MDAOBASE\DaoBase
     }
 
     /**
-     * 重置任务状态到等待接受
-     *  如果该任务有其他正常订单 则不变动
+     * 重置任务状态到等待接受或洽谈中
+     *  如果该任务有正常工作中订单 则不变动
      */
     public function resetTaskToWait($t_id)
     {
