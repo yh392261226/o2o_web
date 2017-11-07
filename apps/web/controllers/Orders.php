@@ -758,10 +758,11 @@ class Orders extends \CLASSES\WebBase
      */
     protected function _resetTask($t_id)
     {
+        //$this->db->debug = 1;
         if (intval($t_id) > 0)
         {
             $tasks_dao = new \WDAO\Tasks();
-            return $tasks_dao->resetTaskToWait($t_id);
+            return $tasks_dao->resetTaskByLastWork($t_id);
         }
         return false;
     }

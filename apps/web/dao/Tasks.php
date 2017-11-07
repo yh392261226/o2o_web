@@ -54,69 +54,97 @@ class Tasks extends \MDAOBASE\DaoBase
     }
 
     /**
-     * 重置任务状态到等待接受或洽谈中
-     *  如果该任务有正常工作中订单 则不变动
+     * 利用任务剩余工种的状态 重置任务状态
      */
-    public function resetTaskToWait($t_id)
+    public function resetTaskByLastWork($t_id)
     {
         if (intval($t_id) > 0)
         {
-            //获取该任务全部正常订单数
-            $task_orders_count = array(
-                'negotiate' => 0, //洽谈中
-                'wait' => 0, //待联系
-            );
-
-            //全部所需工种
+            $task_status = -1;
+            //获取该任务的所有未完成工种信息
             $task_worker_dao = new \WDAO\Task_ext_worker();
-            $workers_data = $task_worker_dao->listData(array(
+            $workers_data = $task_worker_dao->listData(array( //未完结的都取
                 't_id' => intval($t_id),
-                'tew_type' => 0,
                 'tew_status' => 0,
                 'pager' => 0,
             ));
-
             if (!empty($workers_data['data']))
             {
-                //全部可用订单信息
-                $orders_dao = new \WDAO\Orders();
-                $orders_data = $orders_dao->listData(array(
-                    't_id' => intval($t_id),
-                    'pager' => 0,
-                    'where' => 'o_status != -4',
-                ));
-
-                if (!empty($orders_data['data']))
+                $tmp_tew_ids = $tmp = array();
+                foreach ($workers_data['data'] as $key => $val)
                 {
-                    //说明有订单
-                    foreach ($workers_data['data'] as $key => $val)
+                    if (isset($val['tew_id']) && $val['tew_id'] > 0)
                     {
-                        foreach ($orders_data['data'] as $k => $v)
-                        {//订单与可用工种关联且订单在洽谈中状态
-                            if ($val['tew_id'] == $v['tew_id'] && $v['o_status'] = 0 && in_array($v['o_confirm'], array(0, 2)))
-                            {
-                                $task_orders_count['negotiate'] += 1;
-                            }
-                        }
+                        $tmp_tew_ids[] = $val['tew_id'];
+                        $tmp[$val['tew_id']] = $val;
                     }
                 }
-                else
+                $workers_data = $tmp; //转化下所需工种信息
+                unset($key, $val);
+
+                if (!empty($tmp_tew_ids))
                 {
-                    //无订单 直接待联系
-                    $task_orders_count['wait'] += 1;
+                    //全部订单
+                    $orders_dao = new \WDAO\Orders();
+                    $orders_data = $orders_dao->listData(array(
+                    't_id' => intval($t_id),
+                    'pager' => 0,
+                    'where' => 'o_status != -4 and tew_id in (' . implode(',', $tmp_tew_ids) . ')',
+                    ));
+                    if (!empty($orders_data['data']))
+                    {
+                        //有订单信息
+                        foreach ($orders_data['data'] as $key => $val)
+                        {//所有订单中的工种id
+                            $tmp_order_tew_ids[] = $val['tew_id'];
+                        }
+                        unset($key, $val);
+
+                        foreach ($orders_data['data'] as $key => $val)
+                        {
+                            if (($val['o_status'] == 0 && $val['o_confirm'] == 1 && $val['o_pay'] == 0) || ($val['o_status'] == -3 && $val['o_confirm'] == 1 && $val['o_pay'] == 0))
+                            { //纠纷中 或工作中 都算工作中
+                                $task_status = 2;
+                                break;
+                            }
+                            elseif ($val['o_status'] == 0 && in_array($val['o_confirm'], array(0, 2))) //洽谈中
+                            {
+                                $task_status = 1;
+                                break;
+                            }
+                        }
+                        unset($key, $val);
+
+                        //工作中 且有未开工的单 即为半开工状态
+                        sort($tmp_order_tew_ids);
+                        sort($tmp_tew_ids);
+                        if (!empty($tmp_order_tew_ids) && $tmp_order_tew_ids != $tmp_tew_ids)
+                        {
+                            //有待联系的单
+                            if ($task_status == 2)
+                            {
+                                $task_status = 5;
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        //待联系
+                        $task_status = 0;
+                    }
                 }
             }
             else
             {
-                return false; //无可用工种
+                //都完成了 即任务已经完结
+                $task_status = 3;
             }
 
-            //如果有待联系或洽谈中 才修改
-            if ($task_orders_count['wait'] > 0 || $task_orders_count['negotiate'] > 0)
+            if ($task_status != -1)
             {
-                $status = ($task_orders_count['negotiate'] > 0) ? 1 : 0;
                 return $this->updateData(array(
-                    't_status' => $status,
+                    't_status' => $task_status,
                 ), array(
                     't_id' => intval($t_id),
                 ));
