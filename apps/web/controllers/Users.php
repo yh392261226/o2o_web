@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-06 17:03:36
+ * @Last Modified time: 2017-11-08 10:39:24
  */
 namespace App\Controller;
 
@@ -1062,7 +1062,7 @@ class Users extends \CLASSES\WebBase
             {
                 $res = $dao_users ->WXRecharge($RC_log_id,floatval($url_amount));
                 if($res){
-                    $this->exportData( array('data'=>$res),1);
+                    $this->exportData( $res,1);
                 }else{
                     $this->exportData( array('msg'=>'充值失败!系统错误请联系管理员'),0);
                 }
@@ -1082,31 +1082,42 @@ class Users extends \CLASSES\WebBase
     {
         $dao_recharge_log = new \WDAO\Users(array('table'=>'user_recharge_log'));
         $dao_users = new \WDAO\Users(array('table'=>'users'));
+        // echo WXPAY_PATH.'/example/notify.php';
         require_once WXPAY_PATH.'/example/notify.php';
         $notify = new \MLIB\WXPAY\PayNotifyCallBack();
-        // $data = $notify->Handle(false);
+        $data = $notify->Handle(false);
+        // var_dump($data);die;
+        /*事物开始*/
         $this->db->start();
-        $data = array("appid" => "wx2421b1c4370ec43b","attach" => "支付测试", "bank_type" =>"CFT" ,"fee_type" =>"CNY", "is_subscribe" =>"Y" ,"mch_id" =>"10000100" ,"nonce_str" => "5d2b6c2a8db53831f7eda20af46e531c", "openid" => "oUpF8uMEb4qRXf22hE3X68TekukE", "out_trade_no" => "11", "result_code" =>"SUCCESS", "return_code" =>"SUCCESS" ,"sign" => "B552ED6B279343CB493C5DD0D78AB241" ,"sub_mch_id" =>"10000100" ,"time_end" => "20140903131540" ,"total_fee" =>"1" ,"trade_type" =>"JSAPI" ,"transaction_id" => "1004400740201409030005092168",);
+        $data = array("appid" => "wx2421b1c4370ec43b","attach" => "支付测试", "bank_type" =>"CFT" ,"fee_type" =>"CNY", "is_subscribe" =>"Y" ,"mch_id" =>"10000100" ,"nonce_str" => "5d2b6c2a8db53831f7eda20af46e531c", "openid" => "oUpF8uMEb4qRXf22hE3X68TekukE", "out_trade_no" => "109", "result_code" =>"SUCCESS", "return_code" =>"SUCCESS" ,"sign" => "B552ED6B279343CB493C5DD0D78AB241" ,"sub_mch_id" =>"10000100" ,"time_end" => "20140903131540" ,"total_fee" =>"12" ,"trade_type" =>"APP" ,"transaction_id" => "1004400740201409030005092168",);
         /*微信支付成功后处理返回的数据*/
-        if(!empty(floatval($data['total_fee'])) && $data['result_code'] == 'SUCCESS' && isset($data['out_trade_no'])){
+        if(!empty(floatval($data['total_fee'])) && $data['result_code'] == 'SUCCESS' && isset($data['out_trade_no']))
+        {
 
 
             $total_fee = floatval($data['total_fee']);/*支付金额*/
-            $out_trade_no = $data['out_trade_no'];/*支付单号*/
+            $out_trade_no = $data['out_trade_no'];/*支付申请日志单号*/
             $recharge_data = $dao_recharge_log ->infodata(array('key'=>'url_id','val'=>$out_trade_no));
 
             $c_data = array();
-            if($total_fee != $recharge_data['url_amount']){
+            if($total_fee != $recharge_data['url_amount'])
+            {
                 $c_data['url_remark'] = '用户实际支付金额不等于申请金额,申请金额为'.$recharge_data['url_amount'];
             }
-            if($recharge_data['url_status'] == 1){
+            if($recharge_data['url_status'] == 1)
+            {
                 /*申请重复*/
                 return false;
             }
             $c_data['url_amount'] = $total_fee;
-
-            if(RECHARGE_CONFIRMATION){
+            /*是否自动审核*/
+            if(RECHARGE_CONFIRMATION)
+            {
                 $c_data['url_status'] = 0;
+                $res_recharge_log = $dao_recharge_log -> updateData($c_data,array('url_id' => $recharge_data['url_id']));
+                $this->db->commit();
+                return true;
+
             }else{
                 $c_data['url_status'] = 1;
                 $c_data['url_solut_time'] = time();
@@ -1115,8 +1126,11 @@ class Users extends \CLASSES\WebBase
                 $dao_users_ext_funds = new \WDAO\Users(array('table'=>'users_ext_funds'));
                 /*获取用户当前余额*/
                 $user_url_overage = $dao_users_ext_funds ->infoData(array('key'=>'u_id','val'=>$recharge_data['u_id']));
-                $url_overage = $user_url_overage['uef_overage'] + $recharge_data['url_amount'];
-                $c_data['url_overage'] = $url_overage;
+                if($user_url_overage){
+                    $c_data['url_overage'] = $user_url_overage['uef_overage'] + $c_data['url_amount'];
+                }else{
+                    $c_data['url_overage'] =  $c_data['url_amount'];
+                }
 
                 $res_recharge_log = $dao_recharge_log -> updateData($c_data,array('url_id' => $recharge_data['url_id']));
                 $judge_data = array();
@@ -1124,16 +1138,15 @@ class Users extends \CLASSES\WebBase
                 $judge_data['pfl_amount'] = $total_fee;
                 $judge_data['u_id'] = $recharge_data['u_id'];
                 $res_judgeWX = $dao_users ->judgeResWX($judge_data);
+
+                if($res_judgeWX && $res_recharge_log)
+                {
+                    $this->db->commit();
+                    $this->exportData('success');
+                }else{
+                    $this->db->rollback();
+                }
             }
-
-            if($res_judgeWX && $res_recharge_log){
-                $this->db->commit();
-                $this->exportData('success');
-            }else{
-                $this->db->rollback();
-            }
-
-
 
         }else{
            return false;
