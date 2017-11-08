@@ -2781,6 +2781,25 @@ class WxPayJsApiPay extends WxPayDataBase
 	{
 		$this->values['package'] = $value;
 	}
+
+	/**
+	* 设置订单详情预支付交易会话标识
+	* @param string $value
+	**/
+	public function SetPrepayId($value)
+	{
+		$this->values['prepay_id'] = $value;
+	}
+
+	/**
+	* 设置订单详情商户号
+	* @param string $value
+	**/
+	public function SetPartnerId($value)
+	{
+		$this->values['partnerid'] = $value;
+	}
+
 	/**
 	* 获取订单详情扩展字符串的值
 	* @return 值

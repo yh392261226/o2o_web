@@ -161,7 +161,7 @@ class Users extends \MDAOBASE\DaoBase
         //①、获取用户openid
         $tools = new \MLIB\WXPAY\JsApiPay();
         // $openId = $tools->GetOpenid();
-        $openId = 'wx88a7414f850651c8';
+        // $openId = 'wx88a7414f850651c8';
         //②、统一下单
         $input = new \MLIB\WXPAY\WxPayUnifiedOrder();
         $input->SetBody("新用工充值");
@@ -169,15 +169,16 @@ class Users extends \MDAOBASE\DaoBase
         $input->SetOut_trade_no($RC_log_id);/*充值单号*/
         $input->SetTotal_fee(intval($url_amount*100));
         $input->SetTime_start(date("YmdHis"));
-        $input->SetTime_expire(date("YmdHis", time() + 600));
-        $input->SetGoods_tag("test");
+        $input->SetTime_expire(date("YmdHis", time() + 600));/*十分钟不支付失效*/
+        $input->SetGoods_tag("备注信息");
         $input->SetNotify_url(HOSTURL."/Users/rechargeCallback");
         $input->SetTrade_type("APP");
-        $input->SetOpenid($openId);
+        // $input->SetOpenid($openId);
         $order = \MLIB\WXPAY\WxPayApi::unifiedOrder($input);
-        $jsApiParameters = $tools->GetJsApiParameters($order);
+        // var_dump($order);die;
+        $APPParameters = $tools->GetAPPParameters($order);
 
-        return $jsApiParameters;
+        return $APPParameters;
 
     }
     /*处理微信支付结果添加记录和修改用户金额*/

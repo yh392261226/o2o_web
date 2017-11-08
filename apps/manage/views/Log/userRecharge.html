@@ -209,7 +209,6 @@
     /*提交修改status*/
     function submitChange( val,url_id)
     {
-        alert(1);
         $.ajax({
             url: 'changeRechargeStatus?url_id='+url_id+'&url_status='+val,
             type: 'GET',

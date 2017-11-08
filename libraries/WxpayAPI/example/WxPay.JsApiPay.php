@@ -87,6 +87,39 @@ class JsApiPay
 
 	/**
 	 *
+	 * 获取APP支付的参数
+	 * @param array $UnifiedOrderResult 统一支付接口返回的数据
+	 * @throws WxPayException
+	 *
+	 * @return json数据，可直接填入js函数作为参数
+	 */
+	public function GetAPPParameters($UnifiedOrderResult)
+	{
+		if(!array_key_exists("appid", $UnifiedOrderResult)
+		|| !array_key_exists("prepay_id", $UnifiedOrderResult)
+		|| $UnifiedOrderResult['prepay_id'] == "")
+		{
+			// throw new \MLIB\WXPAY\WxPayException("参数错误");
+			return false;
+		}
+
+		$jsapi = new \MLIB\WXPAY\WxPayJsApiPay();
+		$jsapi->SetAppid($UnifiedOrderResult["appid"]);
+		$timeStamp = time();
+		$jsapi->SetTimeStamp("$timeStamp");
+		$jsapi->SetNonceStr(WxPayApi::getNonceStr());
+		$jsapi->SetPackage('Sign=WXPay');
+		$jsapi->SetPrepayId($UnifiedOrderResult['prepay_id']);
+		$jsapi->SetPartnerId(WxPayConfig::MCHID);
+
+		$jsapi->SetSignType("MD5");
+		$jsapi->SetPaySign($jsapi->MakeSign());
+		$parameters = $jsapi->GetValues();
+		return $parameters;
+	}
+
+	/**
+	 *
 	 * 通过code从工作平台获取openid机器access_token
 	 * @param string $code 微信跳转回来带上的code
 	 *
