@@ -61,6 +61,14 @@ class Orders extends \CLASSES\WebBase
                 {
                     $this->exportData('failure');
                 }
+                $this->msgToUser(array(
+                    'author' => 0,
+                    'type'   => 1,
+                    'status' => 0,
+                    'to_uid' => $info['data'][0]['o_worker'],
+                    'title'  => '【任务：雇主确认】',
+                    'desc'   => '雇主已确认任务，请进入工人工作管理中查看',
+                ));
                 $this->exportData('success');
             }
         }
@@ -166,6 +174,15 @@ class Orders extends \CLASSES\WebBase
                     //变更工人状态为忙
                     $user_dao = new \WDAO\Users(array('table' => 'users'));
                     $user_dao->taskStatus($data['o_worker'], '1');
+                    //发送站内信
+                    $this->msgToUser(array(
+                        'author' => 0,
+                        'type'   => 1,
+                        'status' => 0,
+                        'to_uid' => $info['data'][0]['u_id'],
+                        'title'  => '【任务：工人确认】',
+                        'desc'   => '工人已确认任务，请进入雇主发布任务管理中查看',
+                    ));
                 }
                 $this->exportData('success');
             }
@@ -255,6 +272,15 @@ class Orders extends \CLASSES\WebBase
         ),array(
             't_id' => $worker_result['t_id'],
             't_status' => 0,
+        ));
+        //站内信通知
+        $this->msgToUser(array(
+            'author' => 0,
+            'type'   => 1,
+            'status' => 0,
+            'to_uid' => ($data['o_sponsor'] == $data['o_worker']) ? $info['data'][0]['u_id'] : $info['data'][0]['o_worker'],
+            'title'  => ($data['o_sponsor'] == $data['o_worker']) ? '【任务：有工人接单】' : '【任务：邀约成功】',
+            'desc'   => ($data['o_sponsor'] == $data['o_worker']) ? '有工人接单，请进入雇主发布管理中查看' : '邀约成功，请进入工人工作管理中查看',
         ));
 
         $this->exportData('success');
@@ -393,6 +419,18 @@ class Orders extends \CLASSES\WebBase
                     ),array(
                         'o_id' => $order_info['data'][0]['o_id'],
                     ));
+                    if ($orders_update)
+                    {
+                        //站内信通知
+                        $this->msgToUser(array(
+                            'author' => 0,
+                            'type'   => 1,
+                            'status' => 0,
+                            'to_uid' => $data['o_worker'],
+                            'title'  => '【任务：价格变更】',
+                            'desc'   => '价格变更，请进入工人工作管理中查看',
+                        ));
+                    }
                 }
 
                 //4：多退少补 操作平台与用户资金
@@ -503,6 +541,16 @@ class Orders extends \CLASSES\WebBase
                 ));
             }
 
+            //站内信通知
+            $this->msgToUser(array(
+                'author' => 0,
+                'type'   => 1,
+                'status' => 0,
+                'to_uid' => ($tmp['type'] == 'fire') ? $data['o_worker'] : $data['u_id'],
+                'title'  => ($tmp['type'] == 'fire') ? '【任务：解除关系】' : '【任务：工人辞职】',
+                'desc'   => ($tmp['type'] == 'fire') ? '解除关系，请进入工人工作管理中查看' : '解除关系，请进入雇主发布管理中查看',
+            ));
+
             $this->exportData('success');
         }
         $this->exportData('数据异常');
@@ -514,7 +562,7 @@ class Orders extends \CLASSES\WebBase
     private function cancel()
     {
         //$this->db->debug = 1;
-        $data = $task_param = array();
+        $data = $task_param = $tmp = array();
         if (isset($_REQUEST['o_id']) && intval($_REQUEST['o_id']) > 0) $data['o_id'] = $task_param['o_id'] = intval($_REQUEST['o_id']);
         if (isset($_REQUEST['tew_id']) && intval($_REQUEST['tew_id']) > 0) $data['tew_id'] = $task_param['tew_id'] = intval($_REQUEST['tew_id']);
         if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = $task_param['t_id'] = intval($_REQUEST['t_id']);
@@ -523,6 +571,7 @@ class Orders extends \CLASSES\WebBase
         if (isset($_REQUEST['s_id']) && intval($_REQUEST['s_id']) > 0) $data['s_id'] = $task_param['s_id'] = intval($_REQUEST['s_id']);
         if (isset($_REQUEST['o_confirm']) && is_numeric($_REQUEST['o_confirm'])) $data['o_confirm'] = intval($_REQUEST['o_confirm']);
         if (isset($_REQUEST['o_status']) && is_numeric($_REQUEST['o_status'])) $data['o_status'] = intval($_REQUEST['o_status']);
+        if (isset($_REQUEST['sponsor']) && intval($_REQUEST['sponsor']) > 0) $tmp['sponsor'] = intval($_REQUEST['sponsor']);
 
         if (!empty($data) && (isset($data['o_id']) || (isset($data['tew_id']) && isset($data['t_id']) && isset($data['u_id']) && isset($data['o_worker']) && isset($data['s_id']))))
         {
@@ -543,6 +592,18 @@ class Orders extends \CLASSES\WebBase
             $result = $this->orders_dao->updateData(array('o_status' => -4), $data);
             if ($result)
             {
+                if (!empty($tmp) && isset($tmp['sponsor']) && intval($tmp['sponsor']) > 0)
+                {
+                    //站内信通知
+                    $this->msgToUser(array(
+                        'author' => 0,
+                        'type'   => 1,
+                        'status' => 0,
+                        'to_uid' => ($tmp['sponsor'] == $orders['data'][0]['o_worker']) ? $orders['data'][0]['u_id'] : $orders['data'][0]['o_worker'],
+                        'title'  => '【任务：订单取消】',
+                        'desc'   => ($tmp['sponsor'] == $orders['data'][0]['o_worker']) ? '订单取消，请进入雇主发布管理中查看' : '订单取消，请进入工人工作管理中查看',
+                    ));
+                }
                 //任务状态变更
                 $this->_resetTask($data['t_id']);
                 $this->exportData('success');
@@ -704,6 +765,18 @@ class Orders extends \CLASSES\WebBase
                                 if (!$platform_result || !$user_funds_result || !$user_result || !$pay) {
                                     $pay_status = 0;
                                 }
+                                else
+                                {
+                                    //站内信通知
+                                    $this->msgToUser(array(
+                                        'author' => 0,
+                                        'type'   => 1,
+                                        'status' => 0,
+                                        'to_uid' => $val['o_worker'],
+                                        'title'  => '【任务：订单结算】',
+                                        'desc'   => '订单结算，请进入工人工作管理中查看',
+                                    ));
+                                }
                             }
                         }
                         else
@@ -716,6 +789,15 @@ class Orders extends \CLASSES\WebBase
                                 isset($val['o_pay']) && $val['o_pay'] == 0)
                             {
                                 $this->orders_dao->updateData(array('o_status' => -4), $val);
+                                //站内信通知
+                                $this->msgToUser(array(
+                                    'author' => 0,
+                                    'type'   => 1,
+                                    'status' => 0,
+                                    'to_uid' => $val['o_worker'],
+                                    'title'  => '【任务：订单取消】',
+                                    'desc'   => '订单取消，请进入工人工作管理中查看',
+                                ));
                             }
                         }
                     }
