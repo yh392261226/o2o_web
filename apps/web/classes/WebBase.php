@@ -238,6 +238,31 @@ class WebBase extends Swoole\Controller
         return $platform_funds_dao->addData($log_data);
     }
 
+    /**
+     * 添加消息
+     * @param array $data
+     * @return bool
+     */
+    public function msgToUser($data = array())
+    {
+        if (!empty($data) && isset($data['author']) && isset($data['type']) && isset($data['status']) && isset($data['to_uid']) &&
+            isset($data['title']) && '' != trim($data['title']) && isset($data['desc']))
+        {
+            $web_msg_dao = new \WDAO\Web_msg();
+            $wid = $web_msg_dao->addWebMsg($data);
+            if ($wid > 0)
+            {
+                $user_msg_dao = new \WDAO\User_msg();
+                return $user_msg_dao->addUserMsg(array(
+                    'u_id' => $data['to_uid'],
+                    'wm_id'=> $wid,
+                    'from_id' => $data['author'],
+                ));
+            }
+        }
+        return false;
+    }
+
     /*获取用户头像信息*/
     public function getHeadById($u_id = 0,$ext = '.jpg')
     {
