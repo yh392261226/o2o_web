@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-08 10:39:24
+ * @Last Modified time: 2017-11-08 15:55:07
  */
 namespace App\Controller;
 
@@ -356,6 +356,7 @@ class Users extends \CLASSES\WebBase
         }elseif (empty($_REQUEST['u_id']) || !isset($_REQUEST['u_sex']) || empty($_REQUEST['u_true_name']) || empty($_REQUEST['u_idcard']) || empty($_REQUEST['uei_info']) || empty($_REQUEST['uei_address']) || empty($_REQUEST['uei_province']) || empty($_REQUEST['uei_city']) || empty($_REQUEST['uei_area'])){
              $this->exportData( array('msg'=>'参数不足'),0);
         }
+
         $u_id= intval($_REQUEST['u_id']);
         /*users表*/
         if (isset($_REQUEST['u_phone'])) $data_users['u_phone'] = trim($_REQUEST['u_phone']);
@@ -365,6 +366,14 @@ class Users extends \CLASSES\WebBase
         if (isset($_REQUEST['u_true_name'])) $data_users['u_true_name'] = trim($_REQUEST['u_true_name']);
         if (isset($_REQUEST['u_idcard'])) $data_users['u_idcard'] = trim($_REQUEST['u_idcard']);
         if (isset($_REQUEST['u_skills'])) $data_users['u_skills'] = trim($_REQUEST['u_skills']);
+
+        /*判断传入数据长度*/
+        if(isset($data_users['u_true_name']) && mb_strlen($data_users['u_true_name'],'utf8') > 25) $this->exportData( array('msg'=>'昵称长度最长为25个'),0);
+        if(isset($data_users['u_idcard']) && mb_strlen($data_users['u_idcard'],'utf8') > 19) $this->exportData( array('msg'=>'身份证号长度最长为19个'),0);
+        if(isset($data_ext['uei_info']) && mb_strlen($data_ext['uei_info'],'utf8') > 250) $this->exportData( array('msg'=>'个人简介的最大字符长度为250'),0);
+        if(isset($data_ext['uei_address']) && mb_strlen($data_ext['uei_address'],'utf8') > 80) $this->exportData( array('msg'=>'详细地址信息的最大字符长度为80'),0);
+
+
         /*修改users表内容*/
         $res = 0;
         if(!empty($data_users)){
@@ -384,8 +393,8 @@ class Users extends \CLASSES\WebBase
         if (isset($_REQUEST['uei_city'])) $data_ext['uei_city'] = intval($_REQUEST['uei_city']);
         if (isset($_REQUEST['uei_area'])) $data_ext['uei_area'] = intval($_REQUEST['uei_area']);
         if(isset($data_ext['uei_zip']) && strlen($data_ext['uei_zip']) > 6) $this->exportData( array('msg'=>'邮编的最大字符长度为6'),0);
-        if(isset($data_ext['uei_info']) && mb_strlen($data_ext['uei_info'],'utf8') > 250) $this->exportData( array('msg'=>'个人简介的最大字符长度为250'),0);
-        if(isset($data_ext['uei_address']) && mb_strlen($data_ext['uei_address'],'utf8') > 75) $this->exportData( array('msg'=>'个人简介的最大字符长度为75'),0);
+
+
 
         if(!empty($data_ext)){
             $dao_users_ext = new \WDAO\Users(array('table'=>'users_ext_info'));
@@ -733,18 +742,38 @@ class Users extends \CLASSES\WebBase
         if(empty($_GET['u_id']) || empty($u_id = intval($_GET['u_id']))){
             $this->exportData( array('msg'=>'用户id不能为空'),0);
         }
-
         $page = isset($_GET['page']) && !empty(intval($_GET['page'])) ? intval($_GET['page']) : 1;
+        $wm_type = isset($_GET['wm_type']) && !empty(intval($_GET['wm_type'])) ? intval($_GET['wm_type']) : 3;
 
-        $dao_user_msg = new \WDAO\Users(array('table'=>'user_msg'));
-        $msg_list = $dao_user_msg ->listData(array(
-            'u_id' => $u_id,
+        $time = time();
+        $where =  'um_status != -1
+        AND (web_msg.wm_start_time <= '.$time.' OR web_msg.wm_start_time = 0 )
+        AND (web_msg.wm_end_time >= '.$time.' OR web_msg.wm_end_time = 0)
+        AND wm_status = 1
+        AND user_msg.u_id='.$u_id;
+        switch ($wm_type) {
+            case 0:
+                $where .= ' AND web_msg.wm_type = 0';
+                break;
+            case 1:
+                $where .= ' AND web_msg.wm_type = 1';
+                break;
+            case 2:
+                $where .= ' AND web_msg.wm_type = 2';
+                break;
+            default:
+                $where .= ' ';
+                break;
+        }
+
+        $dao_web_msg = new \WDAO\Users(array('table'=>'web_msg'));
+        $msg_list = $dao_web_msg ->listData(array(
             'pager' => true,
             'page' => $page,
-            'web_msg.wm_status' => 1,
-            'where' => 'um_status != -1',
-            'fields' => 'wm_title,wm_in_time,wm_type,user_msg.wm_id,um_id',
-            'join' => array('web_msg','web_msg.wm_id=user_msg.wm_id '),
+            'where' => $where,
+            'fields' => 'web_msg.wm_title,user_msg.um_in_time,web_msg.wm_type,web_msg.wm_id ,user_msg.um_id',
+            'join' => array('user_msg','web_msg.wm_id=user_msg.wm_id '),
+            'order' => 'user_msg.um_in_time desc',
             ));
         unset($msg_list['pager']);
         $this->exportData( $msg_list,1);
@@ -785,7 +814,7 @@ class Users extends \CLASSES\WebBase
             ),array('um_id'=>$um_id));
         $wm_id = 0;
         $wm_id_arr = $dao_user_msg ->infoData(array('key'=>'um_id','val'=>$um_id,'fields'=>'wm_id,um_id'));
-        if($wm_id_arr['wm_id']){
+        if(isset($wm_id_arr['wm_id'])){
             $wm_id = $wm_id_arr['wm_id'];
         }
 
@@ -798,7 +827,7 @@ class Users extends \CLASSES\WebBase
                 'where' => 'web_msg.wm_id='.$wm_id,
                 'wm_status' => 1,
                 'fields'=>'wm_title,wm_in_time,wm_desc,web_msg_ext.wm_id',
-                'join' => array('web_msg_ext','web_msg.wm_id=web_msg_ext.wm_id '),
+                'leftjoin' => array('web_msg_ext','web_msg.wm_id=web_msg_ext.wm_id '),
                 ));
             unset($info['pager']);
 
@@ -1082,11 +1111,9 @@ class Users extends \CLASSES\WebBase
     {
         $dao_recharge_log = new \WDAO\Users(array('table'=>'user_recharge_log'));
         $dao_users = new \WDAO\Users(array('table'=>'users'));
-        // echo WXPAY_PATH.'/example/notify.php';
         require_once WXPAY_PATH.'/example/notify.php';
         $notify = new \MLIB\WXPAY\PayNotifyCallBack();
         $data = $notify->Handle(false);
-        // var_dump($data);die;
         /*事物开始*/
         $this->db->start();
         $data = array("appid" => "wx2421b1c4370ec43b","attach" => "支付测试", "bank_type" =>"CFT" ,"fee_type" =>"CNY", "is_subscribe" =>"Y" ,"mch_id" =>"10000100" ,"nonce_str" => "5d2b6c2a8db53831f7eda20af46e531c", "openid" => "oUpF8uMEb4qRXf22hE3X68TekukE", "out_trade_no" => "109", "result_code" =>"SUCCESS", "return_code" =>"SUCCESS" ,"sign" => "B552ED6B279343CB493C5DD0D78AB241" ,"sub_mch_id" =>"10000100" ,"time_end" => "20140903131540" ,"total_fee" =>"12" ,"trade_type" =>"APP" ,"transaction_id" => "1004400740201409030005092168",);
