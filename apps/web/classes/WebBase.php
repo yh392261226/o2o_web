@@ -253,16 +253,11 @@ class WebBase extends Swoole\Controller
             if ($wid > 0)
             {
                 $user_msg_dao = new \WDAO\User_msg();
-                $curtime = time();
-                $user_msg_data = array(
+                return $user_msg_dao->addUserMsg(array(
                     'u_id' => $data['to_uid'],
                     'wm_id'=> $wid,
                     'from_id' => $data['author'],
-                    'um_in_time' => $curtime,
-                    'um_status' => 0,
-                    'um_last_edit_time' => $curtime,
-                );
-                return $user_msg_dao->addData($user_msg_data);
+                ));
             }
         }
         return false;
