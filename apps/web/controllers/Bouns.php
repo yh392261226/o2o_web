@@ -28,6 +28,7 @@ class Bouns extends \CLASSES\WebBase
         $list = $data = array();
         $data['where'] = ' bouns.b_status = 1 ';
         if (isset($_REQUEST['uid']) && intval($_REQUEST['uid']) > 0) $data['where'] .= ' and bouns_data.bd_author = "' . intval($_REQUEST['uid']) . '"';
+        if (!isset($_REQUEST['uid']) || intval($_REQUEST['uid']) <= 0) $this->exportData();
         if (isset($_REQUEST['un_uid']) && intval($_REQUEST['un_uid']) > 0)  $data['where'] .= ' and bouns_data.bd_author != "' . intval($_REQUEST['un_uid']) . '"';
         if (isset($_REQUEST['bd_id']) && intval($_REQUEST['bd_id']) > 0) $data['bd_id'] = intval($_REQUEST['bd_id']);
         if (isset($_REQUEST['bt_id']) && intval($_REQUEST['bt_id']) > 0) $data['where'] .= ' and bouns.bt_id = "' . intval($_REQUEST['bt_id']) . '"';
