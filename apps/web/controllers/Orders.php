@@ -265,6 +265,16 @@ class Orders extends \CLASSES\WebBase
             $this->exportData('failure');
         }
 
+        //站内信通知
+        $this->msgToUser(array(
+            'author' => 0,
+            'type'   => 1,
+            'status' => 0,
+            'to_uid' => ($data['o_sponsor'] == $data['o_worker']) ? $worker_result['t_author'] : $data['o_worker'],
+            'title'  => ($data['o_sponsor'] == $data['o_worker']) ? '【任务：有工人接单】' : '【任务：邀约成功】',
+            'desc'   => ($data['o_sponsor'] == $data['o_worker']) ? '有工人接单，请进入雇主发布管理中查看' : '邀约成功，请进入工人工作管理中查看',
+        ));
+
         //成单即更改订单状态为洽谈中
         $task_dao = new \WDAO\Tasks();
         $task_dao->updateData(array(
@@ -272,15 +282,6 @@ class Orders extends \CLASSES\WebBase
         ),array(
             't_id' => $worker_result['t_id'],
             't_status' => 0,
-        ));
-        //站内信通知
-        $this->msgToUser(array(
-            'author' => 0,
-            'type'   => 1,
-            'status' => 0,
-            'to_uid' => ($data['o_sponsor'] == $data['o_worker']) ? $info['data'][0]['u_id'] : $info['data'][0]['o_worker'],
-            'title'  => ($data['o_sponsor'] == $data['o_worker']) ? '【任务：有工人接单】' : '【任务：邀约成功】',
-            'desc'   => ($data['o_sponsor'] == $data['o_worker']) ? '有工人接单，请进入雇主发布管理中查看' : '邀约成功，请进入工人工作管理中查看',
         ));
 
         $this->exportData('success');
@@ -654,7 +655,7 @@ class Orders extends \CLASSES\WebBase
         }
         $this->exportData('failure');
     }
-    
+
     /**
      * 释放工人
      */
