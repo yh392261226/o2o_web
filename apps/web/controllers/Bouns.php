@@ -117,57 +117,59 @@ class Bouns extends \CLASSES\WebBase
 
         if (!empty($info))
         {
-            if ($info['bd_author'] != 0)
-            {
-                $info = array();
-            }
-
             $result = 0;
             if (!empty($info) && isset($_REQUEST['uid']) && intval($_REQUEST['uid']) > 0)
             {
-                $info['bouns'] = $this->bouns_dao->infoData($info['b_id']);
-                //print_r($info);exit;
-                if (!empty($info['bouns']))
+                if ($info['bd_author'] == intval($_REQUEST['uid']))
                 {
-                    if ($info['bouns']['b_start_time'] != 0 && $info['bouns']['b_start_time'] > time())
+                    $info['bouns'] = $this->bouns_dao->infoData($info['b_id']);
+                    if (!empty($info['bouns']))
                     {
-                        $this->exportData('此次领取未开始');exit;
-                    }
-
-                    if ($info['bouns']['b_end_time'] != 0 && $info['bouns']['b_end_time'] < time())
-                    {
-                        $this->exportData('此次领取已结束');exit;
-                    }
-                    $info = $info + $info['bouns'];
-                    unset($info['bouns']);
-                }
-                else
-                {
-                    $this->exportData('数据异常');exit;
-                }
-
-                $info['type'] = $this->bouns_type_dao->infoData($info['bt_id']);
-                if (!empty($info['type']))
-                {
-                    $info = $info + $info['type'];
-                    unset($info['type']);
-                }
-
-                $update_data = array();
-                if ($info['bt_withdraw'] == 0) //抵扣券
-                {
-                    $result = $this->bouns_data_dao->updateData(array('bd_author' => intval($_REQUEST['uid'])), array('bd_id' => $info['bd_id']));
-                }
-                else //红包
-                {
-                    $result = $this->bouns_data_dao->updateData(array('bd_author' => intval($_REQUEST['uid']), 'bd_use_time' => time()), array('bd_id' => $info['bd_id']));
-                    if ($result)
-                    {
-                        //向用户充值表中增加金额
-                        $user_funds_result = $this->userFunds(intval($_REQUEST['uid']), floatval($info['b_amount']));
-                        if ($user_funds_result)
+                        if ($info['bouns']['b_start_time'] != 0 && $info['bouns']['b_start_time'] > time())
                         {
-                            $this->usersRechargeLog(intval($_REQUEST['uid']), floatval($info['b_amount']), '', '', 0, 0);
+                            $this->exportData('使用期限未开始');exit;
+                        }
+
+                        if ($info['bouns']['b_end_time'] != 0 && $info['bouns']['b_end_time'] < time())
+                        {
+                            $this->exportData('使用期限已结束');exit;
+                        }
+                        $info = $info + $info['bouns'];
+                        unset($info['bouns']);
+                    }
+                    else
+                    {
+                        $this->exportData('数据异常');
+                    }
+
+                    $info['type'] = $this->bouns_type_dao->infoData($info['bt_id']);
+                    if (!empty($info['type']))
+                    {
+                        $info = $info + $info['type'];
+                        unset($info['type']);
+                    }
+
+                    if ($info['bd_use_time'] > 0)
+                    {
+                        $this->exportData('已被使用');
+                    }
+
+                    $update_data = array();
+                    if ($info['bt_withdraw'] == 0) //抵扣券
+                    {
+                        $result = $this->bouns_data_dao->updateData(array('bd_author' => intval($_REQUEST['uid'])), array('bd_id' => $info['bd_id']));
+                    }
+                    else //红包
+                    {
+                        $result = $this->bouns_data_dao->updateData(array('bd_use_time' => time()), array('bd_id' => $info['bd_id']));
+                        if ($result)
+                        {
+                            //向用户充值表中增加金额  红包直接当真钱用 所以直接充到 overage
+                            $user_funds_result = $this->userFunds(intval($_REQUEST['uid']), floatval($info['b_amount']), 'overage');
+                            if ($user_funds_result)
+                            {
+                                $this->usersRechargeLog(intval($_REQUEST['uid']), floatval($info['b_amount']), '', '', 0, 0);
+                            }
                         }
                     }
                 }
