@@ -55,6 +55,15 @@ class Orders extends \CLASSES\ManageBase
             //        }
             //    }
             //}
+            $log_dao = new \MDAO\Orders_log();
+            $log_data = array(
+                'o_id' => intval($_REQUEST['o_id']),
+                't_id' => intval($_REQUEST['t_id']) > 0 ? intval($_REQUEST['t_id']) : 0,
+                'ol_remark' => 'changestatus:' . $status,
+                'ol_manager' => self::$manager_status,
+                'ol_in_time' => time(),
+            );
+            $log_dao->addData($log_data);
 
             if ($is_ajax)
             {
@@ -127,6 +136,14 @@ class Orders extends \CLASSES\ManageBase
                     if ($user_funds_result && $user_result && $pay_result)
                     {
                         $this->db->commit();
+                        $log_data = array(
+                            'o_id' => intval($_REQUEST['o_id']),
+                            't_id' => $info['t_id'],
+                            'ol_remark' => 'paybytype:' . $type,
+                            'ol_manager' => self::$manager_status,
+                            'ol_in_time' => time(),
+                        );
+                        $log_dao->addData($log_data);
                         echo json_encode(0);exit;
                     }
                 }

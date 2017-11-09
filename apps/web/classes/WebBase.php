@@ -156,7 +156,7 @@ class WebBase extends Swoole\Controller
      */
     public function usersRechargeLog($uid, $amount, $name = '', $card = '', $status = 0, $payid = 0)
     {
-        if (intval($uid) <= 0 || !is_float($amount) || !is_int($status) || intval($payid) < 0)
+        if (intval($uid) <= 0 || !is_float($amount) || !is_numeric($status) || intval($payid) < 0)
         {
             return false;
         }

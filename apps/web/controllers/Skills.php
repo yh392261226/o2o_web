@@ -27,6 +27,7 @@ class Skills extends \CLASSES\WebBase
         $list = $data = array();
         if (isset($_REQUEST['s_id'])) $data['s_id'] = array('type' => 'in', 'value' => $_REQUEST['s_id']);
         if (isset($_REQUEST['s_name'])) $data['s_name'] = array('type'=>'like', 'value' => trim($_REQUEST['s_name']));
+        $data['s_status'] = 1;
         if (isset($_REQUEST['s_status'])) $data['s_status'] = intval($_REQUEST['s_status']);
         $data['pager'] = 0;
         $data['order'] = 's_id asc';
