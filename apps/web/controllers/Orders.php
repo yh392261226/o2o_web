@@ -654,8 +654,7 @@ class Orders extends \CLASSES\WebBase
         }
         $this->exportData('failure');
     }
-
-
+    
     /**
      * 释放工人
      */

@@ -37,4 +37,13 @@ class Orders extends \MMODEL\ModelBase
         }
         return false;
     }
+
+    public function realDel($data = array())
+    {
+        if (!empty($data))
+        {
+            return parent::delData($data);
+        }
+        return false;
+    }
 }
