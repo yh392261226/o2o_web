@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-08 14:30:07
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-09 13:44:45
+ * @Last Modified time: 2017-11-09 16:23:40
  */
 namespace App\Controller;
 
@@ -39,12 +39,12 @@ class Skills extends \CLASSES\ManageBase
         $this->tpl->assign('data',$arr_skill['data']);
         $this->tpl->display("Skills/index.html");
     }
-    /*加载投诉技能添加模板*/
+    /*加载技能添加模板*/
     public function skillsAdd()
     {
         $this->tpl->display("Skills/skillsAdd.html");
     }
-    /*处理投诉添加数据*/
+    /*处理技能添加数据*/
     public function doSkillsAdd()
     {
         $jump = "/skills/skillsAdd";
@@ -65,6 +65,16 @@ class Skills extends \CLASSES\ManageBase
         $data['s_status'] = isset($_POST['s_status'])?intval($_POST['s_status']):0;
         $data['s_info'] = isset($_POST['s_info'])?trim($_POST['s_info']):'';
         $data['s_desc'] = isset($_POST['s_desc'])?trim($_POST['s_desc']):'';
+        /*判断插入数据长度*/
+        if(isset($data['s_name']) && mb_strlen($data['s_name'],'utf8') > 40){
+            msg("技能名的最大字符长度为40!", $status = 0, $jump);
+        }
+        if(isset($data['s_info']) && mb_strlen($data['s_info'],'utf8') > 40){
+            msg("技能简介的最大字符长度为40!", $status = 0, $jump);
+        }
+        if(isset($data['s_desc']) && mb_strlen($data['s_desc'],'utf8') > 40){
+            msg("简介的最大字符长度为60!", $status = 0, $jump);
+        }
 
         $res = $dao_skills ->addData($data);
         if($res){
@@ -127,6 +137,17 @@ class Skills extends \CLASSES\ManageBase
         $data['s_status'] = isset($_POST['s_status'])?intval($_POST['s_status']):0;
         $data['s_info'] = isset($_POST['s_info'])?trim($_POST['s_info']):'';
         $data['s_desc'] = isset($_POST['s_desc'])?trim($_POST['s_desc']):'';
+
+        /*判断插入数据长度*/
+        if(isset($data['s_name']) && mb_strlen($data['s_name'],'utf8') > 40){
+            msg("技能名的最大字符长度为40!", $status = 0, $jump);
+        }
+        if(isset($data['s_info']) && mb_strlen($data['s_info'],'utf8') > 40){
+            msg("技能简介的最大字符长度为40!", $status = 0, $jump);
+        }
+        if(isset($data['s_desc']) && mb_strlen($data['s_desc'],'utf8') > 40){
+            msg("简介的最大字符长度为60!", $status = 0, $jump);
+        }
 
         $res = $dao_skills -> updateData($data,array('s_id' => $s_id));
         if($res){
