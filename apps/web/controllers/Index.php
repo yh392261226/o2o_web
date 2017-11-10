@@ -66,7 +66,7 @@ class Index extends \CLASSES\WebBase
             'status' => 0,
             'to_uid' => 198,
             'title'  => '【测试】',
-            'desc'   => '这是一个测试',
+            'desc'   => '这是一个测试' . time(),
         ));
     }
 }
