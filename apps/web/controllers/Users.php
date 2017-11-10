@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-10 10:18:31
+ * @Last Modified time: 2017-11-10 10:49:21
  */
 namespace App\Controller;
 
@@ -771,10 +771,10 @@ class Users extends \CLASSES\WebBase
             'pager' => true,
             'page' => $page,
             'where' => $where,
-            'fields' => 'web_msg.wm_title,user_msg.um_in_time,web_msg.wm_type,web_msg.wm_id ,user_msg.um_id,web_msg_ext.wm_desc',
+            'fields' => 'web_msg.wm_title,user_msg.um_in_time,web_msg.wm_type,web_msg.wm_id ,user_msg.um_id,web_msg_ext.wm_desc,user_msg.um_status',
             'join' => array('user_msg','web_msg.wm_id=user_msg.wm_id '),
             'leftjoin' => array('web_msg_ext','web_msg.wm_id=web_msg_ext.wm_id '),
-            'order' => 'user_msg.um_in_time desc',
+            'order' => 'user_msg.um_in_time desc,user_msg.um_status asc',
             ));
         unset($msg_list['pager']);
         $this->exportData( $msg_list,1);
@@ -799,6 +799,23 @@ class Users extends \CLASSES\WebBase
         }
 
 
+    }
+
+    /*修改信息读取状态*/
+    public function msgReadEdit()
+    {
+
+        if(empty($_GET['um_id']) || empty($um_id = intval($_GET['um_id']))){
+            $this->exportData( array('msg'=>'用户站内信关系ID为空'),0);
+        }
+
+        $dao_user_msg = new \WDAO\Users(array('table'=>'user_msg'));
+        $res = $dao_user_msg ->updateData(array('um_status' => '1',),array('um_id'=>$um_id));
+        if($res){
+            $this->exportData( array('msg'=>'状态修改成功'),1);
+        }else{
+            $this->exportData( array('msg'=>'状态修改失败'),0);
+        }
     }
 
     /*站内信详细信息*/
