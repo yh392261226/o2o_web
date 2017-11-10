@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-09 11:05:23
+ * @Last Modified time: 2017-11-10 10:18:31
  */
 namespace App\Controller;
 
@@ -771,8 +771,9 @@ class Users extends \CLASSES\WebBase
             'pager' => true,
             'page' => $page,
             'where' => $where,
-            'fields' => 'web_msg.wm_title,user_msg.um_in_time,web_msg.wm_type,web_msg.wm_id ,user_msg.um_id',
+            'fields' => 'web_msg.wm_title,user_msg.um_in_time,web_msg.wm_type,web_msg.wm_id ,user_msg.um_id,web_msg_ext.wm_desc',
             'join' => array('user_msg','web_msg.wm_id=user_msg.wm_id '),
+            'leftjoin' => array('web_msg_ext','web_msg.wm_id=web_msg_ext.wm_id '),
             'order' => 'user_msg.um_in_time desc',
             ));
         unset($msg_list['pager']);

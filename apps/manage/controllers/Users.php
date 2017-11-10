@@ -9,6 +9,7 @@ class Users extends \CLASSES\ManageBase
         $this->users_dao = new \MDAO\Users();
         $this->users_ext_info_dao = new \MDAO\Users_ext_info();
         $this->users_ext_funds_dao = new \MDAO\Users_ext_funds();
+        $this->user_recharge_log_dao = new \MDAO\User_recharge_log();
         //$this->db->debug = 1;
     }
 
@@ -129,6 +130,57 @@ class Users extends \CLASSES\ManageBase
 
         }
         echo 0;exit;
+    }
+
+    /*ajax 修改用户余额*/
+    public function userFundsEdit()
+    {
+        if( isset($_REQUEST['u_id']) && !empty($u_id = intval($_REQUEST['u_id'])) && isset($_REQUEST['uef_overage']) && !empty($uef_overage = intval($_REQUEST['uef_overage'])))
+        {
+            /*查询当前用户的余额*/
+            $data_recharge = array();
+            $funds_arr = $this->users_ext_funds_dao->listData(array('u_id'=>$u_id,'pager'=>false));
+            if(isset($funds_arr['data'][0]['uef_overage']) || (isset($funds_arr['data'][0]['uef_overage']) && $funds_arr['data'][0]['uef_overage'] == $uef_overage))
+            {
+                $data_recharge['url_amount'] = $uef_overage; /*修改的金额*/
+                $data_recharge['u_id'] = $u_id;
+                $data_recharge['url_overage'] = $funds_arr['data'][0]['uef_overage'];
+                $data_recharge['url_in_time'] = time();
+                $data_recharge['p_id'] = 0;
+                $data_recharge['url_remark'] = 'manageredit';
+                $data_recharge['url_solut_author'] = parent::$manager_status;
+
+                if(intval($data_recharge['url_solut_author']) <= 0 ) {
+                    echo -4;
+                    return false; /*非法操作*/
+                }
+
+                $recharge_id = $this->user_recharge_log_dao ->addData($data_recharge);
+                if(!empty(intval($recharge_id)))
+                {
+                    $res = $this->users_ext_funds_dao -> updateData(array('uef_overage'=>$uef_overage),array('u_id'=>$u_id));
+                    if($res){
+                        echo 1 ;
+                        die;
+                    }else{
+                        echo -3;/*金额修改失败*/
+                        return false;
+                    }
+                }else{
+                    echo -2;/*日志插入失败*/
+                    return false;
+                }
+
+
+            }else{
+                echo -1;/*没有这个工人或者修改金额和当前金额相等*/
+                return false;
+            }
+
+        }else{
+            echo 0 ;/*参数不足*/
+            return false;
+        }
     }
 
 }
