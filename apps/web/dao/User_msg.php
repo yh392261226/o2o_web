@@ -17,7 +17,7 @@ class User_msg extends \MDAOBASE\DaoBase
     {
         if (!empty($data) && isset($data['u_id']) && intval($data['u_id']) > 0 &&
             isset($data['wm_id']) && intval($data['wm_id']) > 0 &&
-            isset($data['from_id']) && intval($data['from_id']) > 0)
+            isset($data['from_id']) && is_numeric($data['from_id']))
         {
             $curtime = time();
             $user_msg_data = array(
