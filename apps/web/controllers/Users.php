@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-10 10:49:21
+ * @Last Modified time: 2017-11-10 14:37:59
  */
 namespace App\Controller;
 
@@ -743,7 +743,7 @@ class Users extends \CLASSES\WebBase
             $this->exportData( array('msg'=>'用户id不能为空'),0);
         }
         $page = isset($_GET['page']) && !empty(intval($_GET['page'])) ? intval($_GET['page']) : 1;
-        $wm_type = isset($_GET['wm_type']) && !empty(intval($_GET['wm_type'])) ? intval($_GET['wm_type']) : 3;
+        $wm_type = isset($_GET['wm_type']) ? intval($_GET['wm_type']) : 3;
 
         $time = time();
         $where =  'um_status != -1
