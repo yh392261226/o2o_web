@@ -63,7 +63,7 @@ class Index extends \CLASSES\WebBase
         $this->msgToUser(array(
             'author' => 0,
             'type'   => 1,
-            'status' => 0,
+            'status' => 1,
             'to_uid' => 198,
             'title'  => '【测试】',
             'desc'   => '这是一个测试' . time(),
