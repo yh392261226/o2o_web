@@ -43,9 +43,12 @@ class Orders extends \MDAOBASE\DaoBase
                         $tmp_ids[] = $val['o_id'];
                     }
                 }
+
                 if (!empty($tmp_ids))
                 {
-                    return $this->updateData(array('o_status' => -4), array('where' => 'o_id in (' . implode(',', $tmp_ids) . ')'));
+                    //return $this->realDel(array('where' => 'o_id in (' . implode(',', $tmp_ids) . ')'));
+                    $update_param = $this->createWhere(array('o_id' => array('type' => 'in', 'value' => $tmp_ids), 'pager' => 0));
+                    return $this->updateData(array('o_status' => -4), $update_param);
                 }
             }
         }
