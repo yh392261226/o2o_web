@@ -55,4 +55,18 @@ class Index extends \CLASSES\WebBase
         echo "<pre>";
         print_r($_REQUEST);
     }
+
+    public function msgtest()
+    {
+        //$this->db->debug = 1;
+        //站内信通知
+        $this->msgToUser(array(
+            'author' => 0,
+            'type'   => 1,
+            'status' => 1,
+            'to_uid' => 198,
+            'title'  => '【测试】',
+            'desc'   => '这是一个测试' . time(),
+        ));
+    }
 }

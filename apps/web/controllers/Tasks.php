@@ -531,12 +531,12 @@ class Tasks extends \CLASSES\WebBase
             $result = $this->tasks_dao->updateData(array('t_status' => -9), array('t_id' => $data['t_id'], 't_author' => $data['t_author']));
             if ($result)
             {
-                $orders_dao = new \WDAO\Orders();
-                $orders_data = $orders_dao->listData(array('t_id' => $data['t_id'], 'u_id' => $data['t_author'], 'pager' => 0));
-                if (!empty($orders_data['data'][0]))
-                {
-
-                }
+                //$orders_dao = new \WDAO\Orders();
+                //$orders_data = $orders_dao->listData(array('t_id' => $data['t_id'], 'u_id' => $data['t_author'], 'pager' => 0));
+                //if (!empty($orders_data['data'][0]))
+                //{
+                //
+                //}
                 $this->exportData('success');
             }
         }
@@ -550,6 +550,7 @@ class Tasks extends \CLASSES\WebBase
      */
     private function del()
     {
+        //$this->db->debug = 1;
         $data = array();
         $del_result = -9;
         if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']);
@@ -581,6 +582,7 @@ class Tasks extends \CLASSES\WebBase
      */
     private function _delTaks($data = array())
     {
+        //$this->db->debug = 1;
         if (isset($data['t_id']) && isset($data['t_author']))
         {
             $task_dao = new \WDAO\Tasks();

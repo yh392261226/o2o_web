@@ -64,7 +64,7 @@ class Orders extends \CLASSES\WebBase
                 $this->msgToUser(array(
                     'author' => 0,
                     'type'   => 1,
-                    'status' => 0,
+                    'status' => 1,
                     'to_uid' => $info['data'][0]['o_worker'],
                     'title'  => '【任务：雇主确认】',
                     'desc'   => '雇主已确认任务，请进入工人工作管理中查看',
@@ -178,7 +178,7 @@ class Orders extends \CLASSES\WebBase
                     $this->msgToUser(array(
                         'author' => 0,
                         'type'   => 1,
-                        'status' => 0,
+                        'status' => 1,
                         'to_uid' => $info['data'][0]['u_id'],
                         'title'  => '【任务：工人确认】',
                         'desc'   => '工人已确认任务，请进入雇主发布任务管理中查看',
@@ -265,6 +265,16 @@ class Orders extends \CLASSES\WebBase
             $this->exportData('failure');
         }
 
+        //站内信通知
+        $this->msgToUser(array(
+            'author' => 0,
+            'type'   => 1,
+            'status' => 1,
+            'to_uid' => ($data['o_sponsor'] == $data['o_worker']) ? $worker_result['t_author'] : $data['o_worker'],
+            'title'  => ($data['o_sponsor'] == $data['o_worker']) ? '【任务：有工人接单】' : '【任务：邀约成功】',
+            'desc'   => ($data['o_sponsor'] == $data['o_worker']) ? '有工人接单，请进入雇主发布管理中查看' : '邀约成功，请进入工人工作管理中查看',
+        ));
+
         //成单即更改订单状态为洽谈中
         $task_dao = new \WDAO\Tasks();
         $task_dao->updateData(array(
@@ -272,15 +282,6 @@ class Orders extends \CLASSES\WebBase
         ),array(
             't_id' => $worker_result['t_id'],
             't_status' => 0,
-        ));
-        //站内信通知
-        $this->msgToUser(array(
-            'author' => 0,
-            'type'   => 1,
-            'status' => 0,
-            'to_uid' => ($data['o_sponsor'] == $data['o_worker']) ? $info['data'][0]['u_id'] : $info['data'][0]['o_worker'],
-            'title'  => ($data['o_sponsor'] == $data['o_worker']) ? '【任务：有工人接单】' : '【任务：邀约成功】',
-            'desc'   => ($data['o_sponsor'] == $data['o_worker']) ? '有工人接单，请进入雇主发布管理中查看' : '邀约成功，请进入工人工作管理中查看',
         ));
 
         $this->exportData('success');
@@ -425,7 +426,7 @@ class Orders extends \CLASSES\WebBase
                         $this->msgToUser(array(
                             'author' => 0,
                             'type'   => 1,
-                            'status' => 0,
+                            'status' => 1,
                             'to_uid' => $data['o_worker'],
                             'title'  => '【任务：价格变更】',
                             'desc'   => '价格变更，请进入工人工作管理中查看',
@@ -545,7 +546,7 @@ class Orders extends \CLASSES\WebBase
             $this->msgToUser(array(
                 'author' => 0,
                 'type'   => 1,
-                'status' => 0,
+                'status' => 1,
                 'to_uid' => ($tmp['type'] == 'fire') ? $data['o_worker'] : $data['u_id'],
                 'title'  => ($tmp['type'] == 'fire') ? '【任务：解除关系】' : '【任务：工人辞职】',
                 'desc'   => ($tmp['type'] == 'fire') ? '解除关系，请进入工人工作管理中查看' : '解除关系，请进入雇主发布管理中查看',
@@ -598,7 +599,7 @@ class Orders extends \CLASSES\WebBase
                     $this->msgToUser(array(
                         'author' => 0,
                         'type'   => 1,
-                        'status' => 0,
+                        'status' => 1,
                         'to_uid' => ($tmp['sponsor'] == $orders['data'][0]['o_worker']) ? $orders['data'][0]['u_id'] : $orders['data'][0]['o_worker'],
                         'title'  => '【任务：订单取消】',
                         'desc'   => ($tmp['sponsor'] == $orders['data'][0]['o_worker']) ? '订单取消，请进入雇主发布管理中查看' : '订单取消，请进入工人工作管理中查看',
@@ -654,7 +655,6 @@ class Orders extends \CLASSES\WebBase
         }
         $this->exportData('failure');
     }
-
 
     /**
      * 释放工人
@@ -771,7 +771,7 @@ class Orders extends \CLASSES\WebBase
                                     $this->msgToUser(array(
                                         'author' => 0,
                                         'type'   => 1,
-                                        'status' => 0,
+                                        'status' => 1,
                                         'to_uid' => $val['o_worker'],
                                         'title'  => '【任务：订单结算】',
                                         'desc'   => '订单结算，请进入工人工作管理中查看',
