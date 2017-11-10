@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-06 11:30:52
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-09 13:33:25
+ * @Last Modified time: 2017-11-09 16:42:17
  */
 
 namespace App\Controller;
@@ -40,6 +40,11 @@ class Complaints extends \CLASSES\ManageBase
         if(!isset($_POST['ct_name']) || !isset($_POST['ct_name'])){
             msg("请填写类型名称", $status = 0, $jump);
         }else{
+            /*判断插入数据长度*/
+            if(isset($_POST['ct_name']) && mb_strlen($_POST['ct_name'],'utf8') > 25){
+                msg("投诉名称的最大字符长度为25!", $status = 0, $jump);
+            }
+
             /*判断分类名是否存在*/
             $res = $dao_complaints ->infoData(array('key'=>'ct_name','val'=>$_POST['ct_name'],'fields'=>'ct_id'));
 
@@ -99,6 +104,10 @@ class Complaints extends \CLASSES\ManageBase
         if(!isset($_POST['ct_name']) || empty($_POST['ct_name']) || !isset($_POST['ct_id']) || empty($_POST['ct_id'])){
             msg("参数不足", $status = 0, $jump);
         }else{
+            /*判断插入数据长度*/
+            if(isset($_POST['ct_name']) && mb_strlen($_POST['ct_name'],'utf8') > 25){
+                msg("投诉名称的最大字符长度为25!", $status = 0, $jump);
+            }
             /*判断分类名是否存在*/
             $res = $dao_complaints ->infoData(array('key'=>'ct_name','val'=>$_POST['ct_name'],'fields'=>'ct_id'));
             $ct_id = intval($_POST['ct_id']);

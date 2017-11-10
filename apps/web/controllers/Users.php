@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-08 15:55:07
+ * @Last Modified time: 2017-11-09 11:05:23
  */
 namespace App\Controller;
 
@@ -93,7 +93,7 @@ class Users extends \CLASSES\WebBase
 
             if($u_id){
                 $token = $this->createToken($data['u_name'],$data['u_pass']);
-                $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>-1,'u_id'=>$u_id),1);
+                $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>-1,'u_id'=>"$u_id"),1);
             }
 
 
@@ -1195,7 +1195,7 @@ class Users extends \CLASSES\WebBase
             $this->exportData( array('msg'=>'评论人id为空'),0);
         }
 
-        $data_c['tc_start'] = $data_c['tc_first_start'] = isset($_REQUEST['tc_start']) ? intval($_REQUEST['tc_start']) : 3;
+        $data_c['tc_start'] = $data_c['tc_first_start'] = isset($_REQUEST['tc_start']) ? intval($_REQUEST['tc_start']) : 0;
         $data_c['tc_type'] = isset($_REQUEST['tc_type']) ? intval($_REQUEST['tc_type']) : 0;
         $data_c['tc_last_edit_time'] = time();
         $data_c['tc_in_time'] = time();
@@ -1215,7 +1215,7 @@ class Users extends \CLASSES\WebBase
                 break;
 
             default:
-                $sql = 'update users set u_high_opinions = u_high_opinions + 1 where u_id = ' . $data_c['tc_u_id'];
+                // $sql = 'update users set u_high_opinions = u_high_opinions + 1 where u_id = ' . $data_c['tc_u_id'];
                 break;
         }
 

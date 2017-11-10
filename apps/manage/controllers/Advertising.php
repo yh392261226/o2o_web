@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-04 17:53:06
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-10-31 11:59:56
+ * @Last Modified time: 2017-11-09 16:29:12
  */
 namespace App\Controller;
 
@@ -79,6 +79,17 @@ class Advertising extends \CLASSES\ManageBase
         $data['a_start_time'] = isset($_POST['a_start_time']) && intval($_POST['a_start_time']) > 0?strtotime($_POST['a_start_time']):0;
         $data['a_end_time'] =  isset($_POST['a_end_time']) && intval($_POST['a_end_time']) > 0?strtotime($_POST['a_end_time']):0;
         $data['a_position'] = (isset($_POST['a_position']) && trim($_POST['a_position']) != '') ? trim($_POST['a_position']) : '';
+
+        /*判断插入数据长度*/
+        if(isset($data['a_title']) && mb_strlen($data['a_title'],'utf8') > 255){
+            msg("广告标题的最大字符长度为255!", $status = 0, $jump);
+        }
+        if(isset($data['a_link']) && mb_strlen($data['a_link'],'utf8') > 255){
+            msg("广告链接的最大字符长度为40!", $status = 0, $jump);
+        }
+        if(isset($data['s_desc']) && mb_strlen($data['a_info'],'utf8') > 255){
+            msg("简介的最大字符长度为60!", $status = 0, $jump);
+        }
 
 
         if(isset($_FILES['a_img']['name'][0])&&!empty($_FILES['a_img']['name'][0])){
@@ -186,6 +197,17 @@ class Advertising extends \CLASSES\ManageBase
         $data['a_start_time'] = isset($_POST['a_start_time']) && intval($_POST['a_start_time']) > 0?strtotime($_POST['a_start_time']):0;
         $data['a_end_time'] =  isset($_POST['a_end_time']) && intval($_POST['a_end_time']) > 0?strtotime($_POST['a_end_time']):0;
         $data['a_position'] = (isset($_POST['a_position']) && trim($_POST['a_position']) != '') ? trim($_POST['a_position']) : '';
+
+        /*判断插入数据长度*/
+        if(isset($data['a_title']) && mb_strlen($data['a_title'],'utf8') > 255){
+            msg("广告标题的最大字符长度为255!", $status = 0, $jump);
+        }
+        if(isset($data['a_link']) && mb_strlen($data['a_link'],'utf8') > 255){
+            msg("广告链接的最大字符长度为40!", $status = 0, $jump);
+        }
+        if(isset($data['s_desc']) && mb_strlen($data['a_info'],'utf8') > 255){
+            msg("简介的最大字符长度为60!", $status = 0, $jump);
+        }
 
         if(isset($_FILES['a_img']['name'][0])&&!empty($_FILES['a_img']['name'][0])){
 

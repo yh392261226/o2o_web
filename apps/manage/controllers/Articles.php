@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-09-06 17:53:10
+ * @Last Modified time: 2017-11-09 14:32:20
  */
 
 namespace App\Controller;
@@ -41,7 +41,7 @@ class Articles extends \CLASSES\ManageBase
     {
         $jump = "/Articles/categoryAdd";
         $dao_article = new \MDAO\Articles(array('table'=>'Articles_category'));
-        if(!isset($_POST['ac_name']) || !isset($_POST['ac_pid']) || empty($_POST['ac_pid']) || empty($_POST['ac_name'])){
+        if(!isset($_POST['ac_name']) || !isset($_POST['ac_pid']) || empty($_POST['ac_name'])){
             msg("请填写分类名并选择父分类名", $status = 0, $jump);
         }else{
             /*判断分类名是否存在*/
@@ -58,6 +58,15 @@ class Articles extends \CLASSES\ManageBase
         $data['ac_name'] = trim($_POST['ac_name']);
         $data['ac_info'] = isset($_POST['ac_info'])&&!empty($_POST['ac_info'])?deepAddslashes(htmlspecialchars($_POST['ac_info'])):"";
         $data['ac_status'] = isset($_POST['ac_status'])?intval($_POST['ac_status']):0;
+
+        /*判断长度*/
+        if(isset($data['ac_name']) && mb_strlen($data['ac_name'],'utf8') > 30){
+            msg("文章分类名称的最大字符长度为30!", $status = 0, $jump);
+        }
+        if(isset($data['ac_info']) && mb_strlen($data['ac_info'],'utf8') > 30){
+            msg("文章分类简介的最大字符长度为30!", $status = 0, $jump);
+        }
+
         if(isset($_FILES['ac_img']['name'])&&!empty($_FILES['ac_img']['name'])){
 
             /*获取文件后缀名*/
@@ -244,6 +253,16 @@ class Articles extends \CLASSES\ManageBase
         $data['ac_name'] = trim($_POST['ac_name']);
         $data['ac_info'] = isset($_POST['ac_info'])&&!empty($_POST['ac_info'])?deepAddslashes(htmlspecialchars($_POST['ac_info'])):"";
         $data['ac_status'] = isset($_POST['ac_status'])?intval($_POST['ac_status']):0;
+
+        /*判断长度*/
+        if(isset($data['ac_name']) && mb_strlen($data['ac_name'],'utf8') > 30){
+            msg("文章分类名称的最大字符长度为30!", $status = 0, $jump);
+        }
+        if(isset($data['ac_info']) && mb_strlen($data['ac_info'],'utf8') > 30){
+            msg("文章分类简介的最大字符长度为30!", $status = 0, $jump);
+        }
+
+
         if(isset($_FILES['ac_img']['name'])&&!empty($_FILES['ac_img']['name'])){
 
             /*获取文件后缀名*/
@@ -411,6 +430,21 @@ class Articles extends \CLASSES\ManageBase
         $data['a_start_time'] = isset($_POST['a_start_time']) && intval($_POST['a_start_time']) > 0?strtotime($_POST['a_start_time']):0;
         $data['a_end_time'] = isset($_POST['a_end_time']) && intval($_POST['a_end_time']) > 0 ?strtotime($_POST['a_end_time']):0;
 
+        /*判断长度*/
+        if(isset($data['a_info']) && mb_strlen($data['a_info'],'utf8') > 30){
+            msg("文章简介的最大字符长度为30!", $status = 0, $jump);
+        }
+        if(isset($data['a_title']) && mb_strlen($data['a_title'],'utf8') > 40){
+            msg("文章标题的最大字符长度为40!", $status = 0, $jump);
+        }
+        if(isset($data['a_link']) && mb_strlen($data['a_link'],'utf8') > 40){
+            msg("文章链接的最大字符长度为40!", $status = 0, $jump);
+        }
+        if(isset($data['a_link']) && mb_strlen($data['a_link'],'utf8') > 40){
+            msg("文章链接的最大字符长度为40!", $status = 0, $jump);
+        }
+
+
         if(isset($_FILES['a_img']['name'][0])&&!empty($_FILES['a_img']['name'][0])){
 
             $up_pic = $this->uploadAll('a_img','a_');
@@ -505,6 +539,20 @@ class Articles extends \CLASSES\ManageBase
         $data['a_start_time'] = isset($_POST['a_start_time']) && intval($_POST['a_start_time']) > 0?strtotime($_POST['a_start_time']):0;
         $data['a_end_time'] = isset($_POST['a_end_time']) && intval($_POST['a_end_time']) > 0 ?strtotime($_POST['a_end_time']):0;
 
+        /*判断长度*/
+        if(isset($data['a_info']) && mb_strlen($data['a_info'],'utf8') > 30){
+            msg("文章简介的最大字符长度为30!", $status = 0, $jump);
+        }
+        if(isset($data['a_title']) && mb_strlen($data['a_title'],'utf8') > 40){
+            msg("文章标题的最大字符长度为40!", $status = 0, $jump);
+        }
+        if(isset($data['a_link']) && mb_strlen($data['a_link'],'utf8') > 40){
+            msg("文章链接的最大字符长度为40!", $status = 0, $jump);
+        }
+        if(isset($data['a_link']) && mb_strlen($data['a_link'],'utf8') > 40){
+            msg("文章链接的最大字符长度为40!", $status = 0, $jump);
+        }
+
 
         if(isset($_FILES['a_img']['name'][0])&&!empty($_FILES['a_img']['name'][0])){
 
@@ -548,7 +596,10 @@ class Articles extends \CLASSES\ManageBase
         if(isset($_GET['a_id']) && !empty($_GET['a_id'])){
             $a_id = intval($_GET['a_id']);
             $dao_article = new \MDAO\Articles(array('table'=>'Articles'));
+            $dao_article_ext = new \MDAO\Articles(array('table'=>'articles_ext'));
+
             $res = $dao_article -> delData($a_id);
+            $res = $dao_article_ext -> delData($a_id);
             if($res){
                 msg("文件删除成功!", $status = 1, $jump);
             }
