@@ -117,7 +117,7 @@
                             </tr>
                             <tr>
                                 <th class="text-nowrap">钱包余额：</th>
-                                <td>{{if $info.funds.uef_overage > 0}}{{$info.funds.uef_overage}}{{/if}}</td>
+                                <td><input type="text" id="overageEdit" value="{{if $info.funds.uef_overage >= 0}}{{$info.funds.uef_overage}}{{/if}}"> <input type="button" value="确定提交" onclick="overageEdit();"></td>
                                 <th class="text-nowrap">代金券余额：</th>
                                 <td>{{if $info.funds.uef_ticket > 0}}{{$info.funds.uef_ticket}}{{/if}}</td>
                                 <th class="text-nowrap">红包余额：</th>
@@ -174,6 +174,50 @@
             radioClass: 'iradio_square-green',
         });
     });
+    /*管理员修改账户余额*/
+    function overageEdit(){
+        var overage = $('#overageEdit').val();
+        var u_id = {{$info.u_id}};
+        $.ajax({
+            url: 'userFundsEdit',
+            type: 'POST',
+            data : {
+                "u_id" : u_id,
+                "uef_overage" : overage,
+            },
+            success : function(result) {
+                if(result==1){
+                    alert('修改成功');
+                }else{
+                    switch (result)
+                    {
+                        case ("-1"):
+                            alert('没有这个工人或者修改金额和当前金额相等');
+                            break;
+                        case ("-2"):
+                            alert('日志插入失败');
+                            break;
+                        case ("-3"):
+                            alert('金额修改失败');
+                            break;
+                        case ("-4"):
+                            alert('非法操作');
+                            break;
+                        case ("0"):
+                            alert('参数不足');
+                            break;
+                        default:
+                            alert('修改失败');
+                            break;
+                    }
+
+                }
+            },
+            error:function() {
+                alert('修改失败');
+            }
+        })
+    }
 </script>
 
 
