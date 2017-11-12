@@ -10,8 +10,9 @@
 require_once 'JSON.php';
 
 $php_path = UPLOADURL.'/kindeditor';
-// var_dump($php_path);die;
-$php_url = '../../uploads/kindeditor';
+
+$php_url = 'static-app.gangjianwang.com/kindeditor';
+// var_dump($php_url);die;
 
 //文件保存目录路径
 $save_path = $php_path . '/attached/';

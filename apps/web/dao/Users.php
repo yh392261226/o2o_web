@@ -155,7 +155,8 @@ class Users extends \MDAOBASE\DaoBase
         require_once WXPAY_PATH.'/example/log.php';
 
         //初始化日志
-        $logHandler= new \MLIB\WXPAY\CLogFileHandler(WXPAY_PATH."/logs/".date('Y-m-d').'.log');
+        // $logHandler= new \MLIB\WXPAY\CLogFileHandler(WXPAY_PATH."/logs/".date('Y-m-d').'.log');
+        $logHandler= new \MLIB\WXPAY\CLogFileHandler("/tmp/wxpay/".date('Y-m-d').'.log');
         $log = \MLIB\WXPAY\Log::Init($logHandler, 15);
 
         //①、获取用户openid
@@ -169,7 +170,7 @@ class Users extends \MDAOBASE\DaoBase
         $input->SetOut_trade_no($RC_log_id);/*充值单号*/
         $input->SetTotal_fee(intval($url_amount*100));
         $input->SetTime_start(date("YmdHis"));
-        $input->SetTime_expire(date("YmdHis", time() + 600));/*十分钟不支付失效*/
+        $input->SetTime_expire(date("YmdHis", time() + 6000));/*100分钟不支付失效*/
         $input->SetGoods_tag("备注信息");
         $input->SetNotify_url(HOSTURL."/Users/rechargeCallback");
         $input->SetTrade_type("APP");

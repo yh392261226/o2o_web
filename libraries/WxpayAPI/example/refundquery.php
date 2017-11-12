@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1" /> 
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>微信支付样例-查退款单</title>
 </head>
 <?php
@@ -11,7 +11,7 @@ require_once "../lib/WxPay.Api.php";
 require_once 'log.php';
 
 //初始化日志
-$logHandler= new CLogFileHandler("../logs/".date('Y-m-d').'.log');
+$logHandler= new CLogFileHandler("/tmp/wxpay/".date('Y-m-d').'.log');
 $log = Log::Init($logHandler, 15);
 
 
@@ -52,9 +52,9 @@ if(isset($_REQUEST["refund_id"]) && $_REQUEST["refund_id"] != ""){
 	printf_info(WxPayApi::refundQuery($input));
 	exit();
 }
-	
+
 ?>
-<body>  
+<body>
 	<form action="#" method="post">
         <div style="margin-left:2%;color:#f00">微信订单号、商户订单号、微信订单号、微信退款单号选填至少一个，微信退款单号优先：</div><br/>
         <div style="margin-left:2%;">微信订单号：</div><br/>

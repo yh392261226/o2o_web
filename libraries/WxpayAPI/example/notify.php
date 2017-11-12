@@ -7,7 +7,7 @@ require_once WXPAY_PATH."/lib/WxPay.Notify.php";
 require_once WXPAY_PATH.'/example/log.php';
 
 // 初始化日志
-$logHandler= new \MLIB\WXPAY\CLogFileHandler(WXPAY_PATH."/logs/".date('Y-m-d').'.log');
+$logHandler= new \MLIB\WXPAY\CLogFileHandler("/tmp/wxpay/".date('Y-m-d').'.log');
 $log = \MLIB\WXPAY\Log::Init($logHandler, 15);
 
 class PayNotifyCallBack extends \MLIB\WXPAY\WxPayNotify
