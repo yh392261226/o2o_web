@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-12 14:31:54
+ * @Last Modified time: 2017-11-12 17:07:44
  */
 namespace App\Controller;
 
@@ -1140,8 +1140,8 @@ class Users extends \CLASSES\WebBase
         {
 
 
-            $total_fee = floatval($data['total_fee']);/*支付金额*/
-            $out_trade_no = $data['out_trade_no'];/*支付申请日志单号*/
+            $total_fee = floatval($data['total_fee']/100);/*支付金额*/
+            $out_trade_no = substr($data['out_trade_no'],9);/*支付申请日志单号*/
             $recharge_data = $dao_recharge_log ->infodata(array('key'=>'url_id','val'=>$out_trade_no));
 
             $c_data = array();
