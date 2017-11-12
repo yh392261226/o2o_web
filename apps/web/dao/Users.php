@@ -158,6 +158,8 @@ class Users extends \MDAOBASE\DaoBase
         // $logHandler= new \MLIB\WXPAY\CLogFileHandler(WXPAY_PATH."/logs/".date('Y-m-d').'.log');
         $logHandler= new \MLIB\WXPAY\CLogFileHandler("/tmp/wxpay/".date('Y-m-d').'.log');
         $log = \MLIB\WXPAY\Log::Init($logHandler, 15);
+        /*生成随机字符串链接日志id避免纯数字商户订单号引起的重复问题*/
+        $trade_no = 'gang'. rand(1000,9999).'_'.$RC_log_id;
 
         //①、获取用户openid
         $tools = new \MLIB\WXPAY\JsApiPay();
@@ -167,13 +169,14 @@ class Users extends \MDAOBASE\DaoBase
         $input = new \MLIB\WXPAY\WxPayUnifiedOrder();
         $input->SetBody("新用工充值");
         $input->SetAttach("test");
-        $input->SetOut_trade_no($RC_log_id);/*充值单号*/
+        $input->SetOut_trade_no($trade_no);/*充值单号*/
         $input->SetTotal_fee(intval($url_amount*100));
         $input->SetTime_start(date("YmdHis"));
         $input->SetTime_expire(date("YmdHis", time() + 6000));/*100分钟不支付失效*/
         $input->SetGoods_tag("备注信息");
         $input->SetNotify_url(HOSTURL."/Users/rechargeCallback");
         $input->SetTrade_type("APP");
+        // var_dump($input);die;
         // $input->SetOpenid($openId);
         $order = \MLIB\WXPAY\WxPayApi::unifiedOrder($input);
         // var_dump($order);die;
