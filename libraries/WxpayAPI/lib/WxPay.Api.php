@@ -414,11 +414,13 @@ class WxPayApi
 	{
 		//获取通知的数据
 		$xml = file_get_contents('php://input');
+		file_put_contents('wxData.xml',$xml);
 		//如果返回成功则验证签名
 		try {
 			$result = WxPayResults::Init($xml);
 		} catch (WxPayException $e){
 			$msg = $e->errorMessage();
+			echo $msg;
 			return false;
 		}
 		return call_user_func($callback, $result);

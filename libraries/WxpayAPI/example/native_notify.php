@@ -7,7 +7,7 @@ require_once '../lib/WxPay.Notify.php';
 require_once 'log.php';
 
 //初始化日志
-$logHandler= new CLogFileHandler("../logs/".date('Y-m-d').'.log');
+$logHandler= new CLogFileHandler("/tmp/wxpay/".date('Y-m-d').'.log');
 $log = Log::Init($logHandler, 15);
 
 class NativeNotifyCallBack extends WxPayNotify
@@ -31,22 +31,22 @@ class NativeNotifyCallBack extends WxPayNotify
 		Log::DEBUG("unifiedorder:" . json_encode($result));
 		return $result;
 	}
-	
+
 	public function NotifyProcess($data, &$msg)
 	{
 		//echo "处理回调";
 		Log::DEBUG("call back:" . json_encode($data));
-		
+
 		if(!array_key_exists("openid", $data) ||
 			!array_key_exists("product_id", $data))
 		{
 			$msg = "回调数据异常";
 			return false;
 		}
-		 
+
 		$openid = $data["openid"];
 		$product_id = $data["product_id"];
-		
+
 		//统一下单
 		$result = $this->unifiedorder($openid, $product_id);
 		if(!array_key_exists("appid", $result) ||
@@ -56,7 +56,7 @@ class NativeNotifyCallBack extends WxPayNotify
 		 	$msg = "统一下单失败";
 		 	return false;
 		 }
-		
+
 		$this->SetData("appid", $result["appid"]);
 		$this->SetData("mch_id", $result["mch_id"]);
 		$this->SetData("nonce_str", WxPayApi::getNonceStr());

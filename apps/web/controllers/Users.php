@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-10 14:37:59
+ * @Last Modified time: 2017-11-12 14:31:54
  */
 namespace App\Controller;
 
@@ -1093,7 +1093,7 @@ class Users extends \CLASSES\WebBase
         if(empty($_REQUEST['u_id']) || empty($u_id = intval($_REQUEST['u_id']))){
             $this->exportData( array('msg'=>'用户ID为空'),0);
         }
-        if(empty($_REQUEST['url_amount']) || empty($url_amount = intval($_REQUEST['url_amount']))){
+        if(empty($_REQUEST['url_amount']) || empty($url_amount = floatval($_REQUEST['url_amount']))){
             $this->exportData( array('msg'=>'充值金额不能为空'),0);
         }
         if(empty($_REQUEST['p_id']) || empty($p_id = intval($_REQUEST['p_id']))){
@@ -1134,7 +1134,7 @@ class Users extends \CLASSES\WebBase
         $data = $notify->Handle(false);
         /*事物开始*/
         $this->db->start();
-        $data = array("appid" => "wx2421b1c4370ec43b","attach" => "支付测试", "bank_type" =>"CFT" ,"fee_type" =>"CNY", "is_subscribe" =>"Y" ,"mch_id" =>"10000100" ,"nonce_str" => "5d2b6c2a8db53831f7eda20af46e531c", "openid" => "oUpF8uMEb4qRXf22hE3X68TekukE", "out_trade_no" => "109", "result_code" =>"SUCCESS", "return_code" =>"SUCCESS" ,"sign" => "B552ED6B279343CB493C5DD0D78AB241" ,"sub_mch_id" =>"10000100" ,"time_end" => "20140903131540" ,"total_fee" =>"12" ,"trade_type" =>"APP" ,"transaction_id" => "1004400740201409030005092168",);
+        // $data = array("appid" => "wx2421b1c4370ec43b","attach" => "支付测试", "bank_type" =>"CFT" ,"fee_type" =>"CNY", "is_subscribe" =>"Y" ,"mch_id" =>"10000100" ,"nonce_str" => "5d2b6c2a8db53831f7eda20af46e531c", "openid" => "oUpF8uMEb4qRXf22hE3X68TekukE", "out_trade_no" => "109", "result_code" =>"SUCCESS", "return_code" =>"SUCCESS" ,"sign" => "B552ED6B279343CB493C5DD0D78AB241" ,"sub_mch_id" =>"10000100" ,"time_end" => "20140903131540" ,"total_fee" =>"12" ,"trade_type" =>"APP" ,"transaction_id" => "1004400740201409030005092168",);
         /*微信支付成功后处理返回的数据*/
         if(!empty(floatval($data['total_fee'])) && $data['result_code'] == 'SUCCESS' && isset($data['out_trade_no']))
         {
