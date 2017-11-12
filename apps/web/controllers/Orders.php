@@ -214,7 +214,7 @@ class Orders extends \CLASSES\WebBase
         $worker_result = $worker_dao->listData(array(
             'pager' => 0,
             'fields' => 'tasks.*, task_ext_worker.*',
-            'where' => 'task_ext_worker.tew_id = ' . intval($data['tew_id']) . ' and task_ext_worker.t_id =' . intval($_REQUEST['t_id']),
+            'where' => 'task_ext_worker.tew_id = ' . intval($data['tew_id']) . ' and task_ext_worker.t_id =' . intval($_REQUEST['t_id']) . ' and tasks.t_status in (0, 1, 5)',
             'join' => array('tasks', 'tasks.t_id = task_ext_worker.t_id'),
             'order' => 'task_ext_worker.tew_id desc',
             ));
