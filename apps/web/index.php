@@ -2,7 +2,6 @@
 define('WEBPATH', dirname(__FILE__));
 date_default_timezone_set('Asia/Shanghai');
 require WEBPATH . '/configs/config.php';
-require CONFIGPATH . '/menu.php';
 require CONFIGPATH . '/fields_type.php';
 require FRAMEWORKPATH . '/libs/lib_config.php';
 require APPPATH.'/public/public.php';
