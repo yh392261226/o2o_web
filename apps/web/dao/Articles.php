@@ -120,10 +120,10 @@ class Articles extends \MDAOBASE\DaoBase
             'pager'=>$pager,'page'=>$page,
             'fields'=>'a_id,a_title,a_in_time,a_link,a_img,a_top,a_recommend' ,
             );
-        $info['a_status'] = 1;
         $time = time();
-        $info['a_end_time'] = array('type' => 'ge', 'ge_value' => $time);
-        $info['a_start_time'] = array('type' => 'le', 'le_value' => $time);
+        $info['where'] = 'a_status=1 AND (a_start_time <= '.$time.' OR a_start_time = 0 )
+        AND (a_end_time >= '.$time.' OR a_end_time = 0)';
+
 
        if($condition['ac_id'] > 0)
        {

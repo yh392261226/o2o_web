@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-08-14 15:57:38
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-12 15:21:47
+ * @Last Modified time: 2017-11-13 11:31:44
  */
 
 namespace App\Controller;
@@ -38,6 +38,13 @@ class Articles extends \CLASSES\WebBase
         /*获取文章列表*/
         $dao_article = new \WDAO\Articles(array('table'=>'Articles'));
         $article_list_arr = $dao_article->getArticleList($condition);
+
+        if(count($article_list_arr['data']) == 1 && $article_list_arr['data'][0]['a_id'] > 0)
+        {
+            $dao_article = new \WDAO\Articles(array('table'=>'articles_ext'));
+            $a_info = $dao_article ->infoData(array('key'=>'a_id','val'=>$article_list_arr['data'][0]['a_id']));
+            $article_list_arr['data'][0]['a_desc'] = isset($a_info['a_desc']) ? htmlspecialchars_decode($a_info['a_desc']) : '';
+        }
         unset($article_list_arr['pager']);
         $this->exportData( $article_list_arr['data'],1);
     }

@@ -11,7 +11,7 @@ require_once 'JSON.php';
 
 $php_path = UPLOADURL.'/kindeditor';
 
-$php_url = 'static-app.gangjianwang.com/kindeditor';
+$php_url = 'http://static-app.gangjianwang.com/kindeditor';
 // var_dump($php_url);die;
 
 //文件保存目录路径

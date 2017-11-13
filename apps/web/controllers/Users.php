@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-12 17:07:44
+ * @Last Modified time: 2017-11-13 10:38:01
  */
 namespace App\Controller;
 
@@ -1026,7 +1026,7 @@ class Users extends \CLASSES\WebBase
         if(empty($_REQUEST['u_id']) || empty($u_id = intval($_REQUEST['u_id']))){
             $this->exportData( array('msg'=>'用户ID为空'),0);
         }
-        if(empty($_REQUEST['uwl_amount']) || empty($uwl_amount = intval($_REQUEST['uwl_amount']))){
+        if(empty($_REQUEST['uwl_amount']) || empty($uwl_amount = floatval($_REQUEST['uwl_amount']))){
             $this->exportData( array('msg'=>'提现金额不能为空'),0);
         }
         if(empty($_REQUEST['p_id']) || empty($p_id = intval($_REQUEST['p_id']))){
@@ -1041,6 +1041,24 @@ class Users extends \CLASSES\WebBase
         if(empty($_REQUEST['u_pass']) || empty($u_pass = trim($_REQUEST['u_pass']))){
             $this->exportData( array('msg'=>'提现密码不能为空'),0);
         }
+
+        /*设置充值额度限制*/
+        if(isset($this ->web_config['withdraw_amount_min']) && $this ->web_config['withdraw_amount_min'] > 0)
+        {
+            if($this ->web_config['withdraw_amount_min'] > $uwl_amount)
+            {
+                $this->exportData( array('msg'=>'提现失败!最小提现金额为'.$this ->web_config['withdraw_amount_min'].'元;'),0);
+            }
+        }
+        if(isset($this ->web_config['withdraw_amount_max']) && $this ->web_config['withdraw_amount_max'] > 0)
+        {
+            if($this ->web_config['withdraw_amount_max'] < $uwl_amount)
+            {
+                $this->exportData( array('msg'=>'提现失败!最大提现金额为'.$this ->web_config['withdraw_amount_max'].'元;'),0);
+            }
+        }
+
+
         /*验证支付密码是否正确*/
         $dao_users = new \WDAO\Users(array('table'=>'users'));
         $check_res = $dao_users ->checkUserPayPassword(array('u_id' =>$u_id,'u_pass' =>$u_pass));
@@ -1093,11 +1111,29 @@ class Users extends \CLASSES\WebBase
         if(empty($_REQUEST['u_id']) || empty($u_id = intval($_REQUEST['u_id']))){
             $this->exportData( array('msg'=>'用户ID为空'),0);
         }
-        if(empty($_REQUEST['url_amount']) || empty($url_amount = floatval($_REQUEST['url_amount']))){
-            $this->exportData( array('msg'=>'充值金额不能为空'),0);
+        if(empty($_REQUEST['url_amount']) || floatval($_REQUEST['url_amount']) <= 0){
+            $this->exportData( array('msg'=>'充值金额必须大于0元'),0);
+        }else{
+            $url_amount = floatval($_REQUEST['url_amount']);
         }
         if(empty($_REQUEST['p_id']) || empty($p_id = intval($_REQUEST['p_id']))){
             $this->exportData( array('msg'=>'支付方式不能为空'),0);
+        }
+
+        /*设置充值额度限制*/
+        if(isset($this ->web_config['recharge_amount_min']) && $this ->web_config['recharge_amount_min'] > 0)
+        {
+            if($this ->web_config['recharge_amount_min'] > $url_amount)
+            {
+                $this->exportData( array('msg'=>'充值失败!最小充值金额为'.$this ->web_config['recharge_amount_min'].'元;'),0);
+            }
+        }
+        if(isset($this ->web_config['recharge_amount_max']) && $this ->web_config['recharge_amount_max'] > 0)
+        {
+            if($this ->web_config['recharge_amount_max'] < $url_amount)
+            {
+                $this->exportData( array('msg'=>'充值失败!最大充值金额为'.$this ->web_config['recharge_amount_max'].'元;'),0);
+            }
         }
 
         /*用户充值申请日志*/
