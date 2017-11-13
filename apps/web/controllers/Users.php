@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-13 15:08:50
+ * @Last Modified time: 2017-11-13 15:25:18
  */
 namespace App\Controller;
 
@@ -93,7 +93,7 @@ class Users extends \CLASSES\WebBase
 
             if($u_id){
                 $token = $this->createToken($data['u_name'],$data['u_pass']);
-                $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id"),1);
+                $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>''),1);
             }
 
 
