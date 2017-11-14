@@ -43,6 +43,13 @@ class Payments extends \CLASSES\WebBase
                     //unset($list['data'][$key]['p_paras']);
                     $list['data'][$key]['p_paras'] = @unserialize($val['p_paras']);
                 }
+
+                /*图片*/
+
+                if($val['p_id'] > 0){
+                   $list['data'][$key]['img'] = $this ->web_config['payments_img_url'].$val['p_id'] .'.png';
+                }
+
             }
             $this->exportData($list['data']);
         }

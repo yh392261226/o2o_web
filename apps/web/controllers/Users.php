@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-13 15:25:18
+ * @Last Modified time: 2017-11-14 15:57:08
  */
 namespace App\Controller;
 
@@ -93,7 +93,7 @@ class Users extends \CLASSES\WebBase
 
             if($u_id){
                 $token = $this->createToken($data['u_name'],$data['u_pass']);
-                $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>''),1);
+                $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'.jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>''),1);
             }
 
 
@@ -618,7 +618,7 @@ class Users extends \CLASSES\WebBase
         $withdraw_list['data'] = array();
         if($category=='recharge' || $category=='all'){
         $dao_recharge_log = new \WDAO\Users(array('table'=>'user_recharge_log'));
-        $recharge_list = $dao_recharge_log ->listData(array('u_id'=>$u_id,'pager'=>false,'url_status'=>1, 'fields'=>'url_amount as amount,url_id as id ,url_in_time as time,url_overage as balances, "recharge"'));
+        $recharge_list = $dao_recharge_log ->listData(array('u_id'=>$u_id,'pager'=>false,'url_status'=>1,'where'=>'p_id != 0','fields'=>'url_amount as amount,url_id as id ,url_in_time as time,url_overage as balances, "recharge"'));
         }
 
 
