@@ -761,7 +761,7 @@ class Orders extends \CLASSES\WebBase
                                 $platform_result = $this->platformFundsLog($val['o_id'], ($original_amount * -1), 0, 'payorder'); //平台资金支出
                                 $user_funds_result = $this->userFunds($val['o_worker'], $original_amount, 'overage'); //工人用户资金收入
                                 $user_result = $this->_resetWorker($val['o_worker']); //释放工人状态
-                                $pay = $this->orders_dao->payStatus($val['o_id'], '1'); //更新订单支付状态
+                                $pay = $this->orders_dao->payStatus($val['o_id'], '1', $val['o_status']); //更新订单支付状态
                                 if (!$platform_result || !$user_funds_result || !$user_result || !$pay) {
                                     $pay_status = 0;
                                 }

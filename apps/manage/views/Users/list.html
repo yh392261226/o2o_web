@@ -39,6 +39,7 @@
                     <tr>
                         <th data-field="state" data-checkbox="true"></th>
                         <th data-field="id" data-sortable="true">ID</th>
+                        <th data-field="truename" data-sortable="true">真实姓名</th>
                         <th data-field="name" data-sortable="true">用户名</th>
                         <th data-field="mobile" data-sortable="true">手机号</th>
                         <th data-field="bindmobile" data-sortable="true">绑定手机</th>
@@ -59,6 +60,7 @@
                     <tr>
                         <td><input type="checkbox" name="p_id" value="{{$value.u_id}}"></td>
                         <td>{{$value.u_id}}</td>
+                        <td>{{$value.u_true_name}}</td>
                         <td>{{$value.u_name}}</td>
                         <td>{{$value.u_mobile}}</td>
                         <td>{{if $value.u_bind_mobile > 0}}{{$value.u_bind_mobile}}{{else}}无{{/if}}</td>
