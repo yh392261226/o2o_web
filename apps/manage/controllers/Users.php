@@ -147,6 +147,7 @@ class Users extends \CLASSES\ManageBase
                 $data_recharge['url_overage'] = $funds_arr['data'][0]['uef_overage'];
                 $data_recharge['url_in_time'] = time();
                 $data_recharge['p_id'] = 0;
+                $data_recharge['url_status'] = 1;
                 $data_recharge['url_remark'] = 'manageredit';
                 $data_recharge['url_solut_author'] = parent::$manager_status;
 
