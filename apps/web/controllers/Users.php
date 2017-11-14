@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-14 15:57:08
+ * @Last Modified time: 2017-11-14 18:08:12
  */
 namespace App\Controller;
 
@@ -598,7 +598,7 @@ class Users extends \CLASSES\WebBase
                 }
 
             }
-            // var_dump($list['data']);die;
+
 
         }
         $this->exportData($list,1);
@@ -618,7 +618,53 @@ class Users extends \CLASSES\WebBase
         $withdraw_list['data'] = array();
         if($category=='recharge' || $category=='all'){
         $dao_recharge_log = new \WDAO\Users(array('table'=>'user_recharge_log'));
-        $recharge_list = $dao_recharge_log ->listData(array('u_id'=>$u_id,'pager'=>false,'url_status'=>1,'where'=>'p_id != 0','fields'=>'url_amount as amount,url_id as id ,url_in_time as time,url_overage as balances, "recharge"'));
+        $recharge_list = $dao_recharge_log ->listData(array('u_id'=>$u_id,'pager'=>false,'url_status'=>1,'where'=>'p_id != 0','fields'=>'url_amount as amount,url_id as id ,url_in_time as time,url_overage as balances, "recharge","normal"'));
+        }
+        /*雇主支付工人工资*/
+
+        if($category=='recharge' || $category=='all' || $category=='payorder'){
+            /*订单*/
+            $dao_orders = new \WDAO\Users(array('table'=>'orders'));
+            $payorder_list_o_worker = $dao_orders ->listData(
+                array(
+                    'o_worker'=>$u_id,
+                    'pager'=>false,
+                    'o_pay'=>1,
+                    'fields'=>'o_id'
+                    )
+                );
+            $o_arr=array();
+            foreach ($payorder_list_o_worker['data'] as $value) {
+                $o_arr[] = $value['o_id'];
+            }
+            $o_str = implode(',',$o_arr);
+
+            $payorder_list['data'] = array();
+            if(!empty($o_str)){
+                /*日志*/
+                $dao_platform_funds_log = new \WDAO\Users(array('table'=>'platform_funds_log'));
+                $payorder_list = $dao_platform_funds_log ->listData(
+                    array(
+
+                        'pager'=>false,
+                        'pfl_reason'=>'payorder',
+                        'where'=>'pfl_type_id IN ('.$o_str.')',
+                        'fields'=>'pfl_amount as amount,pfl_id as id ,pfl_in_time as time,pfl_last_editor as balances, "recharge","payorder"',
+                    )
+                );
+            }
+
+            $time = array();
+            $arr = array();
+            $r_data = array();
+            $r_data = array_merge($recharge_list['data'],$payorder_list['data']);
+            foreach ($r_data as $k => $v) {
+                $time[$k]  = $v['time'];
+                $arr[$k] = $v;
+                $r_data[$k]['amount'] = abs($v['amount']);
+            }
+
+            $res = array_multisort($time, SORT_DESC, $arr, SORT_ASC, $r_data);
         }
 
 
@@ -626,13 +672,58 @@ class Users extends \CLASSES\WebBase
         /*提现*/
         if($category=='withdraw' || $category=='all'){
         $dao_withdraw_log = new \WDAO\Users(array('table'=>'user_withdraw_log'));
-        $withdraw_list = $dao_withdraw_log ->listData(array('u_id'=>$u_id,'pager'=>false,'where' => 'uwl_status > -1', 'fields'=>'uwl_id as id,uwl_amount as amount,uwl_in_time as time,uwl_overage as balances,"withdraw"'));
+        $withdraw_list = $dao_withdraw_log ->listData(array('u_id'=>$u_id,'pager'=>false,'where' => 'uwl_status > -1', 'fields'=>'uwl_id as id,uwl_amount as amount,uwl_in_time as time,uwl_overage as balances,"withdraw","normal"'));
         }
 
+
+        if($category=='withdraw' || $category=='all' || $category=='payorder'){
+            /*订单*/
+            $dao_orders = new \WDAO\Users(array('table'=>'orders'));
+            $payorder_list_u_id = $dao_orders ->listData(
+                array(
+                    'u_id'=>$u_id,
+                    'pager'=>false,
+                    'o_pay'=>1,
+                    'fields'=>'o_id'
+                    )
+                );
+            $o_arr=array();
+            foreach ($payorder_list_u_id['data'] as $value) {
+                $o_arr[] = $value['o_id'];
+            }
+            $o_str = '';
+            $o_str = implode(',',$o_arr);
+
+            $payorder_list['data'] = array();
+            if(!empty($o_str)){
+                /*日志*/
+                $payorder_list = $dao_platform_funds_log ->listData(
+                    array(
+
+                        'pager'=>false,
+                        'pfl_reason'=>'payorder',
+                        'where'=>'pfl_type_id IN ('.$o_str.')',
+                        'fields'=>'pfl_amount as amount,pfl_id as id ,pfl_in_time as time,pfl_last_editor as balances, "withdraw","payorder"',
+                    )
+                );
+            }
+
+            $time = array();
+            $arr = array();
+            $w_data = array();
+            $w_data = array_merge($withdraw_list['data'],$payorder_list['data']);
+            foreach ($w_data as $k => $v) {
+                $time[$k]  = $v['time'];
+                $arr[$k] = $v;
+            }
+
+            $res = array_multisort($time, SORT_DESC, $arr, SORT_ASC, $w_data);
+        }
+/*支出收入订单合并*/
         $time = array();
         $arr = array();
         $data = array();
-        $data = array_merge($recharge_list['data'],$withdraw_list['data']);
+        $data = array_merge($w_data,$r_data);
         foreach ($data as $k => $v) {
             $time[$k]  = $v['time'];
             $arr[$k] = $v;
@@ -642,6 +733,7 @@ class Users extends \CLASSES\WebBase
 
 
         foreach ($data as $key => &$value) {
+            /*类型*/
             if(isset($value['withdraw'])){
                 $value['type'] = 'withdraw';
                 unset($value['withdraw']);
@@ -652,6 +744,7 @@ class Users extends \CLASSES\WebBase
             }else{
 
             }
+
         }
 
         $this->exportData( array('data'=>$data),1);
