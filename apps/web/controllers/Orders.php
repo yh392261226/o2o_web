@@ -728,7 +728,7 @@ class Orders extends \CLASSES\WebBase
                                 $real_total = $real_total - $real_total * $platform_rate;
                                 if ($original_amount > $real_total)
                                 {
-                                    $platform_result = $this->platformFundsLog($val['o_id'], (($original_amount - $real_total) * -1), 0, 'payorder'); //平台资金支出
+                                    $platform_result = $this->platformFundsLog($val['o_id'], (($original_amount - $real_total) * -1), 0, 'taskreturn'); //平台资金支出
                                     $user_funds_result = $this->userFunds($val['o_worker'], ($original_amount - $real_total), 'overage'); //雇主用户资金收入
                                     if (!$platform_result || !$user_funds_result)
                                     {
@@ -744,7 +744,7 @@ class Orders extends \CLASSES\WebBase
                                 $real_total = $real_total - $real_total * $platform_rate;
                                 if ($original_amount > $real_total)
                                 {
-                                    $platform_result = $this->platformFundsLog($val['o_id'], (($original_amount - $real_total) * -1), 0, 'payorder'); //平台资金支出
+                                    $platform_result = $this->platformFundsLog($val['o_id'], (($original_amount - $real_total) * -1), 0, 'taskreturn'); //平台资金支出
                                     $user_funds_result = $this->userFunds($val['o_worker'], ($original_amount - $real_total), 'overage'); //雇主用户资金收入
                                     if (!$platform_result || !$user_funds_result)
                                     {
