@@ -9,7 +9,7 @@ class Orders extends \MDAOBASE\DaoBase
     }
 
     //更改订单的支付状态
-    public function payStatus($oid, $status = 0)
+    public function payStatus($oid, $status = 0, $o_status = 1)
     {
         if (intval($oid) > 0 && -1 < intval($status))
         {
@@ -18,6 +18,10 @@ class Orders extends \MDAOBASE\DaoBase
                 'o_pay_time' => time(),
                 //'o_status' => 1,
             );
+            if ($o_status >= 0)
+            {
+                $data['o_status'] = 1;
+            }
             return $this->updateData($data, array('o_id' => intval($oid)));
         }
         return false;
