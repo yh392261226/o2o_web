@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-14 18:14:11
+ * @Last Modified time: 2017-11-15 16:16:42
  */
 namespace App\Controller;
 
@@ -81,23 +81,17 @@ class Users extends \CLASSES\WebBase
             $data['u_in_time'] = $time;
             $data['u_last_edit_time'] = $time;
             $data['u_token'] = $time;
-            $u_id = $dao_users ->addData($data);
 
-            /*占位表*/
-            $dao_users_position = new \WDAO\Users(array('table'=>'users_cur_position'));
-            $dao_users_funds = new \WDAO\Users(array('table'=>'users_ext_funds'));
-            $dao_users_info = new \WDAO\Users(array('table'=>'users_ext_info'));
-            $dao_users_position ->addData(array('u_id'=>$u_id));
-            $dao_users_funds ->addData(array('u_id'=>$u_id));
-            $dao_users_info ->addData(array('u_id'=>$u_id));
 
-            if($u_id){
+            $u_id = $dao_users ->addUser($this,$data);
+
+            if ($u_id)
+            {
                 $token = $this->createToken($data['u_name'],$data['u_pass']);
                 $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'.jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>''),1);
+            }else{
+                $this->exportData(array('msg'=>'注册失败,请重新注册'),0);
             }
-
-
-
         }
 
 

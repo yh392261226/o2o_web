@@ -231,5 +231,26 @@ class Users extends \MDAOBASE\DaoBase
         return false;
     }
 
+    /*注册用户*/
+    public function Adduser($users_con,$data)
+    {
+        $users_con->db->start();
+        $dao_users = new \WDAO\Users(array('table'=>'users'));
+        $u_id = $dao_users ->addData($data);
+        /*占位表*/
+        $dao_users_position = new \WDAO\Users(array('table'=>'users_cur_position'));
+        $dao_users_funds = new \WDAO\Users(array('table'=>'users_ext_funds'));
+        $dao_users_info = new \WDAO\Users(array('table'=>'users_ext_info'));
+        if ($dao_users_position ->addData(array('u_id'=>$u_id)) &&
+        $dao_users_funds ->addData(array('u_id'=>$u_id)) &&
+        $dao_users_info ->addData(array('u_id'=>$u_id)))
+        {
+            $users_con->db->commit();
+            return $u_id;
+        }
+        $users_con->db->rollback();
+        return false;
+    }
+
 
 }
