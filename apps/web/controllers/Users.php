@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-15 16:16:42
+ * @Last Modified time: 2017-11-16 16:48:40
  */
 namespace App\Controller;
 
@@ -607,6 +607,9 @@ class Users extends \CLASSES\WebBase
             $this->exportData( array('msg'=>'用户id不能为空'),0);
         }
         $category = !empty($_GET['category'])  ? trim($_GET['category']) : 'all';
+        $dao_platform_funds_log = new \WDAO\Users(array('table'=>'platform_funds_log'));
+        $r_data = array();
+        $w_data = array();
         /*充值*/
         $recharge_list['data'] = array();
         $withdraw_list['data'] = array();
@@ -636,7 +639,6 @@ class Users extends \CLASSES\WebBase
             $payorder_list['data'] = array();
             if(!empty($o_str)){
                 /*日志*/
-                $dao_platform_funds_log = new \WDAO\Users(array('table'=>'platform_funds_log'));
                 $payorder_list = $dao_platform_funds_log ->listData(
                     array(
 
@@ -650,7 +652,6 @@ class Users extends \CLASSES\WebBase
 
             $time = array();
             $arr = array();
-            $r_data = array();
             $r_data = array_merge($recharge_list['data'],$payorder_list['data']);
             foreach ($r_data as $k => $v) {
                 $time[$k]  = $v['time'];
@@ -704,7 +705,6 @@ class Users extends \CLASSES\WebBase
 
             $time = array();
             $arr = array();
-            $w_data = array();
             $w_data = array_merge($withdraw_list['data'],$payorder_list['data']);
             foreach ($w_data as $k => $v) {
                 $time[$k]  = $v['time'];
