@@ -220,12 +220,19 @@ class WebBase extends Swoole\Controller
      * @param int $status
      * @return bool
      */
-    public function platformFundsLog($type_id, $amount, $type = 0, $reason = '', $status = 0)
+    public function platformFundsLog($type_id, $amount, $type = 0, $reason = '', $status = 0, $rate = 0)
     {
         if (intval($type_id) < 1)
         {
             return false;
         }
+
+        //获取当前费率
+        if ($rate <= 0)
+        {
+            $rate = isset($this->web_config['charge_rate']) && $this->web_config['charge_rate'] > 0 ? $this->web_config['charge_rate'] : 0;
+        }
+
         $platform_funds_dao = new \WDAO\Platform_funds_log();
         $log_data = array(
             'pfl_type' => $type,
@@ -234,6 +241,7 @@ class WebBase extends Swoole\Controller
             'pfl_in_time' => time(),
             'pfl_reason' => $reason,
             'pfl_status' => $status,
+            'pfl_rate'   => $rate,
         );
         return $platform_funds_dao->addData($log_data);
     }
