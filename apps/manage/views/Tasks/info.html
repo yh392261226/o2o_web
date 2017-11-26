@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>任务详情</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="{{$manageurl}}css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="{{$manageurl}}css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="{{$manageurl}}css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/animate.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/style.css?v=4.1.0" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+<div class="wrapper-content animated fadeInRight">
+    <div class="ibox-content">
+        <div class="form-horizontal has-success">
+            <div class="form-group">
+                <div class="col-sm-4">
+                    <label class="col-sm-3 control-label">发布人：&nbsp;</label>
+                    <label class="col-sm-9 form-control-static">{{$info.t_author}}</label>
+                </div>
+                <div class="col-sm-4">
+                    <label class="col-sm-3 control-label">任务总价：&nbsp;</label>
+                    <label class="col-sm-9 form-control-static">初始价格：{{$info.t_amount}} / 最终价格：{{if $info.t_edit_amount > 0}}{{$info.t_edit_amount}}{{else}}{{$info.t_amount}}{{/if}}</label>
+                </div>
+            </div>
+            <div class="hr-line-dashed"></div>
+            <div class="form-group ">
+                <div class="col-sm-4">
+                    <label class="col-sm-3 control-label">修改次数：&nbsp;</label>
+                    <label class="col-sm-9 form-control-static">{{$info.t_amount_edit_times}}</label>
+                </div>
+                <div class="col-sm-4">
+                    <label class="col-sm-3 control-label">任务状态：&nbsp;</label>
+                    <label class="col-sm-9 form-control-static">
+                        {{if $info.t_status == -9}}发布者删除{{/if}}
+                        {{if $info.t_status == -3}}纠纷关闭{{/if}}
+                        {{if $info.t_status == -2}}管理员关闭{{/if}}
+                        {{if $info.t_status == -1}}发布者关闭{{/if}}
+                        {{if $info.t_status == 0}}等待认领{{/if}}
+                        {{if $info.t_status == 1}}洽谈中{{/if}}
+                        {{if $info.t_status == 2}}工作中{{/if}}
+                        {{if $info.t_status == 3}}工作完成{{/if}}
+                        {{if $info.t_status == 4}}纠纷解决{{/if}}
+                        {{if $info.t_status == 5}}工种不全开工{{/if}}
+                    </label>
+                </div>
+            </div>
+            <div class="hr-line-dashed"></div>
+            <div class="form-group ">
+                <div class="col-sm-4">
+                    <label class="col-sm-3 control-label">联系电话：&nbsp;</label>
+                    <label class="col-sm-9 form-control-static">{{if $info.t_phone > 0}}{{$info.t_phone}}{{/if}}</label>
+                </div>
+                <div class="col-sm-4">
+                    <label class="col-sm-3 control-label">电话状态：&nbsp;</label>
+                    <label class="col-sm-9 form-control-static">
+                        {{if $info.t_phone > 0}}
+                        {{if $info.t_phone_status == 0}}隐藏{{/if}}
+                        {{if $info.t_phone_status == 1}}显示{{/if}}
+                        {{/if}}
+                    </label>
+                </div>
+            </div>
+        </div>
+   </div>
+        <div class="hr-line-dashed"></div>
+        {{if $info.workers}}
+        {{foreach from=$info.workers item=workers}}
+        <div class="ibox-content">
+                <div class="form-horizontal has-success">
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">技能：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{$workers.s_name}}</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">所需数量：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{$workers.tew_worker_num}}</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">工人单价：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{$workers.tew_price}}</label>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">开始：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{if $workers.tew_start_time > 0}}{{$workers.tew_start_time|date_format:"%y-%m-%d %H:%M:%S"}}{{/if}}</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">结束：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{if $workers.tew_end_time > 0}}{{$workers.tew_end_time|date_format:"%y-%m-%d %H:%M:%S"}}{{/if}}</label>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">省：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{$regions_cache[$workers.r_province].r_name}}</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">市：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{$regions_cache[$workers.r_city].r_name}}</label>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">区：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{$regions_cache[$workers.r_area].r_name}}</label>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        <label class="col-sm-3 control-label">详细地址：&nbsp;</label>
+                        <label class="col-sm-9 form-control-static">{{$workers.tew_address}}</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hr-line-dashed"></div>
+
+        <div class="col-sm-12">
+        <!-- Example Events -->
+        <div class="example-wrap">
+            <div class="example">
+                <table class="exampleTableEvents" data-height="400" data-mobile-responsive="true" data-striped="true">
+                    <thead>
+                    <tr>
+                        <!--<th data-field="state" data-checkbox="true"></th>-->
+                        <th data-field="id" data-sortable="true">ID</th>
+                        <th data-field="worker" data-sortable="true">工人</th>
+                        <th data-field="skills" data-sortable="true">工种</th>
+                        <th data-field="status" data-sortable="true">价格</th>
+                        <th data-field="start_time" data-sortable="true">添加时间</th>
+                        <th data-field="end_time" data-sortable="true">上一次修改时间</th>
+                        <th data-field="in_time" data-sortable="true">状态</th>
+                        <th data-field="action" data-sortable="true">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{if $orders_list.data}}
+                    {{foreach from=$orders_list.data item=value}}
+                    {{if $workers.tew_skills eq $value.s_id}}
+                    <tr>
+                        <!--<td><input type="checkbox" name="p_id" value="{{$value.o_id}}"></td>-->
+                        <td>{{$value.o_id}}</td>
+                        <td>{{$value.o_worker}}</td>
+                        <td>{{$value.s_id}}</td>
+                        <td>{{$value.o_amount}}</td>
+                        <td>{{$value.o_in_time|date_format:"%y-%m-%d %H:%M:%S"}}</td>
+                        <td>{{if $value.o_last_edit_time > 0}}{{$value.o_last_edit_time|date_format:"%y-%m-%d %H:%M:%S"}}{{/if}}</td>
+                        <td>
+                            {{if $value.o_status == -9}}工人删除{{/if}}
+                            {{if $value.o_status == -8}}雇主删除{{/if}}
+                            {{if $value.o_status == -4}}取消{{/if}}
+                            {{if $value.o_status == -3}}纠纷中{{/if}}
+                            {{if $value.o_status == -2}}解雇工人{{/if}}
+                            {{if $value.o_status == -1}}工人辞职{{/if}}
+                            {{if $value.o_status == 0}}工作中{{/if}}
+                            {{if $value.o_status == 1}}工作完成{{/if}}
+                            {{if $value.o_status == 2}}纠纷解决{{/if}}
+                            {{if $value.o_pay == 1}}&已支付{{/if}}
+
+                        </td>
+                        <td>
+                            <!-- <a href="/Orders/status?o_id={{$value.o_id}}">详情</a> -->
+                            <select class="input-sm col-md-4 input-s-sm inline" name="" id="" onchange="changeStatus(this.value,{{$value.o_id}});">
+                                <option value="0">请选择</option>
+                                <option value="-4" {{if $value.o_status == -4}}selected="selected"{{/if}} >取消</option>
+                                <option value="-3" {{if $value.o_status == -3}}selected="selected"{{/if}} >纠纷中</option>
+                                <option value="2" {{if $value.o_status == 2}}selected="selected"{{/if}} >纠纷解决</option>
+                            </select>
+                            {{if $value.o_status eq 2 && $value.o_pay eq 0}}
+                            <div id="pay_type_{{$value.o_id}}">
+                                <div class="col-md-3">
+                                    <input type="button" onclick="payByType({{$value.o_id}}, 0);" class="input-sm form-control input-s-sm inline" value="按辞职支付">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="button" onclick="payByType({{$value.o_id}}, 1);" class="input-sm form-control input-s-sm inline" value="按解雇支付">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="button" onclick="payByType({{$value.o_id}}, 2);" class="input-sm form-control input-s-sm inline" value="按全款支付">
+                                </div>
+                            </div>
+                            {{/if}}
+                        </td>
+                    </tr>
+                    {{/if}}
+                    {{/foreach}}
+                    {{/if}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- End Example Events -->
+        </div>
+
+        {{/foreach}}
+        {{/if}}
+        <div class="hr-line-dashed"></div>
+        <div class="ibox-content">
+                <div class="form-horizontal has-success">
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <label class="col-sm-1 control-label">标题：</label>
+                        <label class="col-sm-9 form-control-static">{{$info.t_title}}</label>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <label class="col-sm-1 control-label">简介：</label>
+                        <label class="col-sm-9 form-control-static">{{$info.t_info}}</label>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <label class="col-sm-1 control-label">详情：</label>
+                        <label class="col-sm-9 form-control-static">{{$info.t_desc}}</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</div>
+
+<!-- End Panel Other -->
+
+<!-- 全局js -->
+<script src="{{$manageurl}}js/jquery.min.js?v=2.1.4"></script>
+<script src="{{$manageurl}}js/bootstrap.min.js?v=3.3.6"></script>
+
+<!-- 自定义js -->
+<script src="{{$manageurl}}js/content.js?v=1.0.0"></script>
+
+
+<!-- Bootstrap table -->
+<script src="{{$manageurl}}js/plugins/bootstrap-table/bootstrap-table.min.js"></script>
+<script src="{{$manageurl}}js/plugins/bootstrap-table/bootstrap-table-mobile.min.js"></script>
+<script src="{{$manageurl}}js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js"></script>
+
+<!-- Peity -->
+<script src="{{$manageurl}}js/demo/bootstrap-table-demo.js"></script>
+<script>
+    /*提交修改c_status*/
+    function changeStatus(val,oid)
+    {
+        if (val != 0) {
+            $.ajax({
+                url: '/Orders/cStatus?is_ajax=1&o_id='+oid+'&status='+val,
+                type: 'GET',
+                success : function(result) {
+                    result = eval('('+result+')');
+                    if (val == 2) {
+                        $('#pay_type_' + oid).show();
+                    }
+                    alert(result.msg);return false;
+                },
+                error:function() {
+                    alert('修改失败了');return false;
+                }
+            })
+        }
+    }
+
+    function payByType(id, type) {
+        if (id > 0 && type != 'undefined') {
+            $.ajax({
+                url:'/Orders/payByType?is_ajax=1&o_id='+id+'&type='+type,
+                type:'GET',
+                success:function(result) {
+                    if (result == 0) {
+                        alert('操作成功');
+                    } else {
+                        alert('操作失败');
+                    }
+                    return false;
+                },
+                error:function() {
+                    alert('操作失败');return false;
+                }
+            });
+        }
+    }
+</script>
+
+
+
+</body>
+
+</html>

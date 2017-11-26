@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>投诉分类列表</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+
+    <link rel="shortcut icon" href="favicon.ico"> <link href="{{$manageurl}}css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="{{$manageurl}}css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="{{$manageurl}}css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/animate.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/style.css?v=4.1.0" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+
+
+        <div class="col-sm-12">
+            <!-- Example Events -->
+
+            <div class="example-wrap">
+                <div class="example">
+
+                    <div class="btn-group hidden-xs" id="exampleTableEventsToolbar" role="group">
+                        <button type="button" class="btn btn-outline btn-default" onclick="window.location.href='/Complaints/categoryAdd';">
+                            <i class="glyphicon glyphicon-plus" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline btn-default">
+                            <i class="glyphicon glyphicon-trash" aria-hidden="true"></i>
+                        </button>
+
+                    </div>
+
+
+                    <table id="exampleTableEvents" data-height="400" data-mobile-responsive="true" data-striped="true">
+                        <thead>
+                            <tr>
+                                <th data-field="state" data-checkbox="true"></th>
+                                <th data-field="id" data-sortable="true">ID</th>
+                                <th data-field="name" data-sortable="true">类型名称</th>
+                                <th data-field="status" data-sortable="true">是否启用</th>
+                                <th data-field="type" data-sortable="true">类型</th>
+                                <th data-field="action" data-sortable="">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{if $ct_data}}
+                            {{foreach from=$ct_data item=info}}
+                            <tr>
+                                <td><input type="checkbox" name="ct_id" value="{{$info.ct_id}}"></td>
+                                <td>{{$info.ct_id}}</td>
+                                <td>{{$info.ct_name}}</td>
+                                <td>{{if $info.ct_status eq 1}}启用{{else}}禁用{{/if}}</td>
+                                <td>
+                                    {{if $info.ct_type eq 0}}对平台意见/建议{{/if}}
+                                    {{if $info.ct_type eq 1}}对雇主的投诉{{/if}}
+                                    {{if $info.ct_type eq 2}}对工人的投诉{{/if}}
+                                </td>
+                                <td><a href="/Complaints/categoryEdit?ct_id={{$info.ct_id}}">修改</a></td>
+                            </tr>
+                            {{/foreach}}
+                            {{/if}}
+                        </tbody>
+                    </table>
+                    {{include file='layout/pager.html'}}
+                </div>
+            </div>
+            <!-- End Example Events -->
+        </div>
+    </div>
+
+        <!-- End Panel Other -->
+
+    <!-- 全局js -->
+    <script src="{{$manageurl}}js/jquery.min.js?v=2.1.4"></script>
+    <script src="{{$manageurl}}js/bootstrap.min.js?v=3.3.6"></script>
+
+    <!-- 自定义js -->
+    <script src="{{$manageurl}}js/content.js?v=1.0.0"></script>
+
+
+    <!-- Bootstrap table -->
+    <script src="{{$manageurl}}js/plugins/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="{{$manageurl}}js/plugins/bootstrap-table/bootstrap-table-mobile.min.js"></script>
+    <script src="{{$manageurl}}js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js"></script>
+
+    <!-- Peity -->
+    <script src="{{$manageurl}}js/demo/bootstrap-table-demo.js"></script>
+    <script >
+        function advertisingDel(ct_id)
+        {
+            if(confirm("确认删除?")){
+                window.location.href="/Complaints/complaintsDel?ct_id="+ct_id;
+            }
+
+        }
+    </script>
+
+
+
+
+</body>
+
+</html>
