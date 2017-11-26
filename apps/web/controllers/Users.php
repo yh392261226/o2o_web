@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-16 16:48:40
+ * @Last Modified time: 2017-11-20 11:00:29
  */
 namespace App\Controller;
 
@@ -698,7 +698,7 @@ class Users extends \CLASSES\WebBase
                         'pager'=>false,
                         'pfl_reason'=>'payorder',
                         'where'=>'pfl_type_id IN ('.$o_str.')',
-                        'fields'=>'pfl_amount as amount,pfl_id as id ,pfl_in_time as time,pfl_last_editor as balances, "withdraw","payorder"',
+                        'fields'=>'pfl_amount as amount,pfl_id as id ,pfl_in_time as time,pfl_last_editor as balances,pfl_rate, "withdraw","payorder"',
                     )
                 );
             }
@@ -706,7 +706,11 @@ class Users extends \CLASSES\WebBase
             $time = array();
             $arr = array();
             $w_data = array_merge($withdraw_list['data'],$payorder_list['data']);
-            foreach ($w_data as $k => $v) {
+            foreach ($w_data as $k => &$v) {
+                /*订单收入金额修改*/
+                if(isset($v['pfl_rate']) && floatval($v['pfl_rate']) > 0){
+                    $v['amount'] = $v['amount']/(1-floatval($v['pfl_rate']));
+                }
                 $time[$k]  = $v['time'];
                 $arr[$k] = $v;
             }
