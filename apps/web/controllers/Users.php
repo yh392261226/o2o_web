@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-28 16:35:28
+ * @Last Modified time: 2017-11-28 16:45:14
  */
 namespace App\Controller;
 
@@ -708,8 +708,12 @@ class Users extends \CLASSES\WebBase
             foreach ($w_data as $k => $v) {
                 /*订单收入金额修改*/
                 if(isset($v['pfl_rate']) && floatval($v['pfl_rate']) > 0){
+
                     $w_data[$k]['amount'] = $v['amount']/(1-floatval($v['pfl_rate']));
                     unset($w_data[$k]['pfl_rate']);
+
+                    $v['amount'] = $v['amount']/(1-floatval($v['pfl_rate']));
+
                 }
                 $time[$k]  = $v['time'];
                 $arr[$k] = $v;
