@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-20 11:00:29
+ * @Last Modified time: 2017-11-28 16:35:28
  */
 namespace App\Controller;
 
@@ -615,7 +615,7 @@ class Users extends \CLASSES\WebBase
         $withdraw_list['data'] = array();
         if($category=='recharge' || $category=='all'){
         $dao_recharge_log = new \WDAO\Users(array('table'=>'user_recharge_log'));
-        $recharge_list = $dao_recharge_log ->listData(array('u_id'=>$u_id,'pager'=>false,'url_status'=>1,'where'=>'p_id != 0','fields'=>'url_amount as amount,url_id as id ,url_in_time as time,url_overage as balances, "recharge","normal"'));
+        $recharge_list = $dao_recharge_log ->listData(array('u_id'=>$u_id,'pager'=>false,'url_status'=>1,'where'=>'p_id != 0','fields'=>'url_amount as amount,url_id as id ,url_in_time as time,url_overage as balances, "recharge"'));
         }
         /*雇主支付工人工资*/
 
@@ -645,7 +645,7 @@ class Users extends \CLASSES\WebBase
                         'pager'=>false,
                         'pfl_reason'=>'payorder',
                         'where'=>'pfl_type_id IN ('.$o_str.')',
-                        'fields'=>'pfl_amount as amount,pfl_id as id ,pfl_in_time as time,pfl_last_editor as balances, "recharge","payorder"',
+                        'fields'=>'pfl_amount as amount,pfl_id as id ,pfl_in_time as time,pfl_last_editor as balances, "income"',
                     )
                 );
             }
@@ -658,7 +658,6 @@ class Users extends \CLASSES\WebBase
                 $arr[$k] = $v;
                 $r_data[$k]['amount'] = abs($v['amount']);
             }
-
             $res = array_multisort($time, SORT_DESC, $arr, SORT_ASC, $r_data);
         }
 
@@ -667,7 +666,7 @@ class Users extends \CLASSES\WebBase
         /*提现*/
         if($category=='withdraw' || $category=='all'){
         $dao_withdraw_log = new \WDAO\Users(array('table'=>'user_withdraw_log'));
-        $withdraw_list = $dao_withdraw_log ->listData(array('u_id'=>$u_id,'pager'=>false,'where' => 'uwl_status > -1', 'fields'=>'uwl_id as id,uwl_amount as amount,uwl_in_time as time,uwl_overage as balances,"withdraw","normal"'));
+        $withdraw_list = $dao_withdraw_log ->listData(array('u_id'=>$u_id,'pager'=>false,'where' => 'uwl_status > -1', 'fields'=>'uwl_id as id,uwl_amount as amount,uwl_in_time as time,uwl_overage as balances,"withdraw"'));
         }
 
 
@@ -698,18 +697,19 @@ class Users extends \CLASSES\WebBase
                         'pager'=>false,
                         'pfl_reason'=>'payorder',
                         'where'=>'pfl_type_id IN ('.$o_str.')',
-                        'fields'=>'pfl_amount as amount,pfl_id as id ,pfl_in_time as time,pfl_last_editor as balances,pfl_rate, "withdraw","payorder"',
+                        'fields'=>'pfl_amount as amount,pfl_id as id ,pfl_in_time as time,pfl_last_editor as balances,pfl_rate, "pay"',
                     )
                 );
             }
-
             $time = array();
             $arr = array();
             $w_data = array_merge($withdraw_list['data'],$payorder_list['data']);
-            foreach ($w_data as $k => &$v) {
+
+            foreach ($w_data as $k => $v) {
                 /*订单收入金额修改*/
                 if(isset($v['pfl_rate']) && floatval($v['pfl_rate']) > 0){
-                    $v['amount'] = $v['amount']/(1-floatval($v['pfl_rate']));
+                    $w_data[$k]['amount'] = $v['amount']/(1-floatval($v['pfl_rate']));
+                    unset($w_data[$k]['pfl_rate']);
                 }
                 $time[$k]  = $v['time'];
                 $arr[$k] = $v;
@@ -717,6 +717,7 @@ class Users extends \CLASSES\WebBase
 
             $res = array_multisort($time, SORT_DESC, $arr, SORT_ASC, $w_data);
         }
+
 /*支出收入订单合并*/
         $time = array();
         $arr = array();
@@ -726,9 +727,7 @@ class Users extends \CLASSES\WebBase
             $time[$k]  = $v['time'];
             $arr[$k] = $v;
         }
-
         $res = array_multisort($time, SORT_DESC, $arr, SORT_ASC, $data);
-
 
         foreach ($data as $key => &$value) {
             /*类型*/
@@ -739,12 +738,23 @@ class Users extends \CLASSES\WebBase
             }elseif(isset($value['recharge'])){
                 $value['type'] = 'recharge';
                 unset($value['recharge']);
+            }elseif(isset($value['pay'])){
+                $value['type'] = 'pay';
+                unset($value['pay']);
+            }elseif(isset($value['income'])){
+                $value['type'] = 'income';
+                unset($value['income']);
             }else{
 
             }
 
-        }
+            if($value['amount'] < 0){
+                $value['amount'] = $value['amount'] * -1;
+            }
 
+            $value['amount'] = number_format($value['amount'], 2, ',', '');
+
+        }
         $this->exportData( array('data'=>$data),1);
 
     }
