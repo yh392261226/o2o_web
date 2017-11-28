@@ -97,7 +97,7 @@ class Orders extends \CLASSES\WebBase
      */
     private function workerConfirm()
     {
-        $this->db->debug = 1;
+        //$this->db->debug = 1;
         $data = array();
         if (isset($_REQUEST['o_id']) && intval($_REQUEST['o_id']) > 0) $data['o_id'] = intval($_REQUEST['o_id']); //订单id
         if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']); //任务id
