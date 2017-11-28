@@ -709,7 +709,9 @@ class Users extends \CLASSES\WebBase
             foreach ($w_data as $k => &$v) {
                 /*订单收入金额修改*/
                 if(isset($v['pfl_rate']) && floatval($v['pfl_rate']) > 0){
+
                     $v['amount'] = $v['amount']/(1-floatval($v['pfl_rate']));
+
                 }
                 $time[$k]  = $v['time'];
                 $arr[$k] = $v;

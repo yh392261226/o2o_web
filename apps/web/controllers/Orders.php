@@ -55,6 +55,23 @@ class Orders extends \CLASSES\WebBase
             if (isset($info['data']) && !empty($info['data'][0]))
             {
                 if (isset($info['data'][0]['o_confirm']) && $info['data'][0]['o_confirm'] == 2) $this->exportData('已经确认过了，无需再次确认');
+                if (isset($info['data'][0]['o_worker']) && $info['data'][0]['o_worker'] > 0)
+                {
+                    $user_dao = new \WDAO\Users(array('table' => 'users'));
+                    $user_info = $user_dao->infoData($info['data'][0]['o_worker']);
+                    if (!empty($user_info))
+                    {
+                        if ($user_info['u_task_status'] == 1)
+                        {
+                            $this->exportData('该工人已经参与其他工作了，无法确认，请选择其他工人');
+                        }
+                    }
+                    else
+                    {
+                        $this->exportData('failure');
+                    }
+                }
+
                 //更新了订单状态
                 $result = $this->orders_dao->updateData(array('o_confirm' => 2), $data);
                 if (!$result)
@@ -88,19 +105,32 @@ class Orders extends \CLASSES\WebBase
 
         if (!empty($data) && isset($data['o_id']) && isset($data['t_id']) && isset($data['o_worker']))
         {
-            $orders_param = $data;
             $orders_param['pager'] = 0;
             $orders_param['limit'] = 1;
-            $orders_param['where'] = 'o_status = 0';
-            $orders_param['order'] = 'o_id desc';
+            $orders_param['fields'] = 'orders.*, task_ext_worker.*';
+            $orders_param['where'] = 'orders.o_status = 0 and orders.o_id = "' . $data['o_id'] . '" and orders.t_id = "' . $data['t_id'] . '" and orders.o_worker = "' . $data['o_worker'] . '"';
+            $orders_param['order'] = 'orders.o_id desc';
+            $orders_param['join'] = array('task_ext_worker', 'orders.tew_id = task_ext_worker.tew_id');
             $info = $this->orders_dao->listData($orders_param);
-            //print_r($info);
+            //print_r($info);exit;
 
             if (isset($info['data'][0]) && !empty($info['data'][0]))
             {
                 if (isset($info['data'][0]['o_confirm']) && intval($info['data'][0]['o_confirm']) == 1)
                 {
                     $this->exportData('已经确认过了，无需再次确认');
+                }
+
+                if (isset($info['data'][0]['tew_start_time']) && isset($info['data'][0]['tew_end_time']) && $info['data'][0]['tew_start_time'] > 0 && $info['data'][0]['tew_end_time'] > 0)
+                {
+                    if (time() < $info['data'][0]['tew_start_time'])
+                    {
+                        $this->exportData('任务未开始，请在任务开始后确认');
+                    }
+                    if (time() > $info['data'][0]['tew_end_time'])
+                    {
+                        $this->exportData('任务已过截止时间');
+                    }
                 }
 
                 //更新了订单状态
@@ -126,6 +156,7 @@ class Orders extends \CLASSES\WebBase
                     {
                         foreach ($orders_result['data'] as $key => $val)
                         {
+                            if (!isset($orders_skills_counts[$val['s_id']])) $orders_skills_counts[$val['s_id']] = 0;
                             if (isset($val['s_id']) && $val['s_id'] > 0)
                             {
                                 $order_counts += 1;
@@ -142,6 +173,7 @@ class Orders extends \CLASSES\WebBase
                     {
                         foreach ($workers_result['data'] as $key => $val)
                         {
+                            if (!isset($workers_skills_counts[$val['tew_skills']])) $workers_skills_counts[$val['tew_skills']] = 0;
                             if (isset($val['tew_skills']) && $val['tew_skills'] > 0 && isset($val['tew_worker_num']) && $val['tew_worker_num'] > 0)
                             {
                                 $workers_skills_counts[$val['tew_skills']] += $val['tew_worker_num'];
