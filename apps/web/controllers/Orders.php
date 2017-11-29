@@ -116,18 +116,35 @@ class Orders extends \CLASSES\WebBase
 
             if (isset($info['data'][0]) && !empty($info['data'][0]))
             {
+                //判断是否已经确认过
                 if (isset($info['data'][0]['o_confirm']) && intval($info['data'][0]['o_confirm']) == 1)
                 {
                     $this->exportData('已经确认过了，无需再次确认');
                 }
 
+                //判断是否已经满人
+                if (isset($info['data'][0]['tew_worker_num']) && $info['data'][0]['tew_worker_num'] > 0)
+                {
+                    $tew_orders = $this->orders_dao->countData(array(
+                        't_id' => $data['t_id'],
+                        'tew_id' => $info['data'][0]['tew_id'],
+                        's_id'   => $info['data'][0]['s_id'],
+                        'o_confirm' => 1,
+                    ));
+                    if ($info['data'][0]['tew_worker_num'] <= $tew_orders)
+                    {
+                        $this->exportData('来晚咯, 该技能已经不需要人了,请选择其他技能或任务');
+                    }
+                }
+
+                //判断是否在开工期间内
                 if (isset($info['data'][0]['tew_start_time']) && isset($info['data'][0]['tew_end_time']) && $info['data'][0]['tew_start_time'] > 0 && $info['data'][0]['tew_end_time'] > 0)
                 {
                     if (time() < $info['data'][0]['tew_start_time'])
                     {
                         $this->exportData('任务未开始，请在任务开始后确认');
                     }
-                    if (time() > $info['data'][0]['tew_end_time'])
+                    if (time() > ($info['data'][0]['tew_end_time'] + 86399))
                     {
                         $this->exportData('任务已过截止时间');
                     }
