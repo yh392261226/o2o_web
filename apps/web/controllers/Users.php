@@ -3,7 +3,7 @@
  * @Author: Zhaoyu
  * @Date:   2017-09-16 13:37:26
  * @Last Modified by:   Zhaoyu
- * @Last Modified time: 2017-11-28 16:45:14
+ * @Last Modified time: 2017-11-28 17:01:18
  */
 namespace App\Controller;
 
@@ -756,7 +756,7 @@ class Users extends \CLASSES\WebBase
                 $value['amount'] = $value['amount'] * -1;
             }
 
-            $value['amount'] = number_format($value['amount'], 2, ',', '');
+            $value['amount'] = number_format($value['amount'], 2, '.', '');
 
         }
         $this->exportData( array('data'=>$data),1);
