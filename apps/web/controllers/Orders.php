@@ -105,6 +105,21 @@ class Orders extends \CLASSES\WebBase
 
         if (!empty($data) && isset($data['o_id']) && isset($data['t_id']) && isset($data['o_worker']))
         {
+            $user_dao = new \WDAO\Users(array('table' => 'users'));
+            $worker_info = $user_dao->infoData($data['o_worker']);
+            if (!empty($worker_info))
+            {
+                if (isset($worker_info['u_task_status']) && $worker_info['u_task_status'] == 1)
+                {
+                    $this->exportData('已在工作中，无法同时开工多个任务');
+                }
+            }
+            else
+            {
+                $this->exportData('failure');
+            }
+            unset($user_dao, $worker_info);
+
             $orders_param['pager'] = 0;
             $orders_param['limit'] = 1;
             $orders_param['fields'] = 'orders.*, task_ext_worker.*';
