@@ -445,7 +445,7 @@ class Orders extends \CLASSES\WebBase
 
                 //2：将取出来的信息 与 要改的信息做比对 得出差额
                 //改价前后差价 = 原价 - 改后价
-                $tmp['agio'] = $tmp['original_amount'] - $data['tew_price'];
+                $tmp['agio'] = ($tmp['original_amount'] - $data['tew_price']) * (ceil(($data['end_time'] - $data['start_time']) / 3600 / 24));
                 if ($tmp['agio'] < 0)
                 {
                     $user_funds_dao = new \WDAO\Users_ext_funds(array('table' => 'Users_ext_funds'));
@@ -459,7 +459,7 @@ class Orders extends \CLASSES\WebBase
                 $this->db->start();
                 //3：改数据库中的数据
                 //任务更新改价次数及总任务改后价
-                $tmp['edit_amount'] = ($data['tew_price'] * $data['worker_num'] * ceil(($data['end_time'] - $data['start_time']) / 3600 / 24));
+                $tmp['edit_amount'] = ($data['tew_price'] * $data['worker_num'] * (ceil(($data['end_time'] - $data['start_time']) / 3600 / 24) + 1));
                 $times_update = $task_dao->queryData('update tasks set t_amount_edit_times=t_amount_edit_times+1, t_amount=t_amount + ' . ($tmp['edit_amount'] * -1) . ', t_last_edit_time = ' . time() . ', t_last_editor = ' . $data['t_author'] . ' where t_id = "' . $tmp['t_id'] . '"');
 
                 //更改该工人的订单价格
@@ -499,8 +499,8 @@ class Orders extends \CLASSES\WebBase
                 }
 
                 //4：多退少补 操作平台与用户资金
-                $user_funds_result = $this->userFunds($data['t_author'], $tmp['edit_amount'], $type = 'changeprice'); //用户资金
-                $platform_funds_result = $this->platformFundsLog($tmp['t_id'], (-1 * $tmp['edit_amount']), 3, 'changeprice');     //平台资金日志
+                $user_funds_result = $this->userFunds($data['t_author'], $tmp['agio'], $type = 'changeprice'); //用户资金
+                $platform_funds_result = $this->platformFundsLog($tmp['t_id'], (-1 * $tmp['agio']), 3, 'changeprice');     //平台资金日志
 
                 if ($times_update && $orders_update && $user_funds_result && $platform_funds_result)
                 {
@@ -762,10 +762,12 @@ class Orders extends \CLASSES\WebBase
                 //print_r($orders_data);exit;
                 if (!empty($orders_data['data']))
                 {
+                    $this->db->debug = 1;
                     $pay_status = 1;
                     $this->db->start();
                     foreach ($orders_data['data'] as $key => $val)
                     {
+                        //print_r($val);exit;
                         if (!empty($val) && isset($val['o_id']) && $val['o_id'] > 0 &&
                             isset($val['o_amount']) && $val['o_amount'] > 0 &&
                             isset($val['o_worker']) && $val['o_worker'] > 0 &&
@@ -773,55 +775,55 @@ class Orders extends \CLASSES\WebBase
                             isset($val['o_confirm']) && $val['o_confirm'] == 1 &&
                             isset($val['o_pay']) && $val['o_pay'] == 0)
                         {
-                            //print_r($val);
-                            //continue;
                             $platform_rate = isset($this->web_config['charge_rate']) && $this->web_config['charge_rate'] > 0 ? $this->web_config['charge_rate'] : 0;
                             if ($platform_rate <= 0)
                             {
                                 $platform_rate = 0;
                             }
                             //原有该花总价
-                            $original_amount = $val['o_amount'] * (ceil($val['tew_end_time'] - $val['tew_start_time']) / 3600 / 24 + 1);
-                            $original_amount = $original_amount - $original_amount * $platform_rate;
+                            $original_amount = $val['o_amount'] * (ceil(($val['tew_end_time'] - $val['tew_start_time']) / 3600 / 24) + 1);
 
                             //解决辞职或解雇的工人价格
                             if ($val['o_status'] == -1) //辞职
                             {
                                 //实际总价
-                                $real_total = $val['o_amount'] * (ceil($val['unbind_time'] - $val['tew_start_time']) / 3600 / 24);
-                                $real_total = $real_total - $real_total * $platform_rate;
+                                $real_total = $val['o_amount'] * (ceil(($val['unbind_time'] - $val['tew_start_time']) / 3600 / 24) - 1);
                                 if ($original_amount > $real_total)
                                 {
                                     $platform_result = $this->platformFundsLog($val['o_id'], (($original_amount - $real_total) * -1), 0, 'taskreturn'); //平台资金支出
-                                    $user_funds_result = $this->userFunds($val['o_worker'], ($original_amount - $real_total), 'overage'); //雇主用户资金收入
+                                    $user_funds_result = $this->userFunds($val['u_id'], ($original_amount - $real_total), 'overage'); //雇主用户资金收入
                                     if (!$platform_result || !$user_funds_result)
                                     {
                                         $pay_status = 0;
                                     }
-                                    $original_amount = $real_total;
                                 }
+                                //$real_total = $real_total - $real_total * $platform_rate;
+                                $original_amount = $real_total;
                             }
+
                             if ($val['o_status'] == -2) //解雇
                             {
                                 //实际总价
-                                $real_total = $val['o_amount'] * (ceil($val['unbind_time'] - $val['tew_start_time']) / 3600 / 24 + 1);
-                                $real_total = $real_total - $real_total * $platform_rate;
+                                $real_total = $val['o_amount'] * (ceil(($val['unbind_time'] - $val['tew_start_time']) / 3600 / 24));
                                 if ($original_amount > $real_total)
                                 {
                                     $platform_result = $this->platformFundsLog($val['o_id'], (($original_amount - $real_total) * -1), 0, 'taskreturn'); //平台资金支出
-                                    $user_funds_result = $this->userFunds($val['o_worker'], ($original_amount - $real_total), 'overage'); //雇主用户资金收入
+                                    $user_funds_result = $this->userFunds($val['u_id'], ($original_amount - $real_total), 'overage'); //雇主用户资金收入
                                     if (!$platform_result || !$user_funds_result)
                                     {
                                         $pay_status = 0;
                                     }
-                                    $original_amount = $real_total;
                                 }
+                                //$real_total = $real_total - $real_total * $platform_rate;
+                                $original_amount = $real_total;
                             }
 
+                            //echo $original_amount;exit;
                             if ($pay_status == 1)
                             {
                                 //给每个工人单独发钱并单独扣除平台款项
                                 $platform_result = $user_result = 0;
+                                $original_amount = $original_amount - $original_amount * $platform_rate;
                                 $platform_result = $this->platformFundsLog($val['o_id'], ($original_amount * -1), 0, 'payorder'); //平台资金支出
                                 $user_funds_result = $this->userFunds($val['o_worker'], $original_amount, 'overage'); //工人用户资金收入
                                 $user_result = $this->_resetWorker($val['o_worker']); //释放工人状态

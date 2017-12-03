@@ -425,7 +425,7 @@ class Tasks extends \CLASSES\WebBase
                 $worker[$key][8] = isset($tmp['area']) ? $tmp['area'] : 0;
                 $worker[$key][9] = isset($tmp['address']) ? $tmp['address'] : '';
                 $worker[$key][10] = 0;
-                $tmp['total'] = $tmp['total_edit'] += $worker[$key][2] * $worker[$key][3] * (ceil($worker[$key][5] - $worker[$key][4]) / 3600 / 24 + 1);
+                $tmp['total'] = $tmp['total_edit'] += $worker[$key][2] * $worker[$key][3] * (ceil(($worker[$key][5] - $worker[$key][4]) / 3600 / 24) + 1);
                 if ($tmp['total'] <= 0)
                 {
                     $this->exportData(array('msg' => '价格必须大于0', 'status' => 1));
