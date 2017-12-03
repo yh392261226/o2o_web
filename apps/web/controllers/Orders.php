@@ -762,7 +762,7 @@ class Orders extends \CLASSES\WebBase
                 //print_r($orders_data);exit;
                 if (!empty($orders_data['data']))
                 {
-                    $this->db->debug = 1;
+                    //$this->db->debug = 1;
                     $pay_status = 1;
                     $this->db->start();
                     foreach ($orders_data['data'] as $key => $val)
