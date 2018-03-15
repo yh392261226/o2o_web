@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title> 文章分类添加</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+
+    <link rel="shortcut icon" href="favicon.ico"> <link href="{{$manageurl}}css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="{{$manageurl}}css/font-awesome.css?v=4.4.0" rel="stylesheet">
+
+    <link href="{{$manageurl}}css/animate.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/style.css?v=4.1.0" rel="stylesheet">
+    <link href="{{$manageurl}}css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
+    <script type="text/javascript" src="{{$manageurl}}js/area.js"></script>
+
+</head>
+
+<body class="gray-bg">
+
+
+    <div class="wrapper wrapper-content animated fadeInUp">
+        <div class="row">
+            <div class="col-sm-12">
+
+                <div class="ibox">
+                    <div class="ibox-title">
+                        <h5>文章管理</h5>
+                        <div class="ibox-tools">
+                            <a href="categoryList" class="btn btn-primary btn-xs">文章分类列表</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>文章分类添加 <small></small></h5>
+                    </div>
+                    <div class="ibox-content">
+                        <form method="post" class="form-horizontal" enctype="multipart/form-data" action="/Articles/doCategoryAdd">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">分类名称:</label>
+
+                                <div class="col-sm-4">
+                                    <input type="text" name="ac_name" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+
+                            <div class="form-group control-label">
+                                <label class="col-sm-2 control-label">是否启用:
+                                    <br/>
+                                    <small class="text-navy"></small>
+                                </label>
+                                <div class="col-sm-2">
+                                    <div class="radio radio-info radio-inline">
+                                        <input id="inlineRadio1"  type="radio" name="ac_status" value="1">
+                                        <label for="inlineRadio1">是</label>
+                                    </div>
+                                    <div class="radio radio-info radio-inline">
+                                            <input id="inlineRadio2"  type="radio" name="ac_status" value="0">
+                                            <label for="inlineRadio2">否</label>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">父分类:</label>
+
+                                <div class="col-sm-4">
+                                    <select class="form-control m-b" name="ac_pid">
+                                    <option value="0">顶级分类</option>
+                                    {{foreach from=$ac_tree item=value}}
+                                        <option value="{{$value.ac_id}}">{{'__'|str_repeat:$value.level}} {{$value.ac_name}}</option>
+                                    {{/foreach}}
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">分类图标:</label>
+
+                                <div class="col-sm-4">
+                                    <input class="form-control" id="fileInput" type="file" name="ac_img">
+                                </div>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">分类描述:</label>
+
+                                <div class="col-sm-4">
+                                    <textarea class="form-control" rows="3" name="ac_info"></textarea>
+                                </div>
+                            </div>
+
+
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">地区选择:(不选择默认为全国)</label>
+
+                                <div class="col-sm-2">
+                                    <select class="form-control m-b" name="province" id="selProvinces" onchange="region.changed(this, 2, 'selCities')">
+                                    <option value="">请选择</option>
+                                    {{foreach from=$area_provinces item=value}}
+                                        <option value="{{$value.region_id}}">{{$value.region_name}}</option>
+                                    {{/foreach}}
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <select class="form-control m-b" name="city" id="selCities" onchange="region.changed(this, 3, 'selDistricts')">
+                                        <option value="">请选择</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <select class="form-control m-b" name="district" id="selDistricts" onchange="region.changed(this, 4)">
+                                        <option value="">请选择</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <div class="col-sm-4 col-sm-offset-2">
+                                    <input type="hidden" name="r_id" id="area_id" value="1">
+                                    <button class="btn btn-primary" type="submit">保存内容</button>
+                                </div>
+                            </div>
+
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全局js -->
+    <script src="{{$manageurl}}js/jquery.min.js?v=2.1.4"></script>
+    <script src="{{$manageurl}}js/bootstrap.min.js?v=3.3.6"></script>
+
+
+    <!-- 自定义js -->
+    <script src="{{$manageurl}}js/content.js?v=1.0.0"></script>
+    <!-- iCheck -->
+    <script src="{{$manageurl}}js/plugins/iCheck/icheck.min.js"></script>
+
+
+
+
+
+    <script>
+        $(document).ready(function(){
+
+            $('#loading-example-btn').click(function () {
+                btn = $(this);
+                simpleLoad(btn, true)
+
+                // Ajax example
+//                $.ajax().always(function () {
+//                    simpleLoad($(this), false)
+//                });
+
+                simpleLoad(btn, false)
+            });
+        });
+
+        function simpleLoad(btn, state) {
+            if (state) {
+                btn.children().addClass('fa-spin');
+                btn.contents().last().replaceWith(" Loading");
+            } else {
+                setTimeout(function () {
+                    btn.children().removeClass('fa-spin');
+                    btn.contents().last().replaceWith(" Refresh");
+                }, 2000);
+            }
+        }
+
+
+
+
+                /*地区三级联动
+* @Author: Zhaoyu
+* @Date:   2017-08-15 15:06:12
+* @Last Modified by:   Zhaoyu
+* @Last Modified time: 2017-08-17 10:01:56
+*/
+
+
+    var region = new Object();
+
+    region.isAdmin = false;
+
+    region.loadRegions = function(parent, type, target)
+    {
+    $.ajax( {
+        url:'/Articles/ajaxArea',// 跳转到 action
+        data:'type=' + type + '&target=' + target + "&parent=" + parent,
+        type:'get',
+        dataType:'json',
+        success:function(data) {
+         if(data.code =="1" ){
+            region.response(data['data']);
+         }else{
+             // alert(data.message);
+         }
+        },
+        error : function() {
+           alert("异常！");
+        }
+ });
+    }
+
+    /* *
+     * 载入指定的国家下所有的省份
+     *
+     * @country integer     国家的编号
+     * @selName string      列表框的名称
+     */
+    region.loadProvinces = function(country, selName)
+    {
+      var objName = (typeof selName == "undefined") ? "selProvinces" : selName;
+      region.loadRegions(country, 1, objName);
+    }
+
+    /* *
+     * 载入指定的省份下所有的城市
+     *
+     * @province    integer 省份的编号
+     * @selName     string  列表框的名称
+     */
+    region.loadCities = function(province, selName)
+    {
+      var objName = (typeof selName == "undefined") ? "selCities" : selName;
+      region.loadRegions(province, 2, objName);
+    }
+
+    /* *
+     * 载入指定的城市下的区 / 县
+     *
+     * @city    integer     城市的编号
+     * @selName string      列表框的名称
+     */
+    region.loadDistricts = function(city, selName)
+    {
+      var objName = (typeof selName == "undefined") ? "selDistricts" : selName;
+
+      region.loadRegions(city, 3, objName);
+    }
+
+    /* *
+     * 处理下拉列表改变的函数
+     *
+     * @obj     object  下拉列表
+     * @type    integer 类型
+     * @selName string  目标列表框的名称
+     */
+    region.changed = function(obj, type, selName)
+    {
+      var parent = obj.options[obj.selectedIndex].value;
+      if(parent!=""){
+        document.getElementById('area_id').value = parent;
+      }
+      if(type!=4){
+        region.loadRegions(parent, type, selName);
+      }
+
+    }
+
+    region.response = function(result, text_result)
+    {
+      var sel = document.getElementById(result.target);
+      sel.length = 1;
+      sel.selectedIndex = 0;
+      sel.style.display = (result.regions.length == 0 && ! region.isAdmin && result.type + 0 == 3) ? "none" : '';
+
+      if (document.all)
+      {
+        sel.fireEvent("onchange");
+      }
+      else
+      {
+        var evt = document.createEvent("HTMLEvents");
+        evt.initEvent('change', true, true);
+        sel.dispatchEvent(evt);
+      }
+
+      if (result.regions)
+      {
+        for (i = 0; i < result.regions.length; i ++ )
+        {
+          var opt = document.createElement("OPTION");
+          opt.value = result.regions[i].region_id;
+          opt.text  = result.regions[i].region_name;
+
+          sel.options.add(opt);
+        }
+      }
+    }
+    </script>
+
+
+
+    </body>
+</html>

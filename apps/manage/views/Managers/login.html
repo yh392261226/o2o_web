@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+    <title>管理后台 - 登录</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link href="{{$manageurl}}css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="{{$manageurl}}css/animate.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/style.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/login.css" rel="stylesheet">
+    <link href="{{$manageurl}}css/plugins/sweetalert/sweetalert.css" rel="stylesheet">
+    <script src="{{$manageurl}}js/jquery.min.js?v=2.1.4"></script>
+    <script src="{{$manageurl}}js/plugins/sweetalert/sweetalert.min.js"></script>
+    <!--[if lt IE 9]>
+    <meta http-equiv="refresh" content="0;ie.html" />
+    <![endif]-->
+    <script>
+        if (window.top !== window.self) {
+            window.top.location = window.location;
+        }
+    </script>
+
+</head>
+
+<body class="signin">
+<div class="signinpanel">
+    <div class="row">
+        <div class="col-sm-12">
+            <form onsubmit="return false">
+                <h4 class="no-margins">登录：</h4>
+                <p class="m-t-md">管理后台登录</p>
+                <input type="text" class="form-control uname" placeholder="用户名" name="" value="" id="manager_name" />
+                <input type="password" class="form-control pword m-b" placeholder="密码" name="" value="" id="manager_passwd" />
+                <button class="btn btn-success btn-block" onclick="check_login()">登录</button>
+            </form>
+        </div>
+    </div>
+    <div class="signup-footer">
+        <div class="pull-left">
+            &copy; hAdmin
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    function check_login() {
+        var manager_name = $("#manager_name").val();
+        var manager_passwd = $("#manager_passwd").val();
+        if (manager_name == '' && manager_passwd == '') {
+            swal({
+                title: "抱歉出错了!",
+                text: "用户名和密码是必填项哦!"
+            });
+        }else if (manager_name == '') {
+            swal({
+                title: "抱歉出错了!",
+                text: "用户名不能为空哦!"
+            });
+        }else if (manager_passwd == '') {
+            swal({
+                title: "抱歉出错了!",
+                text: "密码不能为空哦!"
+            });
+        }else{
+            $.ajax({
+                url:'/Managers/login',
+                type:'post',
+                data:{m_name:manager_name,m_pass:manager_passwd},
+                dataType:'json',
+                success:function(info){
+                    if (info.status == '200') {
+                        if (info.data == 'success') {
+                            swal('登陆成功', '欢迎您' + manager_name, 'success');
+                            window.location.href = info.url;
+                            return false;
+                        }
+                        swal('error', info.data);
+                        return false;
+                    }else{
+                        swal('通信失败', '请联系管理员解决', 'error');
+                    }
+                },
+                error:function() {
+                    swal('通信失败', '请联系管理员解决', 'error');
+                }
+            });
+        }
+    }
+</script>
+</html>
