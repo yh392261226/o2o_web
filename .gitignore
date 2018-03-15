@@ -12,3 +12,5 @@ sftp-config.json
 .phpintel/
 管理员模块.txt
 apps/manage/cache/*
+apps/uploads/static/app/xinyonggong.apk
+apps/uploads/static/app/xinyonggong_android.apk
