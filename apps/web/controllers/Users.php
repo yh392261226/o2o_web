@@ -13,49 +13,64 @@ class Users extends \CLASSES\WebBase
     {
         parent::__construct($swoole);
     }
+
     public function Login()
     {
-        $phone_number = !empty($_GET['phone_number']) ? intval($_GET['phone_number']) : 0;
-        $verify_code = !empty($_GET['verify_code']) ? intval($_GET['verify_code']) : 0;
-        if(empty($phone_number) || empty($verify_code))
-        {
-            $this->exportData( array('msg' => '手机号或验证码不能为空'),0);
-        }
-
-        /*获取验证码信息*/
-        $dao_verify_code = new \WDAO\Verifies(array('table'=>'verifies'));
-        $self_data = $dao_verify_code->listData(array(
-            'u_mobile' => $phone_number,
-            'fields' => 'code,v_in_time',
-            'limit' => 1,
-            'pager'=> false,
-                ));
-
-        if(empty($self_data['data']['0']['code']) || empty($self_data['data']['0']['v_in_time'])){
-            $this->exportData(array('msg'=>'系统错误请联系管理员'),0);
-        }
-        $time_max = $this ->web_config['verify_code_time'] + $self_data['data']['0']['v_in_time'];
-        $time = time();
-
-        if($verify_code != $self_data['data']['0']['code'] || ($time > $time_max))
-        {
-            $this->exportData(array('msg'=>'验证码不正确或验证码已过有效期'),0);
-        }
-
-        /*获取用户信息*/
-        $dao_users = new \WDAO\Users(array('table'=>'users'));
-        $user_data = $dao_users->listData(array(
-            'u_mobile' => $phone_number,
+        $type = isset($_GET['type']) && in_array($_GET['type'], array('verify', 'third', 'pass')) ? trim($_GET['type']) : 'verify';
+        $logindata = array(
             'pager' => false,
             'fields'=>'u_true_name,u_pass,u_status,u_online,u_id,u_sex,u_idcard,u_name',
-                ));
+        );
 
+        if ($type == 'pass')
+        {
+            $username = isset($_GET['username']) && trim($_GET['username']) != '' ? trim($_GET['username']) : '';
+            $userpass = isset($_GET['userpass']) && trim($_GET['userpass']) != '' ? encyptPassword(trim($_GET['userpass'])) : '';
+            if ('' == $username || '' == $userpass) $this->exportData(array('msg'=>'参数错误p'));
+            $logindata['u_name'] = $username;
+            $logindata['u_password'] = $userpass;
+        }
+        elseif ($type == 'third')
+        {
+            $openid = isset($_GET['openid']) && '' != trim($_GET['openid']) ? trim($_GET['openid']) : '';
+            if ('' == $openid) $this->exportData(array('msg'=>'参数错误3'));
+            $logindata['u_openid'] = $openid;
+        }
+        elseif ($type == 'verify')
+        {
+            $phone_number = !empty($_GET['phone_number']) ? intval($_GET['phone_number']) : 0;
+            $verify_code = !empty($_GET['verify_code']) ? intval($_GET['verify_code']) : 0;
+            if(empty($phone_number) || empty($verify_code))
+            {
+                $this->exportData( array('msg' => '手机号或验证码不能为空'),0);
+            }
+            /*获取验证码信息*/
+            $dao_verify_code = new \WDAO\Verifies(array('table'=>'verifies'));
+            $self_data = $dao_verify_code->listData(array(
+                'u_mobile' => $phone_number,
+                'fields' => 'code,v_in_time',
+                'limit' => 1,
+                'pager'=> false,
+                    ));
 
-
-
+            if(empty($self_data['data']['0']['code']) || empty($self_data['data']['0']['v_in_time']))
+            {
+                $this->exportData(array('msg'=>'系统错误请联系管理员'),0);
+            }
+            $time_max = $this ->web_config['verify_code_time'] + $self_data['data']['0']['v_in_time'];
+            if($verify_code != $self_data['data']['0']['code'] || (time() > $time_max))
+            {
+                $this->exportData(array('msg'=>'验证码不正确或验证码已过有效期'),0);
+            }
+            $logindata['u_mobile'] = $phone_number;
+        }
+        /*获取用户信息*/
+        $dao_users = new \WDAO\Users(array('table'=>'users'));
+        $user_data = $dao_users->listData($logindata);
         if(!empty($user_data['data']['0']['u_id'])){
             /*用户存在*/
-            if($user_data['data']['0']['u_status'] < 0){
+            if($user_data['data']['0']['u_status'] < 0)
+            {
                 $this->exportData(array('msg'=>'用户登录受限,请联系管理员!'),0);
             }
             $data = array();
@@ -66,7 +81,8 @@ class Users extends \CLASSES\WebBase
             $u_idcard = isset($user_data['data']['0']['u_idcard']) ? $user_data['data']['0']['u_idcard'] :'';
             $u_pass = isset($user_data['data']['0']['u_pass']) ? $user_data['data']['0']['u_pass'] :'';
             $u_sex = isset($user_data['data']['0']['u_sex']) ? $user_data['data']['0']['u_sex'] : '';
-            if($res){
+            if($res)
+            {
                 $token = $this->createToken($user_data['data']['0']['u_name'],$user_data['data']['0']['u_pass']);
                 $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_true_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass'],'u_idcard'=>$u_idcard ),1);
             }
@@ -81,8 +97,6 @@ class Users extends \CLASSES\WebBase
             $data['u_in_time'] = $time;
             $data['u_last_edit_time'] = $time;
             $data['u_token'] = $time;
-
-
             $u_id = $dao_users ->addUser($this,$data);
 
             if ($u_id)
@@ -93,9 +107,6 @@ class Users extends \CLASSES\WebBase
                 $this->exportData(array('msg'=>'注册失败,请重新注册'),0);
             }
         }
-
-
-
     }
 
     /*发送短信验证码*/
@@ -1251,7 +1262,7 @@ class Users extends \CLASSES\WebBase
     }
         /*充值开始*/
         /*充值记录接口*/
-        public function applyRechargeLog()
+    public function applyRechargeLog()
     {
         if(empty($_REQUEST['u_id']) || empty($u_id = intval($_REQUEST['u_id']))){
             $this->exportData( array('msg'=>'用户ID为空'),0);
