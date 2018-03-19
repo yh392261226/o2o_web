@@ -1667,7 +1667,7 @@ class Users extends \CLASSES\WebBase
             $this ->exportData( array('msg'=>'密码修改失败,请联系管理员'),0);
         }
     }
-
+    //用户名密码注册接口
     public function register(){
         $time=time();
         $username = isset($_GET['username']) && trim($_GET['username']) != '' ? trim($_GET['username']) : $this->exportData(array('msg'=>'用户名不能为空'));
