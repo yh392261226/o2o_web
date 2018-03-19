@@ -91,6 +91,7 @@ class Users extends \CLASSES\WebBase
 
         }else{
             /*用户不存在*/
+
             $data = array();
             $data['u_name'] = uniqid('u_');
             $data['u_pass'] = '';
@@ -376,6 +377,9 @@ class Users extends \CLASSES\WebBase
         }elseif (empty($_REQUEST['u_id']) || !isset($_REQUEST['u_sex']) || empty($_REQUEST['u_true_name']) || empty($_REQUEST['u_idcard']) || empty($_REQUEST['uei_info']) || empty($_REQUEST['uei_address']) || empty($_REQUEST['uei_province']) || empty($_REQUEST['uei_city']) || empty($_REQUEST['uei_area'])){
              $this->exportData( array('msg'=>'参数不足'),0);
         }
+
+
+
 
         $u_id= intval($_REQUEST['u_id']);
         /*users表*/
@@ -1110,6 +1114,8 @@ class Users extends \CLASSES\WebBase
             }
 
 
+
+
             if(!empty($c_id)){
                 $ext_data = array();
                 $ext_data['c_id'] = $c_id;
@@ -1661,42 +1667,51 @@ class Users extends \CLASSES\WebBase
             $this ->exportData( array('msg'=>'密码修改失败,请联系管理员'),0);
         }
     }
+    //用户名密码注册接口
+    public function register(){
+        $time=time();
+        $username = isset($_GET['username']) && trim($_GET['username']) != '' ? trim($_GET['username']) : $this->exportData(array('msg'=>'用户名不能为空'));
+        $userpass = isset($_GET['userpass']) && trim($_GET['userpass']) != '' ? encyptPassword(trim($_GET['userpass'])) : $this->exportData(array('msg'=>'用户密码不能为空'));
+        $password_confirm=isset($_GET['password_confirm']) && trim($_GET['password_confirm']) != '' ? encyptPassword(trim($_GET['password_confirm'])) : $this->exportData(array('msg'=>'请输入确认密码'));
+      
+        $logindata['u_name'] = $username;
+        $logindata['u_password'] = $userpass;
+        if($userpass!=$password_confirm){
+            
+            $this->exportData(array('msg'=>'两次密码输入不相同'));
+        
+        }
+        else{
 
+        $dao_users = new \WDAO\Users(array('table'=>'users'));
+        
+        $info = $dao_users->infoData(array('key'=>'u_name','val'=>$username,'fields'=>'u_id'));
+        if($info){
+            
+            $this->exportData(array('用户已存在'));
+        }else{
+            /*用户不存在*/
 
+            $data = array();
+            $data['u_name'] = $username;
+            $data['u_pass'] = '';
+            $data['u_password'] = $userpass;
+            $data['u_in_time'] = $time;
+            $data['u_last_edit_time'] = $time;
+            $data['u_token'] = $time;
+            $u_id = $dao_users ->addUser($this,$data);
 
+            if ($u_id)
+            {
+                $token = $this->createToken($data['u_name'],$data['u_password']);
+                $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'.jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>'','u_password'=>$userpass),1);
+            }else{
+                $this->exportData(array('msg'=>'注册失败,请重新注册'),0);
+            }
+        }
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    }
 
 
 
