@@ -59,6 +59,7 @@ class Users extends \CLASSES\WebBase
                 $this->exportData(array('msg'=>'系统错误请联系管理员'),0);
             }
             $time_max = $this ->web_config['verify_code_time'] + $self_data['data']['0']['v_in_time'];
+            if($verify_code != $self_data['data']['0']['code'] || ($time > $time_max))
             {
                 $this->exportData(array('msg'=>'验证码不正确或验证码已过有效期'),0);
             }
