@@ -159,7 +159,20 @@ class Users extends \CLASSES\WebBase
         }
 
         $dao_favorate = new \WDAO\Users_favorate(array('table'=>'users_favorate'));
-        $favorate_arr = $dao_favorate -> listData(array('users_favorate.u_id'=>$u_id,'f_type'=>0,'leftjoin'=>array('task_ext_info','task_ext_info.t_id = users_favorate.f_type_id'),'join'=>array('tasks',"tasks.t_id = users_favorate.f_type_id"),'fields'=>'tasks.t_title,tasks.t_amount,tasks.t_duration,tasks.t_author,tasks.t_status,f_id,task_ext_info.t_desc','pager'=>false));
+        $favorate_arr = $dao_favorate -> listData(array(
+          'users_favorate.u_id'=>$u_id,
+          'f_type'=>0,
+          'leftjoin'=> array(
+            'task_ext_info',
+            'task_ext_info.t_id = users_favorate.f_type_id'
+            ),
+          'join' => array(
+            'tasks',
+            "tasks.t_id = users_favorate.f_type_id"
+          ),
+          'fields' => 'tasks.*,f_id,task_ext_info.t_desc',
+          'pager'=>false
+          ));
         foreach ($favorate_arr['data'] as $key => &$value) {
             if(!empty($value['t_author'])){
                 $value['u_img'] = $this-> getHeadById($value['t_author']);
