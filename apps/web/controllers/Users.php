@@ -83,6 +83,15 @@ class Users extends \CLASSES\WebBase
             $u_pass = isset($user_data['data']['0']['u_pass']) ? $user_data['data']['0']['u_pass'] :'';
             $u_sex = isset($user_data['data']['0']['u_sex']) ? $user_data['data']['0']['u_sex'] : '';
             $u_password = isset($user_data['data']['0']['u_password']) ? $user_data['data']['0']['u_password'] : '';
+            if(''==$u_password)
+            {
+                $haspwd = 0;
+            }
+            else
+            {
+                $haspwd = 1;
+            }
+           
              if('' != $username || '' != $userpass)
             {
                 if($userpass!=$u_password)
@@ -94,7 +103,8 @@ class Users extends \CLASSES\WebBase
             if($res)
             {
                 $token = $this->createToken($user_data['data']['0']['u_name'],$user_data['data']['0']['u_pass']);
-                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_name'],'u_true_name'=>$user_data['data']['0']['u_true_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass'],'u_idcard'=>$u_idcard ),1);
+
+                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_name'],'u_true_name'=>$user_data['data']['0']['u_true_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass'],'u_idcard'=>$u_idcard,'haspwd'=>$haspwd ),1);
             }
 
 
@@ -114,7 +124,7 @@ class Users extends \CLASSES\WebBase
                 if ($u_id)
                 {
                     $token = $this->createToken($data['u_name'],$data['u_pass']);
-                    $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'.jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>''),1);
+                    $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'.jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>'','haspwd'=>'0'),1);
                 }else{
                     $this->exportData(array('msg'=>'注册失败,请重新注册'),0);
                 }
@@ -1719,13 +1729,69 @@ class Users extends \CLASSES\WebBase
             if ($u_id)
             {
                 $token = $this->createToken($data['u_name'],$data['u_password']);
-                $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'.jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>'','u_password'=>$userpass),1);
+                $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'.jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>'','u_password'=>$userpass,'haspwd'=>'1'),1);
             }else{
                 $this->exportData(array('msg'=>'注册失败,请重新注册'),0);
             }
         }
         }
 
+    }
+    //忘记密码
+    public function forget_Password(){
+        $phone_number = isset($_GET['phone_number']) && trim($_GET['phone_number']) != '' ? trim($_GET['phone_number']) : '';
+        $verify_code = isset($_GET['verify_code']) && trim($_GET['verify_code']) != '' ? trim($_GET['verify_code']) : '';
+        $userpass = isset($_GET['userpass']) && trim($_GET['userpass']) != '' ? encyptPassword(trim($_GET['userpass'])) : '';
+        $password_confirm = isset($_GET['password_confirm']) && trim($_GET['password_confirm']) != '' ? encyptPassword(trim($_GET['password_confirm'])) : '';
+       
+        $dao_users = new \WDAO\Users(array('table'=>'users'));
+        /*验证验证码*/
+        if(isset($phone_number) && !empty($num = intval($phone_number)) && !empty($verify_code) && !empty($userpass) && !empty($password_confirm))
+        {
+        $res = $dao_users ->checkVerifies($phone_number,trim($verify_code),$this ->web_config['verify_code_time']);
+            if($res === true){
+               if($userpass!=$password_confirm)
+                {
+                    $this->exportData(array('msg'=>'两次密码输入不相同'),0);
+                }
+                $info = $dao_users->infoData(array('key'=>'u_name','val'=>$phone_number,'fields'=>'u_id'));
+                if($info)
+                {
+                    $res = $dao_users ->updateData(array('u_password' => $userpass), array('u_id' => $info['u_id']));
+                }
+                else
+                {
+                    $this->exportData(array('msg'=>'用户不存在,请注册'),0);
+                }
+            }else{
+                switch ($res) {
+                    case '-1':
+                        $this ->exportData( array('msg'=>'系统错误请联系管理员'),0);
+                        break;
+                    case '-2':
+                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
+                        break;
+                    default:
+                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
+                        break;
+                }
+            }
+            
+        }
+        elseif(isset($phone_number) && !empty($num = intval($phone_number)) )/*手机号发送验证码*/
+        {
+            $this ->sendVerifyCode('用户您好!您正在重置密码,验证码为',$num);
+        }
+        else
+        {
+            $this ->exportData( array('msg'=>'参数不足,密码修改失败'),0);
+        }
+        if($res){
+            $this ->exportData( array('msg'=>'密码重置成功'),1);
+        }else{
+            $this ->exportData( array('msg'=>'密码重置失败,请联系管理员'),0);
+        }
+        
     }
 
 
