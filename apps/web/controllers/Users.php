@@ -19,7 +19,7 @@ class Users extends \CLASSES\WebBase
         $type = isset($_GET['type']) && in_array($_GET['type'], array('verify', 'third', 'pass')) ? trim($_GET['type']) : 'verify';
         $logindata = array(
             'pager' => false,
-            'fields'=>'u_true_name,u_pass,u_status,u_online,u_id,u_sex,u_idcard,u_name',
+            'fields'=>'u_true_name,u_pass,u_status,u_online,u_id,u_sex,u_idcard,u_name,u_password',
         );
         $time = time();
 
@@ -29,7 +29,7 @@ class Users extends \CLASSES\WebBase
             $userpass = isset($_GET['userpass']) && trim($_GET['userpass']) != '' ? encyptPassword(trim($_GET['userpass'])) : '';
             if ('' == $username || '' == $userpass) $this->exportData(array('msg'=>'参数错误p'));
             $logindata['u_name'] = $username;
-            $logindata['u_password'] = $userpass;
+           
         }
         elseif ($type == 'third')
         {
@@ -82,31 +82,46 @@ class Users extends \CLASSES\WebBase
             $u_idcard = isset($user_data['data']['0']['u_idcard']) ? $user_data['data']['0']['u_idcard'] :'';
             $u_pass = isset($user_data['data']['0']['u_pass']) ? $user_data['data']['0']['u_pass'] :'';
             $u_sex = isset($user_data['data']['0']['u_sex']) ? $user_data['data']['0']['u_sex'] : '';
+            $u_password = isset($user_data['data']['0']['u_password']) ? $user_data['data']['0']['u_password'] : '';
+             if('' != $username || '' != $userpass)
+            {
+                if($userpass!=$u_password)
+                {
+                    $this->exportData(array('msg'=>'密码错误!'),0);
+                }
+            }
+
             if($res)
             {
                 $token = $this->createToken($user_data['data']['0']['u_name'],$user_data['data']['0']['u_pass']);
-                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_true_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass'],'u_idcard'=>$u_idcard ),1);
+                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_name'],'u_true_name'=>$user_data['data']['0']['u_true_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass'],'u_idcard'=>$u_idcard ),1);
             }
 
 
         }else{
             /*用户不存在*/
-
-            $data = array();
-            $data['u_name'] = uniqid('u_');
-            $data['u_pass'] = '';
-            $data['u_mobile'] = $phone_number;
-            $data['u_in_time'] = $time;
-            $data['u_last_edit_time'] = $time;
-            $data['u_token'] = $time;
-            $u_id = $dao_users ->addUser($this,$data);
-
-            if ($u_id)
+            if(in_array($_GET['type'], array('verify', 'third')))
             {
-                $token = $this->createToken($data['u_name'],$data['u_pass']);
-                $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'.jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>''),1);
-            }else{
-                $this->exportData(array('msg'=>'注册失败,请重新注册'),0);
+                $data = array();
+                $data['u_name'] = uniqid('u_');
+                $data['u_pass'] = '';
+                $data['u_mobile'] = $phone_number;
+                $data['u_in_time'] = $time;
+                $data['u_last_edit_time'] = $time;
+                $data['u_token'] = $time;
+                $u_id = $dao_users ->addUser($this,$data);
+
+                if ($u_id)
+                {
+                    $token = $this->createToken($data['u_name'],$data['u_pass']);
+                    $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'.jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>''),1);
+                }else{
+                    $this->exportData(array('msg'=>'注册失败,请重新注册'),0);
+                }
+            }
+            else
+            {
+                $this->exportData(array('msg'=>'用户名不存在,请重新注册'));
             }
         }
     }
@@ -1670,15 +1685,15 @@ class Users extends \CLASSES\WebBase
     //用户名密码注册接口
     public function register(){
         $time=time();
-        $username = isset($_GET['username']) && trim($_GET['username']) != '' ? trim($_GET['username']) : $this->exportData(array('msg'=>'用户名不能为空'));
-        $userpass = isset($_GET['userpass']) && trim($_GET['userpass']) != '' ? encyptPassword(trim($_GET['userpass'])) : $this->exportData(array('msg'=>'用户密码不能为空'));
-        $password_confirm=isset($_GET['password_confirm']) && trim($_GET['password_confirm']) != '' ? encyptPassword(trim($_GET['password_confirm'])) : $this->exportData(array('msg'=>'请输入确认密码'));
+        $username = isset($_GET['username']) && trim($_GET['username']) != '' ? trim($_GET['username']) : $this->exportData(array('msg'=>'用户名不能为空'),0);
+        $userpass = isset($_GET['userpass']) && trim($_GET['userpass']) != '' ? encyptPassword(trim($_GET['userpass'])) : $this->exportData(array('msg'=>'用户密码不能为空'),0);
+        $password_confirm=isset($_GET['password_confirm']) && trim($_GET['password_confirm']) != '' ? encyptPassword(trim($_GET['password_confirm'])) : $this->exportData(array('msg'=>'请输入确认密码'),0);
       
         $logindata['u_name'] = $username;
         $logindata['u_password'] = $userpass;
         if($userpass!=$password_confirm){
             
-            $this->exportData(array('msg'=>'两次密码输入不相同'));
+            $this->exportData(array('msg'=>'两次密码输入不相同'),0);
         
         }
         else{
@@ -1688,7 +1703,7 @@ class Users extends \CLASSES\WebBase
         $info = $dao_users->infoData(array('key'=>'u_name','val'=>$username,'fields'=>'u_id'));
         if($info){
             
-            $this->exportData(array('用户已存在'));
+            $this->exportData(array('msg'=>'用户已存在'),0);
         }else{
             /*用户不存在*/
 
