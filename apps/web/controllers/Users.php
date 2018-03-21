@@ -27,7 +27,8 @@ class Users extends \CLASSES\WebBase
         {
             $phone_number = isset($_GET['phone_number']) && trim($_GET['phone_number']) != '' ? trim($_GET['phone_number']) : '';
             $userpass = isset($_GET['userpass']) && trim($_GET['userpass']) != '' ? encyptPassword(trim($_GET['userpass'])) : '';
-            if ('' == $phone_number || '' == $userpass) $this->exportData(array('msg'=>'参数错误p'));
+            $verify_code = isset($_GET['verify_code']) && trim($_GET['verify_code']) != '' ? trim($_GET['verify_code']) : '';
+            if ('' == $phone_number || '' == $userpass) $this->exportData(array('msg'=>'手机号或密码不能为空'),0);
             $logindata['u_mobile'] = $phone_number;
            
         }
@@ -83,35 +84,31 @@ class Users extends \CLASSES\WebBase
             $u_pass = isset($user_data['data']['0']['u_pass']) ? $user_data['data']['0']['u_pass'] :'';
             $u_sex = isset($user_data['data']['0']['u_sex']) ? $user_data['data']['0']['u_sex'] : '';
             $u_password = isset($user_data['data']['0']['u_password']) ? $user_data['data']['0']['u_password'] : '';
-            if(''==$u_password)
-            {
-                $haspwd = 0;
-            }
-            else
-            {
-                $haspwd = 1;
-            }
-           
-             if('' != $phone_number || '' != $userpass)
+
+            if('' != $phone_number and '' != isset($userpass))
             {
                 if($userpass!=$u_password)
                 {
                     $this->exportData(array('msg'=>'密码错误!'),0);
                 }
             }
-
             if($res)
             {
                 $token = $this->createToken($user_data['data']['0']['u_name'],$user_data['data']['0']['u_pass']);
 
-                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_name'],'u_true_name'=>$user_data['data']['0']['u_true_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass'],'u_idcard'=>$u_idcard,'haspwd'=>$haspwd ),1);
+                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_name'],'u_true_name'=>$user_data['data']['0']['u_true_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass'],'u_idcard'=>$u_idcard),1);
             }
 
 
         }else{
             /*用户不存在*/
-           
-                $data = array();
+                
+                $dao_users = new \WDAO\Users(array('table'=>'users'));
+                $res = $dao_users ->checkVerifies($phone_number,trim($verify_code),$this ->web_config['verify_code_time']);
+                
+                if($res===true)
+                {
+                    $data = array();
                 $data['u_name'] = uniqid('u_');
                 $data['u_pass'] = '';
                 $data['u_mobile'] = $phone_number;
@@ -120,6 +117,21 @@ class Users extends \CLASSES\WebBase
                 $data['u_last_edit_time'] = $time;
                 $data['u_token'] = $time;
                 $u_id = $dao_users ->addUser($this,$data);
+                }
+                else{
+                    switch ($res) {
+                    case '-1':
+                        $this ->exportData( array('msg'=>'系统错误请联系管理员'),0);
+                        break;
+                    case '-2':
+                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
+                        break;
+                    default:
+                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
+                        break;
+                    }
+                }
+                
 
                 if ($u_id)
                 {
