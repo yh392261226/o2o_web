@@ -1812,7 +1812,31 @@ class Users extends \CLASSES\WebBase
         }
         
     }
+    //修改用户密码
+    public function setPass()
+    {
+        $u_id = isset($_GET['u_id']) && intval($_GET['u_id']) != '' ? trim($_GET['u_id']) : $this->exportData(array('msg'=>'用户名id为空'),0);
+        $u_password = isset($_GET['u_password']) && trim($_GET['u_password']) != '' ? encyptPassword(trim($_GET['u_password'])) : $this->exportData(array('msg'=>'用户密码不能为空'),0);
+        $password_confirm=isset($_GET['password_confirm']) && trim($_GET['password_confirm']) != '' ? encyptPassword(trim($_GET['password_confirm'])) : $this->exportData(array('msg'=>'请输入确认密码'),0);
+        if($u_password!=$password_confirm){
+            
+            $this->exportData(array('msg'=>'两次密码输入不相同'),0);
+        
+        }
+        $dao_users = new \WDAO\Users(array('table'=>'users'));
+        $u_info = $dao_users -> infoData(array('key'=>'u_id','val'=>$u_id,'fields'=>'u_id,u_password'));
+        $data = array();
+        $data['u_password'] = encyptPassword($u_password);
+        $res = $dao_users ->updateData($data,array('u_id'=>$u_id));
+        if($res){
+                $this ->exportData( array('msg'=>'设置密码成功'),1);
+        }else{
+                $this ->exportData( array('msg'=>'设置密码失败'),0);
+        }
 
+       
+
+    }
 
 
 
