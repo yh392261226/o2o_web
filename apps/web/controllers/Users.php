@@ -25,10 +25,10 @@ class Users extends \CLASSES\WebBase
 
         if ($type == 'pass')
         {
-            $username = isset($_GET['username']) && trim($_GET['username']) != '' ? trim($_GET['username']) : '';
+            $phone_number = isset($_GET['phone_number']) && trim($_GET['phone_number']) != '' ? trim($_GET['phone_number']) : '';
             $userpass = isset($_GET['userpass']) && trim($_GET['userpass']) != '' ? encyptPassword(trim($_GET['userpass'])) : '';
-            if ('' == $username || '' == $userpass) $this->exportData(array('msg'=>'参数错误p'));
-            $logindata['u_name'] = $username;
+            if ('' == $phone_number || '' == $userpass) $this->exportData(array('msg'=>'参数错误p'));
+            $logindata['u_mobile'] = $phone_number;
            
         }
         elseif ($type == 'third')
@@ -92,7 +92,7 @@ class Users extends \CLASSES\WebBase
                 $haspwd = 1;
             }
            
-             if('' != $username || '' != $userpass)
+             if('' != $phone_number || '' != $userpass)
             {
                 if($userpass!=$u_password)
                 {
@@ -110,12 +110,12 @@ class Users extends \CLASSES\WebBase
 
         }else{
             /*用户不存在*/
-            if(in_array($_GET['type'], array('verify', 'third')))
-            {
+           
                 $data = array();
                 $data['u_name'] = uniqid('u_');
                 $data['u_pass'] = '';
                 $data['u_mobile'] = $phone_number;
+                $data['u_password'] = $userpass;
                 $data['u_in_time'] = $time;
                 $data['u_last_edit_time'] = $time;
                 $data['u_token'] = $time;
@@ -128,11 +128,7 @@ class Users extends \CLASSES\WebBase
                 }else{
                     $this->exportData(array('msg'=>'注册失败,请重新注册'),0);
                 }
-            }
-            else
-            {
-                $this->exportData(array('msg'=>'用户名不存在,请重新注册'));
-            }
+            
         }
     }
 
@@ -146,7 +142,7 @@ class Users extends \CLASSES\WebBase
             if ($phone_number == '15840344241') $code = '123456';
 
             /*发送验证码接口*/
-            $content = '登录验证码为'.$msg.$code.'。';
+            $content = '获取的验证码为'.$msg.$code.'。';
             $result = sendSms($phone_number, $content);
             if(!$result)
             {
