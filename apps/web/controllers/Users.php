@@ -103,43 +103,7 @@ class Users extends \CLASSES\WebBase
         }else{
             /*用户不存在*/
                 
-                $dao_users = new \WDAO\Users(array('table'=>'users'));
-                $res = $dao_users ->checkVerifies($phone_number,trim($verify_code),$this ->web_config['verify_code_time']);
-                
-                if($res===true)
-                {
-                    $data = array();
-                $data['u_name'] = uniqid('u_');
-                $data['u_pass'] = '';
-                $data['u_mobile'] = $phone_number;
-                $data['u_password'] = $userpass;
-                $data['u_in_time'] = $time;
-                $data['u_last_edit_time'] = $time;
-                $data['u_token'] = $time;
-                $u_id = $dao_users ->addUser($this,$data);
-                }
-                else{
-                    switch ($res) {
-                    case '-1':
-                        $this ->exportData( array('msg'=>'系统错误请联系管理员'),0);
-                        break;
-                    case '-2':
-                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
-                        break;
-                    default:
-                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
-                        break;
-                    }
-                }
-                
-
-                if ($u_id)
-                {
-                    $token = $this->createToken($data['u_name'],$data['u_pass']);
-                    $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'.jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>'','haspwd'=>'0'),1);
-                }else{
-                    $this->exportData(array('msg'=>'注册失败,请重新注册'),0);
-                }
+               $this->exportData(array('msg'=>'用户不存在,请注册!'),0);
             
         }
     }
@@ -1699,6 +1663,53 @@ class Users extends \CLASSES\WebBase
         }else{
             $this ->exportData( array('msg'=>'密码修改失败,请联系管理员'),0);
         }
+    }
+
+    //手机注册接口
+    public function mobileRegister()
+    {
+        $time=time();
+        $phone_number = isset($_GET['phone_number']) && trim($_GET['phone_number']) != '' ? trim($_GET['phone_number']) : $this->exportData(array('msg'=>'手机号不能为空'),0);
+        $userpass = isset($_GET['userpass']) && trim($_GET['userpass']) != '' ? encyptPassword(trim($_GET['userpass'])) : $this->exportData(array('msg'=>'密码不能为空'),0);
+        $verify_code = isset($_GET['verify_code']) && trim($_GET['verify_code']) != '' ? trim($_GET['verify_code']) : $this->exportData(array('msg'=>'验证码不能为空'),0);
+                $dao_users = new \WDAO\Users(array('table'=>'users'));
+                $res = $dao_users ->checkVerifies($phone_number,trim($verify_code),$this ->web_config['verify_code_time']);
+                
+                if($res===true)
+                {
+                    $data = array();
+                $data['u_name'] = uniqid('u_');
+                $data['u_pass'] = '';
+                $data['u_mobile'] = $phone_number;
+                $data['u_password'] = $userpass;
+                $data['u_in_time'] = $time;
+                $data['u_last_edit_time'] = $time;
+                $data['u_token'] = $time;
+                $u_id = $dao_users ->addUser($this,$data);
+                }
+                else{
+                    switch ($res) {
+                    case '-1':
+                        $this ->exportData( array('msg'=>'请获取验证码'),0);
+                        break;
+                    case '-2':
+                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
+                        break;
+                    default:
+                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
+                        break;
+                    }
+                }
+                
+
+                if ($u_id)
+                {
+                    $token = $this->createToken($data['u_name'],$data['u_pass']);
+                    $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'.jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>'','haspwd'=>'0'),1);
+                }else{
+                    $this->exportData(array('msg'=>'注册失败,请重新注册'),0);
+                }
+
     }
     //用户名密码注册接口
     public function register(){
