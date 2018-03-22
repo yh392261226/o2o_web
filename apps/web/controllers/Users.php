@@ -1674,6 +1674,11 @@ class Users extends \CLASSES\WebBase
         $verify_code = isset($_GET['verify_code']) && trim($_GET['verify_code']) != '' ? trim($_GET['verify_code']) : $this->exportData(array('msg'=>'验证码不能为空'),0);
                 $dao_users = new \WDAO\Users(array('table'=>'users'));
                 $res = $dao_users ->checkVerifies($phone_number,trim($verify_code),$this ->web_config['verify_code_time']);
+                $info = $dao_users->infoData(array('key'=>'u_mobile','val'=>$phone_number,'fields'=>'u_id'));
+                if($info)
+                {
+                    $this->exportData(array('msg'=>'用户已存在'),0);
+                }
                 
                 if($res===true)
                 {
