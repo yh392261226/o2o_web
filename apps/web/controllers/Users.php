@@ -1778,7 +1778,7 @@ class Users extends \CLASSES\WebBase
                 {
                     $this->exportData(array('msg'=>'两次密码输入不相同'),0);
                 }
-                $info = $dao_users->infoData(array('key'=>'u_name','val'=>$phone_number,'fields'=>'u_id'));
+                $info = $dao_users->infoData(array('key'=>'u_mobile','val'=>$phone_number,'fields'=>'u_id'));
                 if($info)
                 {
                     $res = $dao_users ->updateData(array('u_password' => $userpass), array('u_id' => $info['u_id']));
