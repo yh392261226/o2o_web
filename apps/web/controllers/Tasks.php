@@ -345,7 +345,7 @@ class Tasks extends \CLASSES\WebBase
             $this->exportData(array('msg' => '参数错误', 'status' => -1));
         }
         $request_data = json_decode(base64_decode($_POST['data']), true);
-        //error_log(var_export($request_data, true) . '\n', 3, 'request.log');
+//        error_log(var_export($request_data, true) . '\n', 3, 'request.log');
 
         $data['t_storage'] = $tmp['t_storage'] = 1;
         if (isset($request_data['t_storage']) && is_numeric($request_data['t_storage'])) $data['t_storage'] = intval($request_data['t_storage']);
@@ -474,8 +474,13 @@ class Tasks extends \CLASSES\WebBase
 //        {
 //            $this->exportData(array('msg' => '用户支付密码不能为空', 'status' => 3));
 //        }
-//        $user_dao = new \WDAO\Users(array('table' => 'users'));
+        $user_dao = new \WDAO\Users(array('table' => 'users'));
 //        $pass_result = $user_dao->checkUserPayPassword(array('u_id' => intval($request_data['t_author']), 'u_pass' => $tmp['u_pass']));
+        $pass_result = $user_dao->infoData(intval($request_data['t_author']));
+        if (empty($pass_result))
+        {
+            $this->exportData(array('msg' => '发布人id不正确', 'status' => -2));
+        }
 //        if (false == $pass_result || !isset($pass_result['u_mobile']) || '' == $pass_result['u_mobile'])
 //        {
 //            $this->exportData(array('msg' => '用户支付密码错误', 'status' => 3));
@@ -502,7 +507,8 @@ class Tasks extends \CLASSES\WebBase
 //            }
 
             //事物提交或回滚
-            if ($amount_result && $user_funds_result && $platform_funds_result)
+//            if ($amount_result && $user_funds_result && $platform_funds_result)
+            if ($amount_result)
             {
                 $this->db->commit();
                 $this->exportData(array('msg' => '发布成功', 'status' => 0));
