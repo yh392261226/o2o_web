@@ -469,37 +469,37 @@ class Tasks extends \CLASSES\WebBase
             }
         }
 
-        //获取用户支付密码及
-        if (!isset($tmp['u_pass']))
-        {
-            $this->exportData(array('msg' => '用户支付密码不能为空', 'status' => 3));
-        }
-        $user_dao = new \WDAO\Users(array('table' => 'users'));
-        $pass_result = $user_dao->checkUserPayPassword(array('u_id' => intval($request_data['t_author']), 'u_pass' => $tmp['u_pass']));
-        if (false == $pass_result || !isset($pass_result['u_mobile']) || '' == $pass_result['u_mobile'])
-        {
-            $this->exportData(array('msg' => '用户支付密码错误', 'status' => 3));
-        }
-
-        //获取用户资金
-        $users_ext_funds_dao = new \WDAO\Users_ext_funds(array('table'=>'users_ext_funds'));
-        $users_ext_funds_info = $users_ext_funds_dao->infoData(intval($request_data['t_author']));
-        if (empty($users_ext_funds_info) || !isset($users_ext_funds_info['uef_overage']) || $users_ext_funds_info['uef_overage'] < $tmp['total'])
-        {
-            $this->exportData(array('msg' => '用户资金不足', 'status' => 2));
-        }
+//        //获取用户支付密码及
+//        if (!isset($tmp['u_pass']))
+//        {
+//            $this->exportData(array('msg' => '用户支付密码不能为空', 'status' => 3));
+//        }
+//        $user_dao = new \WDAO\Users(array('table' => 'users'));
+//        $pass_result = $user_dao->checkUserPayPassword(array('u_id' => intval($request_data['t_author']), 'u_pass' => $tmp['u_pass']));
+//        if (false == $pass_result || !isset($pass_result['u_mobile']) || '' == $pass_result['u_mobile'])
+//        {
+//            $this->exportData(array('msg' => '用户支付密码错误', 'status' => 3));
+//        }
+//
+//        //获取用户资金
+//        $users_ext_funds_dao = new \WDAO\Users_ext_funds(array('table'=>'users_ext_funds'));
+//        $users_ext_funds_info = $users_ext_funds_dao->infoData(intval($request_data['t_author']));
+//        if (empty($users_ext_funds_info) || !isset($users_ext_funds_info['uef_overage']) || $users_ext_funds_info['uef_overage'] < $tmp['total'])
+//        {
+//            $this->exportData(array('msg' => '用户资金不足', 'status' => 2));
+//        }
 
         //订单改价
         if ($worker_result && $data['t_storage'] == 0 && $tmp['t_storage'] == 1)
         {
             $this->db->start();
             $amount_result = $task_dao->updateData(array('t_edit_amount' => $tmp['total_edit'], 't_amount' => $tmp['total'], 't_phone' => $pass_result['u_mobile'], 't_storage' => 0), array('t_id' => $result));
-            if ($amount_result)
-            {
-                //扣除用户资金 并加入平台资金日志
-                $user_funds_result = $this->userFunds(intval($request_data['t_author']), (-1 * $tmp['total_edit']), $type = 'pubtask'); //扣除用户资金
-                $platform_funds_result = $this->platformFundsLog($result, $tmp['total_edit'], 3, 'pubtask', 0);     //平台资金日志增加
-            }
+//            if ($amount_result)
+//            {
+//                //扣除用户资金 并加入平台资金日志
+//                $user_funds_result = $this->userFunds(intval($request_data['t_author']), (-1 * $tmp['total_edit']), $type = 'pubtask'); //扣除用户资金
+//                $platform_funds_result = $this->platformFundsLog($result, $tmp['total_edit'], 3, 'pubtask', 0);     //平台资金日志增加
+//            }
 
             //事物提交或回滚
             if ($amount_result && $user_funds_result && $platform_funds_result)
@@ -629,19 +629,19 @@ class Tasks extends \CLASSES\WebBase
             }
 
             //归还已经扣除资金
-            $platform_funds_dao = new \WDAO\Platform_funds_log();
-            $back_platform_funds = $platform_funds_dao->rebackFundsToUser(array(
-                'pfl_type' => 3,
-                'pfl_reason' => '"pubtask","changeprice","taskreturn"',
-                'pfl_type_id' => intval($data['t_id']),
-                'u_id' => intval($data['t_author']),
-                'platform_rate' => $platform_rate,
-            ));
-            if (!$back_platform_funds)
-            {
-                return -2;
-                //$this->exportData('返还用户资金失败，请联系客服人员');
-            }
+//            $platform_funds_dao = new \WDAO\Platform_funds_log();
+//            $back_platform_funds = $platform_funds_dao->rebackFundsToUser(array(
+//                'pfl_type' => 3,
+//                'pfl_reason' => '"pubtask","changeprice","taskreturn"',
+//                'pfl_type_id' => intval($data['t_id']),
+//                'u_id' => intval($data['t_author']),
+//                'platform_rate' => $platform_rate,
+//            ));
+//            if (!$back_platform_funds)
+//            {
+//                return -2;
+//                //$this->exportData('返还用户资金失败，请联系客服人员');
+//            }
 
             //删除之前的该任务 并重新写入
             $del_old_result = $task_dao->delOldTask(array('t_id' => $data['t_id'], 't_author' => $data['t_author']));
