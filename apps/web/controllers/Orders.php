@@ -684,6 +684,68 @@ class Orders extends \CLASSES\WebBase
         $this->exportData('failure');
     }
 
+
+    private function payorder()
+    {
+        $data = array();
+        if (isset($_REQUEST['o_id']) && intval($_REQUEST['o_id']) > 0) $data['o_id'] = intval($_REQUEST['o_id']); //订单id
+        if (isset($_REQUEST['tew_id']) && intval($_REQUEST['tew_id']) > 0) $data['tew_id'] = intval($_REQUEST['tew_id']); //任务工人关系id 即单个工种的id
+        if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']); //任务id
+        if (isset($_REQUEST['t_author']) && intval($_REQUEST['t_author']) > 0) $data['t_author'] = intval($_REQUEST['t_author']); //雇主id
+        if (!empty($data) && $data['o_id'] > 0)
+        {
+            $data['pager'] = 0;
+            //获取订单信息
+            $orders_data = $this->orders_dao->infoData($data['o_id']);
+            if (!empty($orders_data))
+            {
+                if ((isset($data['t_author']) && $data['t_author'] != $orders_data['t_author'])) || (isset($data['tew_id']) && $data['tew_id'] != $orders_data['tew_id'])
+                {
+                    $this->exportData(array('msg' => '订单不存在'));
+                }
+
+                $amount = ($orders_data['o_amount'] * getDays($orders_data['o_end_time'], $orders_data['o_start_time']));
+                //扣除雇主资费
+                $orderpay = $this->userFunds($orders_data['u_id'], $amount * -1, 'payorder');
+                //增加平台资费
+                $platform_add = $this->platformFundsLog($data['o_id'], $amount, 0, 'orderadd');
+                //增加工人资费
+                $worker_add = $this->userFunds($orders_data['o_worker'], $amount, 'payorder');
+                //扣除平台资费
+                $platform_del = $this->platformFundsLog($data['o_id'], $amount * -1, 0, 'payorder');
+                //更新订单支付状态
+                $pay = $this->orders_dao->payStatus($val['o_id'], '1', $val['o_status']);
+                if ($orderpay && $worker_add && $pay)
+                {
+                    //验证工种是否完结
+                    $tew_count = $this->orders_dao->countData(array(
+                        'u_id' => $orders_data['u_id'],
+                        't_id' => $orders_data['t_id'],
+                        'tew_id' => $orders_data['tew_id'],
+                        'o_status' => 0,
+                        ));
+                    if ($tew_count <= 0)
+                    {
+                        $task_ext_worker_dao = new \WDAO\Task_ext_worker();
+                        $task_ext_worker_dao->updateData(array(
+                            'tew_status' => 1,
+                        ), array(
+                            'tew_id' => $orders_data['tew_id']
+                        ));
+                    }
+                    //验证所有工种是否完结 如果完结 结束任务
+                    $tasks_dao = new \WDAO\Tasks();
+                    $tasks_dao->resetTaskByLastWork($orders_data['t_id']);
+
+                    $this->exportData(array('msg' => 'success'));
+                }
+                $this->exportData(array('msg' => 'failure'));
+            }
+            $this->exportData(array('msg' => '订单不存在'));
+        }
+        $this->exportData(array('msg' => '参数错误'));
+    }
+
     /**
      * 订单支付
      */

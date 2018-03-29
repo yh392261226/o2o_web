@@ -122,6 +122,7 @@ class WebBase extends Swoole\Controller
                 case 'pubtask':
                 case 'withdraw':
                 case 'recharge':
+                case 'payorder':
                 case 'changeprice':
                     $sets = ' uef_overage = uef_overage + ' . $amount;
                     break;
