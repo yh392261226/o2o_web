@@ -58,5 +58,36 @@ class Orders extends \MDAOBASE\DaoBase
         }
         return false;
     }
+    //修改订单状态为完成
+    public function editOrders($data=array())
+    {
+
+        if (!empty($data))
+        {
+            $param = $data;
+            $param['pager'] = 0;
+            $orders_data = $this->listData($param);
+            if (!empty($orders_data['data']))
+            {
+                $tmp_ids = array();
+                foreach ($orders_data['data'] as $key => $val)
+                {
+                    if (isset($val['o_id']) && $val['o_id'] > 0)
+                    {
+                        $tmp_ids[] = $val['o_id'];
+                    }
+                }
+
+                if (!empty($tmp_ids))
+                {
+                    $update_param = $this->createWhere(array('o_id' => array('type' => 'in', 'value' => $tmp_ids), 'pager' => 0));
+                    return $this->updateData(array('o_status' => 1), $update_param);
+                }
+            }
+        }
+        return false;
+    }
+
+
 
 }

@@ -59,5 +59,33 @@ class Task_ext_worker extends \MDAOBASE\DaoBase
         }
         return array();
     }
+    //修改工人状态为完成
+    public function editWorker($data=array())
+    {
+        if (!empty($data))
+        {
+            $param = $data;
+            $param['pager'] = 0;
+            $worker_data = $this->listData($param);
+            if (!empty($worker_data['data']))
+            {
+                $tmp_ids = array();
+                foreach ($worker_data['data'] as $key => $val)
+                {
+                    if (isset($val['tew_id']) && $val['tew_id'] > 0)
+                    {
+                        $tmp_ids[] = $val['tew_id'];
+                    }
+                }
+
+                if (!empty($tmp_ids))
+                {
+                    $update_param = $this->createWhere(array('tew_id' => array('type' => 'in', 'value' => $tmp_ids), 'pager' => 0));
+                    return $this->updateData(array('tew_status' => 1), $update_param);
+                }
+            }
+        }
+        return false;
+    }
 
 }
