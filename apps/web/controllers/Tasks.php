@@ -555,7 +555,6 @@ class Tasks extends \CLASSES\WebBase
         }
         $this->exportData('failure');
     }
-
     /**
      * 删除任务及归还资金与抵扣券 [对外]
      * @param array $data
@@ -659,6 +658,35 @@ class Tasks extends \CLASSES\WebBase
             return 0;
         }
         return -9;
+    }
+
+    /**
+     * 修改任务 所需工人 订单 完成状态
+     */
+    private function editTask()
+    {
+        $orders_dao = new \WDAO\Orders();
+        $worker_dao= new \WDAO\Task_ext_worker();
+        $data=array();
+        if (isset($_REQUEST['t_id']) && intval($_REQUEST['t_id']) > 0) $data['t_id'] = intval($_REQUEST['t_id']);
+        if (isset($_REQUEST['t_author']) && intval($_REQUEST['t_author']) > 0) $data['t_author'] = intval($_REQUEST['t_author']);
+        if (!empty($data) && isset($data['t_id']) && isset($data['t_author']));
+        {
+            $task_result = $this->tasks_dao->updateData(array('t_status' => 3), array('t_id' => $data['t_id'], 't_author' => $data['t_author']));
+            $orders_result = $orders_dao->editOrders(array('t_id' => $data['t_id'], 'u_id' => $data['t_author'],'o_status' => 0));
+            $worker_result = $worker_dao->editWorker(array('t_id' => $data['t_id']));
+            if ($task_result && $orders_result && $worker_result)
+            {
+                //$orders_dao = new \WDAO\Orders();
+                //$orders_data = $orders_dao->listData(array('t_id' => $data['t_id'], 'u_id' => $data['t_author'], 'pager' => 0));
+                //if (!empty($orders_data['data'][0]))
+                //{
+                //
+                //}
+                $this->exportData(array('msg' => '任务完成', 'status' => 3));
+            }
+        }
+        $this->exportData('failure');
     }
 
 }
