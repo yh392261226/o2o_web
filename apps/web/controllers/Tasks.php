@@ -675,6 +675,20 @@ class Tasks extends \CLASSES\WebBase
             $task_result = $this->tasks_dao->updateData(array('t_status' => 3), array('t_id' => $data['t_id'], 't_author' => $data['t_author']));
             $orders_result = $orders_dao->editOrders(array('t_id' => $data['t_id'], 'u_id' => $data['t_author'],'o_status' => 0));
             $worker_result = $worker_dao->editWorker(array('t_id' => $data['t_id']));
+            $user_dao = new \WDAO\Users(array('table'=>'users'));
+            $orders_data = $orders_dao->listData(array('t_id' => $data['t_id']));
+            if (!empty($orders_data['data']))
+            {
+                $tmp_work = array();
+                foreach ($orders_data['data'] as $key => $val)
+                {
+                    if (isset($val['o_id']) && $val['o_id'] > 0)
+                    {
+                        $user_dao->taskStatus($val['o_worker'],'0');
+                    }
+                    
+                }
+            }
             if ($task_result && $orders_result && $worker_result)
             {
                 //$orders_dao = new \WDAO\Orders();
