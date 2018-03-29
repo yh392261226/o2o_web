@@ -34,14 +34,12 @@ class Skills extends \CLASSES\WebBase
         $list = $this->skills_dao->listData($data);
 
         if (!empty($list))
-        {
-            /*图片*/
-            foreach ($list['data'] as $k => &$v) {
-               if($v['s_id'] > 0){
-                   $v['img'] = $this ->web_config['skill_img_url'].$v['s_id'].'.jpg';
-               }
+        {/*图片*/
+            foreach ($list['data'] as $key => $val)
+            {
+                $list['data'][$key]['img'] = '';
+                if ($val['s_id'] > 0) $list['data'][$key]['img'] = $this ->web_config['skill_img_url'].$val['s_id'].'.jpg';
             }
-
             $this->exportData($list['data']);
         }
         else
