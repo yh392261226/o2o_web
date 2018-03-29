@@ -736,6 +736,9 @@ class Orders extends \CLASSES\WebBase
                     //验证所有工种是否完结 如果完结 结束任务
                     $tasks_dao = new \WDAO\Tasks();
                     $tasks_dao->resetTaskByLastWork($orders_data['t_id']);
+                    //释放工人
+                    $users_dao = new \WDAO\Users();
+                    $users_dao->taskStatus($orders_data['o_worker']);
 
                     $this->exportData(array('msg' => 'success'));
                 }
