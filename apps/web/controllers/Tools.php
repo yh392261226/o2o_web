@@ -49,15 +49,4 @@ class Tools extends \CLASSES\WebBase
         $this->exportData($types);
     }
 
-    public function internal()
-    {
-        $pass = '365gj';
-        $this->exportData($pass);
-    }
-
-    public function lock()
-    {
-        $result = '-1';
-        $this->exportData($result);
-    }
 }
