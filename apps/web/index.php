@@ -1,6 +1,5 @@
 <?php
 define('WEBPATH', dirname(__FILE__));
-define('MANAGEPATH', WEBPATH . '/../manage');
 date_default_timezone_set('Asia/Shanghai');
 require WEBPATH . '/configs/config.php';
 require CONFIGPATH . '/fields_type.php';
