@@ -336,7 +336,7 @@ class Users extends \CLASSES\WebBase
         if (isset($ext_info['uei_city']) && $ext_info['uei_city'] > 0) $user_area_name .= $regions[$ext_info['uei_city']]['r_name'];
         $user_area_name .= ' ';
         if (isset($ext_info['uei_area']) && $ext_info['uei_area'] > 0) $user_area_name .= $regions[$ext_info['uei_area']]['r_name'];
-
+        
         $ext_info['user_area_name'] = $user_area_name;
         unset($ext_info['u_id']);
 
@@ -368,7 +368,8 @@ class Users extends \CLASSES\WebBase
             unset($_REQUEST);
             $_REQUEST = $data_r;
 
-        }elseif (empty($_REQUEST['u_id']) || !isset($_REQUEST['u_sex']) || empty($_REQUEST['u_true_name']) || empty($_REQUEST['u_idcard']) || empty($_REQUEST['uei_info']) || empty($_REQUEST['uei_address']) || empty($_REQUEST['uei_province']) || empty($_REQUEST['uei_city']) || empty($_REQUEST['uei_area'])){
+        }
+        elseif (empty($_REQUEST['u_id'])  || empty($_REQUEST['u_true_name']) || empty($_REQUEST['uei_province']) || empty($_REQUEST['uei_city']) || empty($_REQUEST['uei_area'])){
              $this->exportData( array('msg'=>'参数不足'),0);
         }
 
