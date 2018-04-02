@@ -699,7 +699,8 @@ class Orders extends \CLASSES\WebBase
             $orders_data = $this->orders_dao->infoData($data['o_id']);
             if (!empty($orders_data))
             {
-                if ((isset($data['t_author']) && $data['t_author'] != $orders_data['t_author'])) || (isset($data['tew_id']) && $data['tew_id'] != $orders_data['tew_id'])
+                if ((isset($data['t_author']) && $data['t_author'] != $orders_data['t_author']) ||
+                (isset($data['tew_id']) && $data['tew_id'] != $orders_data['tew_id']))
                 {
                     $this->exportData(array('msg' => '订单不存在'));
                 }
