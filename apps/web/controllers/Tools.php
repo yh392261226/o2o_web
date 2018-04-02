@@ -42,9 +42,9 @@ class Tools extends \CLASSES\WebBase
     public function taskType()
     {
         $types = array(
-            0 => '小型工地',
-            1 => '个人家装',
-            2 => '大型建筑',
+            0 => '家装',
+            1 => '工装',
+            2 => '工地施工',
         );
         $this->exportData($types);
     }
