@@ -102,8 +102,22 @@ class Users extends \CLASSES\WebBase
 
         }else{
             /*用户不存在*/
-                
-               $this->exportData(array('msg'=>'用户不存在,请注册!'),0);
+            $data = array();
+            $data['u_name'] = uniqid('u_');
+            $data['u_pass'] = '';
+            $data['u_mobile'] = $phone_number;
+            $data['u_in_time'] = $time;
+            $data['u_last_edit_time'] = $time;
+            $data['u_token'] = $time;
+            $u_id = $dao_users ->addUser($this,$data);
+            if ($u_id)
+            {
+                $token = $this->createToken($data['u_name'],$data['u_pass']);
+                $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'.jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>''),1);
+            }else{
+                $this->exportData(array('msg'=>'注册失败,请重新注册'),0);
+            }
+//               $this->exportData(array('msg'=>'用户不存在,请注册!'),0);
             
         }
     }
