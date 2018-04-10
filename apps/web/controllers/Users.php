@@ -13,66 +13,50 @@ class Users extends \CLASSES\WebBase
     {
         parent::__construct($swoole);
     }
-
+   
     public function Login()
     {
-        $type = isset($_GET['type']) && in_array($_GET['type'], array('verify', 'third', 'pass')) ? trim($_GET['type']) : 'verify';
-        $logindata = array(
-            'pager' => false,
-            'fields'=>'u_true_name,u_pass,u_status,u_online,u_id,u_sex,u_idcard,u_name,u_password',
-        );
+        $phone_number = !empty($_GET['phone_number']) ? intval($_GET['phone_number']) : 0;
+        $verify_code = !empty($_GET['verify_code']) ? intval($_GET['verify_code']) : 0;
+        if(empty($phone_number) || empty($verify_code))
+        {
+            $this->exportData( array('msg' => '手机号或验证码不能为空'),0);
+        }
+
+        /*获取验证码信息*/
+        $dao_verify_code = new \WDAO\Verifies(array('table'=>'verifies'));
+        $self_data = $dao_verify_code->listData(array(
+            'u_mobile' => $phone_number,
+            'fields' => 'code,v_in_time',
+            'limit' => 1,
+            'pager'=> false,
+                ));
+
+        if(empty($self_data['data']['0']['code']) || empty($self_data['data']['0']['v_in_time'])){
+            $this->exportData(array('msg'=>'系统错误请联系管理员'),0);
+        }
+        $time_max = $this ->web_config['verify_code_time'] + $self_data['data']['0']['v_in_time'];
         $time = time();
 
-        if ($type == 'pass')
+        if($verify_code != $self_data['data']['0']['code'] || ($time > $time_max))
         {
-            $phone_number = isset($_GET['phone_number']) && trim($_GET['phone_number']) != '' ? trim($_GET['phone_number']) : '';
-            $userpass = isset($_GET['userpass']) && trim($_GET['userpass']) != '' ? encyptPassword(trim($_GET['userpass'])) : '';
-            $verify_code = isset($_GET['verify_code']) && trim($_GET['verify_code']) != '' ? trim($_GET['verify_code']) : '';
-            if ('' == $phone_number || '' == $userpass) $this->exportData(array('msg'=>'手机号或密码不能为空'),0);
-            $logindata['u_mobile'] = $phone_number;
-           
+            $this->exportData(array('msg'=>'验证码不正确或验证码已过有效期'),0);
         }
-        elseif ($type == 'third')
-        {
-            $openid = isset($_GET['openid']) && '' != trim($_GET['openid']) ? trim($_GET['openid']) : '';
-            if ('' == $openid) $this->exportData(array('msg'=>'参数错误3'));
-            $logindata['u_openid'] = $openid;
-        }
-        elseif ($type == 'verify')
-        {
-            $phone_number = !empty($_GET['phone_number']) ? intval($_GET['phone_number']) : 0;
-            $verify_code = !empty($_GET['verify_code']) ? intval($_GET['verify_code']) : 0;
-            if(empty($phone_number) || empty($verify_code))
-            {
-                $this->exportData( array('msg' => '手机号或验证码不能为空'),0);
-            }
-            /*获取验证码信息*/
-            $dao_verify_code = new \WDAO\Verifies(array('table'=>'verifies'));
-            $self_data = $dao_verify_code->listData(array(
-                'u_mobile' => $phone_number,
-                'fields' => 'code,v_in_time',
-                'limit' => 1,
-                'pager'=> false,
-                    ));
 
-            if(empty($self_data['data']['0']['code']) || empty($self_data['data']['0']['v_in_time']))
-            {
-                $this->exportData(array('msg'=>'系统错误请联系管理员'),0);
-            }
-            $time_max = $this ->web_config['verify_code_time'] + $self_data['data']['0']['v_in_time'];
-            if($verify_code != $self_data['data']['0']['code'] || ($time > $time_max))
-            {
-                $this->exportData(array('msg'=>'验证码不正确或验证码已过有效期'),0);
-            }
-            $logindata['u_mobile'] = $phone_number;
-        }
         /*获取用户信息*/
         $dao_users = new \WDAO\Users(array('table'=>'users'));
-        $user_data = $dao_users->listData($logindata);
+        $user_data = $dao_users->listData(array(
+            'u_mobile' => $phone_number,
+            'pager' => false,
+            'fields'=>'u_true_name,u_pass,u_status,u_online,u_id,u_sex,u_idcard,u_name',
+                ));
+
+
+
+
         if(!empty($user_data['data']['0']['u_id'])){
             /*用户存在*/
-            if($user_data['data']['0']['u_status'] < 0)
-            {
+            if($user_data['data']['0']['u_status'] < 0){
                 $this->exportData(array('msg'=>'用户登录受限,请联系管理员!'),0);
             }
             $data = array();
@@ -83,20 +67,9 @@ class Users extends \CLASSES\WebBase
             $u_idcard = isset($user_data['data']['0']['u_idcard']) ? $user_data['data']['0']['u_idcard'] :'';
             $u_pass = isset($user_data['data']['0']['u_pass']) ? $user_data['data']['0']['u_pass'] :'';
             $u_sex = isset($user_data['data']['0']['u_sex']) ? $user_data['data']['0']['u_sex'] : '';
-            $u_password = isset($user_data['data']['0']['u_password']) ? $user_data['data']['0']['u_password'] : '';
-
-            if('' != $phone_number and '' != isset($userpass))
-            {
-                if($userpass!=$u_password)
-                {
-                    $this->exportData(array('msg'=>'密码错误!'),0);
-                }
-            }
-            if($res)
-            {
+            if($res){
                 $token = $this->createToken($user_data['data']['0']['u_name'],$user_data['data']['0']['u_pass']);
-
-                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_name'],'u_true_name'=>$user_data['data']['0']['u_true_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass'],'u_idcard'=>$u_idcard),1);
+                $this->exportData(array('token'=>$token,'u_img'=>$u_img,'u_online'=>$user_data['data']['0']['u_online'],'u_name'=>$user_data['data']['0']['u_true_name'],'u_sex'=>$user_data['data']['0']['u_sex'],'u_id'=>$user_data['data']['0']['u_id'],'u_pass'=>$user_data['data']['0']['u_pass'],'u_idcard'=>$u_idcard ),1);
             }
 
 
@@ -109,7 +82,10 @@ class Users extends \CLASSES\WebBase
             $data['u_in_time'] = $time;
             $data['u_last_edit_time'] = $time;
             $data['u_token'] = $time;
+
+
             $u_id = $dao_users ->addUser($this,$data);
+
             if ($u_id)
             {
                 $token = $this->createToken($data['u_name'],$data['u_pass']);
@@ -117,9 +93,10 @@ class Users extends \CLASSES\WebBase
             }else{
                 $this->exportData(array('msg'=>'注册失败,请重新注册'),0);
             }
-//               $this->exportData(array('msg'=>'用户不存在,请注册!'),0);
-            
         }
+
+
+
     }
 
     /*发送短信验证码*/
@@ -132,7 +109,7 @@ class Users extends \CLASSES\WebBase
             if ($phone_number == '15840344241') $code = '123456';
 
             /*发送验证码接口*/
-            $content = '获取的验证码为'.$msg.$code.'。';
+            $content = '登录验证码为'.$msg.$code.'。';
             $result = sendSms($phone_number, $content);
             if(!$result)
             {
@@ -163,159 +140,6 @@ class Users extends \CLASSES\WebBase
         return encyptPassword($u_name.$u_pass).'|'.base64_encode($hash);
     }
 
-    /*收藏任务列表*/
-    public function favorateTasks()
-    {
-        $u_id = isset($_GET['u_id']) ? intval($_GET['u_id']) : 0;
-        if(empty($u_id)){
-            $this->exportData( array('msg'=>'请输入用户id'),0);
-        }
-
-        $dao_favorate = new \WDAO\Users_favorate(array('table'=>'users_favorate'));
-        $favorate_arr = $dao_favorate -> listData(array(
-          'users_favorate.u_id'=>$u_id,
-          'f_type'=>0,
-          'leftjoin'=> array(
-            'task_ext_info',
-            'task_ext_info.t_id = users_favorate.f_type_id'
-            ),
-          'join' => array(
-            'tasks',
-            "tasks.t_id = users_favorate.f_type_id"
-          ),
-          'fields' => 'tasks.*,f_id,task_ext_info.t_desc',
-          'pager'=>false
-          ));
-        foreach ($favorate_arr['data'] as $key => &$value) {
-            if(!empty($value['t_author'])){
-                $value['u_img'] = $this-> getHeadById($value['t_author']);
-            }
-        }
-        $this->exportData( $favorate_arr,1);
-    }
-    /*收藏工人列表*/
-    public function favorateUsers()
-    {
-        $u_id = isset($_GET['u_id']) ? intval($_GET['u_id']) : 0;
-        if(empty($u_id)){
-            $this->exportData( array('msg'=>'请输入用户id'),0);
-        }
-        // if(empty($_GET['ucp_posit_x']) || empty($ucp_posit_x = floatval($_GET['ucp_posit_x']))){
-        //     $this->exportData( array('msg'=>'用户x坐标为空'),0);
-        // }
-        // if(empty($_GET['ucp_posit_y']) || empty($ucp_posit_y = floatval($_GET['ucp_posit_y']))){
-        //     $this->exportData( array('msg'=>'用户y坐标为空'),0);
-        // }
-
-
-        $dao_favorate = new \WDAO\Users_favorate(array('table'=>'users_favorate'));
-        /*获取当前userid收藏的用户id*/
-        $favorate_id_arr = array();
-        $favorate_arr = $dao_favorate -> listData(array(
-            'users_favorate.u_id'=>$u_id,
-            'f_type'=>1,
-            'fields'=>'f_type_id,f_id','pager'=>false,
-            ));
-        if(empty($favorate_arr['data'])){
-            $this->exportData( array('data'=>array()),1);
-        }
-        foreach ($favorate_arr['data'] as $key => $value) {
-            $favorate_id_arr[] = $value['f_type_id'];
-        }
-
-        /*获取用户的个人信息和用户自我介绍数组*/
-        $dao_users = new \WDAO\Users_favorate(array('table'=>'users'));
-        $users_arr = $dao_users -> listData(array(
-            'u_id' => array('type' => 'in', 'value' => $favorate_id_arr),
-            'fields'=>'u_id,u_task_status,users.u_true_name as u_name,u_sex','pager'=>false,
-            )
-        );
-        $dao_users_ext_info = new \WDAO\Users_favorate(array('table'=>'users_ext_info'));
-        $users_ext_arr = $dao_users_ext_info -> listData(array(
-            'u_id' => array('type' => 'in', 'value' => $favorate_id_arr),
-            'fields'=>'u_id,uei_info','pager'=>false,
-            )
-        );
-        $dao_users_cur_position = new \WDAO\Users_favorate(array('table'=>'users_cur_position'));
-        $users_position_arr = $dao_users_cur_position -> listData(array(
-            'u_id' => array('type' => 'in', 'value' => $favorate_id_arr),
-            'fields'=>'u_id,ucp_posit_x,ucp_posit_y','pager'=>false,
-            )
-        );
-        $res = array();
-        foreach ($favorate_id_arr as $key => $value) {
-            $res[$key]['u_id'] = $value;
-            $res[$key]['u_img'] = $this-> getHeadById($value);
-            foreach ($users_arr['data'] as $k_user => $v_user) {
-                if($value == $v_user['u_id']){
-                    $res[$key]['u_name'] = isset($v_user['u_name']) ? $v_user['u_name'] : '';
-                    $res[$key]['u_task_status'] = isset($v_user['u_task_status']) ? $v_user['u_task_status'] : '';
-                    $res[$key]['u_sex'] = isset($v_user['u_sex']) ? $v_user['u_sex'] : '';
-                }
-            }
-            foreach ($users_ext_arr['data'] as $k_ext => $v_ext) {
-                if($value == $v_ext['u_id']){
-                    $res[$key]['uei_info'] = isset($v_ext['uei_info']) ? $v_ext['uei_info'] : '';
-                }
-            }
-            foreach ($users_position_arr['data'] as $k_position => $v_position) {
-                if($value == $v_position['u_id']){
-                    if(!empty($v_position['ucp_posit_x']) && !empty($v_position['ucp_posit_y'])){
-                        // $res[$key]['distance'] = $this -> GetDistance($v_position['ucp_posit_x'],$v_position['ucp_posit_y'],$ucp_posit_x,$ucp_posit_y);
-                        $res[$key]['ucp_posit_x'] = $v_position['ucp_posit_x'];
-                        $res[$key]['ucp_posit_y'] = $v_position['ucp_posit_y'];
-                    }
-                }
-            }
-            foreach ($favorate_arr['data'] as $k => $v) {
-                if($value == $v['f_type_id']){
-                    $res[$key]['f_id'] = isset($v['f_id']) ? $v['f_id'] : '';
-                }
-            }
-        }
-        /*获取分类数组*/
-        $this->exportData( array('data'=>$res),1);
-    }
-
-    /*收藏删除*/
-    public function favorateDel()
-    {
-        if (empty($_GET['f_id']) || empty($f_id = intval($_GET['f_id']))){
-             $this->exportData( array('msg'=>'请输入被收藏id'),0);
-        }
-        $dao_favorate = new \WDAO\Users_favorate(array('table'=>'users_favorate'));
-
-        $res = $dao_favorate ->delData(array('f_id'=>array('type'=>'in','value'=>$f_id)));
-        if($res){
-            $this->exportData( array('msg'=>'取消收藏成功'),1);
-        }
-
-
-    }
-    /*收藏添加*/
-    public function favorateAdd()
-    {
-        $data = array();
-        if (empty($_GET['u_id']) || empty($data['u_id'] = intval($_GET['u_id']))){
-             $this->exportData( array('msg'=>'请输入被收藏id'),0);
-        }
-        if (empty($_GET['f_type_id']) || empty($data['f_type_id'] = intval($_GET['f_type_id']))){
-             $this->exportData( array('msg'=>'请输入被收藏id'),0);
-        }
-        if (!isset($_GET['f_type'])){
-             $this->exportData( array('msg'=>'请输入收藏类型'),0);
-        }
-        if($_GET['f_type'] == 1 && $data['u_id'] == $data['f_type_id']){
-            $this->exportData( array('msg'=>'您不能收藏自己'),0);
-        }
-        $data['f_type'] = intval($_GET['f_type']);
-        $dao_favorate = new \WDAO\Users_favorate(array('table'=>'users_favorate'));
-        $f_id = $dao_favorate ->addData($data);
-        if(intval($f_id) > 0){
-            $this->exportData(array('data'=>array('f_id'=>$f_id)),1);
-        }
-    }
-
     /*用户余额接口*/
     public function usersFunds()
     {
@@ -344,13 +168,16 @@ class Users extends \CLASSES\WebBase
         $ext_info = $dao_ext_info -> infoData(array('fields'=>'uei_info,u_id,uei_province,uei_city,uei_area,uei_address','key'=>'u_id','val' => $u_id,'pager'=>false));
 
         $user_area_name = '';
-        include_once MANAGEPATH . '/regions.php';
-        if (isset($ext_info['uei_province']) && $ext_info['uei_province'] > 0) $user_area_name .= $regions[$ext_info['uei_province']]['r_name'];
-        $user_area_name .= ' ';
-        if (isset($ext_info['uei_city']) && $ext_info['uei_city'] > 0) $user_area_name .= $regions[$ext_info['uei_city']]['r_name'];
-        $user_area_name .= ' ';
-        if (isset($ext_info['uei_area']) && $ext_info['uei_area'] > 0) $user_area_name .= $regions[$ext_info['uei_area']]['r_name'];
-        
+        if(!empty($ext_info['uei_city'])){
+            $dao_regions = new \WDAO\Users(array('table'=>'regions'));
+            $city_name = $dao_regions ->infoData(array('fields'=>'r_id,r_name','key'=>'r_id','val' => $ext_info['uei_city'],'pager'=>false));
+            if(!empty($ext_info['uei_city'])){
+                $area_name = $dao_regions ->infoData(array('fields'=>'r_id,r_name','key'=>'r_id','val' => $ext_info['uei_area'],'pager'=>false));
+                $user_area_name = $city_name['r_name'].$area_name['r_name'];
+            }else{
+                $user_area_name = $city_name['r_name'];
+            }
+        }
         $ext_info['user_area_name'] = $user_area_name;
         unset($ext_info['u_id']);
 
@@ -382,13 +209,9 @@ class Users extends \CLASSES\WebBase
             unset($_REQUEST);
             $_REQUEST = $data_r;
 
-        }
-        elseif (empty($_REQUEST['u_id'])  || empty($_REQUEST['u_true_name']) || empty($_REQUEST['uei_province']) || empty($_REQUEST['uei_city']) || empty($_REQUEST['uei_area'])){
+        }elseif (empty($_REQUEST['u_id']) || !isset($_REQUEST['u_sex']) || empty($_REQUEST['u_true_name']) || empty($_REQUEST['u_idcard']) || empty($_REQUEST['uei_info']) || empty($_REQUEST['uei_address']) || empty($_REQUEST['uei_province']) || empty($_REQUEST['uei_city']) || empty($_REQUEST['uei_area'])){
              $this->exportData( array('msg'=>'参数不足'),0);
         }
-
-
-
 
         $u_id= intval($_REQUEST['u_id']);
         /*users表*/
@@ -919,126 +742,6 @@ class Users extends \CLASSES\WebBase
 
     }
 
-    /*用户站内标题信息*/
-    public function msgList($value='')
-    {
-        if(empty($_GET['u_id']) || empty($u_id = intval($_GET['u_id']))){
-            $this->exportData( array('msg'=>'用户id不能为空'),0);
-        }
-        $page = isset($_GET['page']) && !empty(intval($_GET['page'])) ? intval($_GET['page']) : 1;
-        $wm_type = isset($_GET['wm_type']) ? intval($_GET['wm_type']) : 3;
-
-        $time = time();
-        $where =  'um_status != -1
-        AND (web_msg.wm_start_time <= '.$time.' OR web_msg.wm_start_time = 0 )
-        AND (web_msg.wm_end_time >= '.$time.' OR web_msg.wm_end_time = 0)
-        AND wm_status = 1
-        AND user_msg.u_id='.$u_id;
-        switch ($wm_type) {
-            case 0:
-                $where .= ' AND web_msg.wm_type = 0';
-                break;
-            case 1:
-                $where .= ' AND web_msg.wm_type = 1';
-                break;
-            case 2:
-                $where .= ' AND web_msg.wm_type = 2';
-                break;
-            default:
-                $where .= ' ';
-                break;
-        }
-
-        $dao_web_msg = new \WDAO\Users(array('table'=>'web_msg'));
-        $msg_list = $dao_web_msg ->listData(array(
-            'pager' => true,
-            'page' => $page,
-            'where' => $where,
-            'fields' => 'web_msg.wm_title,user_msg.um_in_time,web_msg.wm_type,web_msg.wm_id ,user_msg.um_id,web_msg_ext.wm_desc,user_msg.um_status',
-            'join' => array('user_msg','web_msg.wm_id=user_msg.wm_id '),
-            'leftjoin' => array('web_msg_ext','web_msg.wm_id=web_msg_ext.wm_id '),
-            'order' => 'user_msg.um_in_time desc,user_msg.um_status asc',
-            ));
-        unset($msg_list['pager']);
-        $this->exportData( $msg_list,1);
-    }
-
-    /*删除站内信息*/
-    public function msgDel()
-    {
-
-        if(empty($_GET['um_id']) || empty($um_id = intval($_GET['um_id']))){
-            $this->exportData( array('msg'=>'用户站内信关系ID为空'),0);
-        }
-
-        $dao_user_msg = new \WDAO\Users(array('table'=>'user_msg'));
-        $res = $dao_user_msg ->updateData(array(
-            'um_status' => '-1',
-            ),array('um_id'=>$um_id));
-        if($res){
-            $this->exportData( array('msg'=>'信息删除成功'),1);
-        }else{
-            $this->exportData( array('msg'=>'信息删除失败'),0);
-        }
-
-
-    }
-
-    /*修改信息读取状态*/
-    public function msgReadEdit()
-    {
-
-        if(empty($_GET['um_id']) || empty($um_id = intval($_GET['um_id']))){
-            $this->exportData( array('msg'=>'用户站内信关系ID为空'),0);
-        }
-
-        $dao_user_msg = new \WDAO\Users(array('table'=>'user_msg'));
-        $res = $dao_user_msg ->updateData(array('um_status' => '1',),array('um_id'=>$um_id));
-        if($res){
-            $this->exportData( array('msg'=>'状态修改成功'),1);
-        }else{
-            $this->exportData( array('msg'=>'状态修改失败'),0);
-        }
-    }
-
-    /*站内信详细信息*/
-    public function msgInfo()
-    {
-
-        if(empty($_GET['um_id']) || empty($um_id = intval($_GET['um_id']))){
-            $this->exportData( array('msg'=>'用户站内信关系ID为空'),0);
-        }
-        /*修改状态*/
-        $dao_user_msg = new \WDAO\Users(array('table'=>'user_msg'));
-        $msg_list = $dao_user_msg ->updateData(array(
-            'um_status' => '1',
-            ),array('um_id'=>$um_id));
-        $wm_id = 0;
-        $wm_id_arr = $dao_user_msg ->infoData(array('key'=>'um_id','val'=>$um_id,'fields'=>'wm_id,um_id'));
-        if(isset($wm_id_arr['wm_id'])){
-            $wm_id = $wm_id_arr['wm_id'];
-        }
-
-        /*获取内容*/
-        $info = array();
-        if(!empty($wm_id)){
-            $dao_web_msg = new \WDAO\Users(array('table'=>'web_msg'));
-
-            $info = $dao_web_msg -> listData(array(
-                'where' => 'web_msg.wm_id='.$wm_id,
-                'wm_status' => 1,
-                'fields'=>'wm_title,wm_in_time,wm_desc,web_msg_ext.wm_id',
-                'leftjoin' => array('web_msg_ext','web_msg.wm_id=web_msg_ext.wm_id '),
-                ));
-            unset($info['pager']);
-
-        }
-        $this->exportData( $info,1);
-    }
-
-
-
-
     /*用户位置信息修改*/
     public function updatePosition()
     {
@@ -1073,136 +776,6 @@ class Users extends \CLASSES\WebBase
         }else{
             $this->exportData( array('msg'=>'位置信息修改失败'),0);
         }
-    }
-
-    /*用户投诉信息问题提示信息*/
-    public function complaintsType()
-    {
-        $ct_type = isset($_GET['ct_type']) && (!empty(intval($_GET['ct_type'])) || $_GET['ct_type'] === '0') ?  intval($_GET['ct_type']) : -1;
-        $condition = array();
-        $condition['ct_status'] = 1;
-        $condition['fields'] = 'ct_id,ct_name';
-        if($ct_type !== -1){
-            $condition['ct_type'] = $ct_type;
-        }
-
-        $complaints_type = new \WDAO\Users(array('table'=>'complaints_type'));
-        $complaints_type_arr = $complaints_type -> listData($condition);
-        unset($complaints_type_arr['pager']);
-        $this->exportData( array($complaints_type_arr),1);
-    }
-
-
-    /*添加投诉信息*/
-    public function complaintsAdd()
-    {
-
-        if(empty($_POST['c_id']) || empty(intval($_POST['c_id']))){
-            if(empty($_POST['c_author']) || empty($c_author = intval($_POST['c_author']))){
-                $this->exportData( array('msg'=>'用户ID为空'),0);
-            }
-            if(empty($_POST['c_against']) || empty($c_against = intval($_POST['c_against']))){
-                $this->exportData( array('msg'=>'针对投诉人不能为空'),0);
-            }
-            if(empty($_POST['ct_id']) || empty($ct_id = intval($_POST['ct_id']))){
-                $this->exportData( array('msg'=>'投诉类型不能为空'),0);
-            }
-            $data = array();
-            !empty($_POST['c_title']) ? $array['c_title'] = trim($_POST['c_title']) : false;
-            $data['c_author'] = $c_author;
-            $data['c_against'] = $c_against;
-            $data['ct_id'] = $ct_id;
-            $data['c_in_time'] = time();
-            $dao_complaints = new \WDAO\Users(array('table'=>'complaints'));
-
-            $c_id = 0;
-            $c_id = $dao_complaints ->addData($data);
-
-            if($c_id <= 0) {
-                $this->exportData( array('msg'=>'投诉信息写入失败'),0);
-            }
-
-
-
-
-            if(!empty($c_id)){
-                $ext_data = array();
-                $ext_data['c_id'] = $c_id;
-                $ext_data['c_replay'] = '';
-                $ext_data['c_mark'] = '';
-                $ext_data['c_desc'] = isset($_POST['c_desc']) ? trim($_POST['c_desc']) : ' ';
-                if(!empty($_POST['c_img'])){
-                    $ext_data['c_img'] = '';
-                    $res = $dao_complaints ->uploadComplaintImg($_POST['c_img'],'../uploads/images/'.date('Y/m/d'));
-                    if(intval($res) < 0){
-                        switch (intval($res)) {
-                            case -1:
-                                $this->exportData( array('msg'=>'图片目录创建失败'),0);
-                                break;
-                            case -2:
-                                $this->exportData( array('msg'=>'图片写入失败'),0);
-                                break;
-                            default:
-                                $ext_data['c_img'] = $res;
-                                break;
-                        }
-                    }else{
-                        $ext_data['c_img'] = $res;
-                    }
-                }
-                $dao_complaints_ext = new \WDAO\Users(array('table'=>'complaints_ext'));
-                $res_ext_add = $dao_complaints_ext -> addData($ext_data);
-                if($res_ext_add){
-                    $this->exportData( array('msg'=>'投诉信息写入成功','c_id'=>$c_id),1);
-                }
-
-            }
-        }else{
-            if(isset($_POST['c_id']) && !empty(intval($_POST['c_id'])) && !empty($_POST['c_img'])){
-                $dao_complaints_ext = new \WDAO\Users(array('table'=>'complaints_ext'));
-                $complaints_ext_info = $dao_complaints_ext -> infoData(array(
-                    'fields' => 'c_img,c_id',
-                    'key' => 'c_id',
-                    'val' => intval($_POST['c_id']),
-                    ));
-                $ext_data = '';
-                $res = $dao_complaints_ext ->uploadComplaintImg($_POST['c_img'],'../uploads/images/'.date('Y/m/d'));
-                if(intval($res) < 0){
-                    switch (intval($res)) {
-                        case -1:
-                            $this->exportData( array('msg'=>'图片目录创建失败'),0);
-                            break;
-                        case -2:
-                            $this->exportData( array('msg'=>'图片写入失败'),0);
-                            break;
-                        default:
-                            $img_path = $res;
-                            break;
-                    }
-                }else{
-                    $img_path = $res;
-                }
-
-
-                if(!empty($img_path) && intval($res) >= 0){
-                    if(!empty($complaints_ext_info['c_img'])){
-                        $ext_data = array('c_img'=>$complaints_ext_info['c_img'].','.$img_path);
-                    }else{
-                        $ext_data = array('c_img'=>$img_path);
-                    }
-                    $res = $dao_complaints_ext ->updateData($ext_data,array('c_id'=>$_POST['c_id']));
-                    if($res){
-                        $this->exportData( array('msg'=>'图片信息修改成功'),1);
-                    }else{
-                        $this->exportData( array('msg'=>'图片信息修改失败'),0);
-                    }
-                }else{
-                    $this->exportData( array('msg'=>'图片信息写入失败'),0);
-                }
-
-            }
-        }
-        $this->exportData( array('msg'=>'参数不足,图片信息写入失败!'),0);
     }
 
     /*用户提现申请接口*/
@@ -1291,7 +864,7 @@ class Users extends \CLASSES\WebBase
     }
         /*充值开始*/
         /*充值记录接口*/
-    public function applyRechargeLog()
+        public function applyRechargeLog()
     {
         if(empty($_REQUEST['u_id']) || empty($u_id = intval($_REQUEST['u_id']))){
             $this->exportData( array('msg'=>'用户ID为空'),0);
@@ -1419,135 +992,7 @@ class Users extends \CLASSES\WebBase
         }
 
     }
-    /*充值结束*/
-    /*评价添加接口*/
-    public function commentAdd()
-    {
-        $data_c = array();
-        if(empty($_REQUEST['t_id']) || empty($data_c['t_id'] = intval($_REQUEST['t_id']))){
-            $this->exportData( array('msg'=>'任务id为空'),0);
-        }
-        if(empty($_REQUEST['u_id']) || empty($data_c['u_id'] = intval($_REQUEST['u_id']))){
-            $this->exportData( array('msg'=>'评论人id为空'),0);
-        }
-        if(empty($_REQUEST['tc_u_id']) || empty($data_c['tc_u_id'] = intval($_REQUEST['tc_u_id']))){
-            $this->exportData( array('msg'=>'评论人id为空'),0);
-        }
-
-        $data_c['tc_start'] = $data_c['tc_first_start'] = isset($_REQUEST['tc_start']) ? intval($_REQUEST['tc_start']) : 0;
-        $data_c['tc_type'] = isset($_REQUEST['tc_type']) ? intval($_REQUEST['tc_type']) : 0;
-        $data_c['tc_last_edit_time'] = time();
-        $data_c['tc_in_time'] = time();
-        $dao_task_comment = new \WDAO\Users(array('table'=>'task_comment'));
-        $tc_id = $dao_task_comment -> addData($data_c);
-        /*设置users好评次数*/
-        $dao_users = new \WDAO\Users(array('table'=>'users'));
-        switch ($data_c['tc_start']) {
-            case '3':
-                $sql = 'update users set u_high_opinions = u_high_opinions + 1 where u_id = ' . $data_c['tc_u_id'];
-                break;
-            case '2':
-                $sql = 'update users set u_middle_opinions = u_middle_opinions + 1 where u_id = ' . $data_c['tc_u_id'];
-                break;
-            case '1':
-                $sql = 'update users set u_low_opinions = u_low_opinions + 1 where u_id = ' . $data_c['tc_u_id'];
-                break;
-
-            default:
-                // $sql = 'update users set u_high_opinions = u_high_opinions + 1 where u_id = ' . $data_c['tc_u_id'];
-                break;
-        }
-
-        $result = $dao_users ->queryData($sql);
-
-
-        $data_ext = array();
-        isset($_REQUEST['tce_desc']) ? $data_ext['tce_desc'] = trim($_REQUEST['tce_desc']) : false ;
-        if(!empty($data_ext) && intval($tc_id) > 0) {
-            $data_ext['tc_id'] = intval($tc_id);
-            $dao_task_comment_ext = new \WDAO\Users(array('table'=>'task_comment_ext'));
-            $dao_task_comment_ext -> addData($data_ext);
-        }
-        if(intval($tc_id) > 0){
-           $this->exportData( array('data'=>array('tc_id'=>$tc_id)),1);
-        }else{
-           $this->exportData( array('msg'=>"评价失败"),0);
-        }
-    }
-    /**********************************************************添加好评次数**********************************************************/
-    /*评价修改接口*/
-    // public function commentEdit()
-    // {
-    //     $data_c = array();
-    //     if(empty($_REQUEST['tc_id']) || empty($tc_id = intval($_REQUEST['tc_id']))){
-    //         $this->exportData( array('msg'=>'评价id为空'),0);
-    //     }
-
-    //     isset($_REQUEST['tc_start']) ? $data_c['tc_start'] = intval($_REQUEST['tc_start']) : fales;
-    //     $data_c['tc_last_edit_time'] = time();
-    //     $dao_task_comment = new \WDAO\Users(array('table'=>'task_comment'));
-    //     $res = $dao_task_comment -> updateData($data_c,array('tc_id' => $tc_id));
-    //     $data_ext = array();
-    //     $data_ext['tce_desc'] = isset($_REQUEST['tce_desc']) ? trim($_REQUEST['tce_desc']) : '' ;
-    //     if($res) {
-    //         $data_ext['tc_id'] = intval($tc_id);
-    //         $dao_task_comment_ext = new \WDAO\Users(array('table'=>'task_comment_ext'));
-    //         $dao_task_comment_ext -> updateData($data_ext,array('tc_id' => $tc_id));
-    //     }
-    //     $sql = 'update task_comment set tc_edit_times = tc_edit_times + 1 where tc_id = ' . $tc_id;
-    //     $result = $dao_task_comment ->queryData($sql);
-    //     if($res){
-    //        $this->exportData( array('msg'=>'修改评论成功'),1);
-    //     }
-    // }
-
-    /*查看自己评论他人接口列表*/
-    public function userCommentOther()
-    {
-        $data = array();
-        if(empty($_REQUEST['u_id']) || empty($data['u_id'] =  intval($_REQUEST['u_id']))){
-            $this->exportData( array('msg'=>'用户id为空'),0);
-        }
-        if(isset($_REQUEST['page']) && !empty(intval($_REQUEST['page']))) {
-            $data['pager'] = true;
-            $data['page'] = intval($_REQUEST['page']) ;
-        }else{
-            $data['pager'] = false;
-        }
-        $data['leftjoin'] = array('task_comment_ext','task_comment.tc_id=task_comment_ext.tc_id');
-        $data['fields'] = 'task_comment.tc_id as tc_id,t_id,tc_u_id,tc_in_time,tc_start,task_comment_ext.tce_desc';
-        $dao_task_comment = new \WDAO\Users(array('table'=>'task_comment'));
-        $list = $dao_task_comment ->listData($data);
-        foreach ($list['data'] as $k => &$v) {
-            $v['u_img'] = $this-> getHeadById($v['tc_u_id']);
-        }
-        unset($list['pager']);
-        $this->exportData( $list,1);
-    }
-
-    /*查看他人评论自己接口列表*/
-    public function otherCommentUser()
-    {
-        $data = array();
-        if(empty($_REQUEST['tc_u_id']) || empty($data['tc_u_id'] =  intval($_REQUEST['tc_u_id']))){
-            $this->exportData( array('msg'=>'用户id为空'),0);
-        }
-        if(isset($_REQUEST['page']) && !empty(intval($_REQUEST['page']))) {
-            $data['pager'] = true;
-            $data['page'] = intval($_REQUEST['page']) ;
-        }else{
-            $data['pager'] = false;
-        }
-        $data['leftjoin'] = array('task_comment_ext','task_comment.tc_id=task_comment_ext.tc_id');
-        $data['fields'] = 'task_comment.tc_id as tc_id,u_id,t_id,tc_u_id,tc_in_time,tc_start,task_comment_ext.tce_desc';
-        $dao_task_comment = new \WDAO\Users(array('table'=>'task_comment'));
-        $list = $dao_task_comment ->listData($data);
-        foreach ($list['data'] as $k => &$v) {
-            $v['u_img'] = $this-> getHeadById($v['u_id']);
-        }
-        unset($list['pager']);
-        $this->exportData( $list,1);
-    }
+   
 
     /*设置用户支付密码*/
     public function setPassword()
@@ -1677,183 +1122,42 @@ class Users extends \CLASSES\WebBase
         }
     }
 
-    //手机注册接口
-    public function mobileRegister()
-    {
-        $time=time();
-        $phone_number = isset($_GET['phone_number']) && trim($_GET['phone_number']) != '' ? trim($_GET['phone_number']) : $this->exportData(array('msg'=>'手机号不能为空'),0);
-        $userpass = isset($_GET['userpass']) && trim($_GET['userpass']) != '' ? encyptPassword(trim($_GET['userpass'])) : $this->exportData(array('msg'=>'密码不能为空'),0);
-        $verify_code = isset($_GET['verify_code']) && trim($_GET['verify_code']) != '' ? trim($_GET['verify_code']) : $this->exportData(array('msg'=>'验证码不能为空'),0);
-                $dao_users = new \WDAO\Users(array('table'=>'users'));
-                $res = $dao_users ->checkVerifies($phone_number,trim($verify_code),$this ->web_config['verify_code_time']);
-                $info = $dao_users->infoData(array('key'=>'u_mobile','val'=>$phone_number,'fields'=>'u_id'));
-                if($info)
-                {
-                    $this->exportData(array('msg'=>'用户已存在'),0);
-                }
-                
-                if($res===true)
-                {
-                    $data = array();
-                $data['u_name'] = uniqid('u_');
-                $data['u_pass'] = '';
-                $data['u_mobile'] = $phone_number;
-                $data['u_password'] = $userpass;
-                $data['u_in_time'] = $time;
-                $data['u_last_edit_time'] = $time;
-                $data['u_token'] = $time;
-                $u_id = $dao_users ->addUser($this,$data);
-                }
-                else{
-                    switch ($res) {
-                    case '-1':
-                        $this ->exportData( array('msg'=>'请获取验证码'),0);
-                        break;
-                    case '-2':
-                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
-                        break;
-                    default:
-                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
-                        break;
-                    }
-                }
-                
 
-                if ($u_id)
-                {
-                    $token = $this->createToken($data['u_name'],$data['u_pass']);
-                    $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'.jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>'','haspwd'=>'0'),1);
-                }else{
-                    $this->exportData(array('msg'=>'注册失败,请重新注册'),0);
-                }
 
-    }
-    //用户名密码注册接口
-    public function register(){
-        $time=time();
-        $username = isset($_GET['username']) && trim($_GET['username']) != '' ? trim($_GET['username']) : $this->exportData(array('msg'=>'用户名不能为空'),0);
-        $userpass = isset($_GET['userpass']) && trim($_GET['userpass']) != '' ? encyptPassword(trim($_GET['userpass'])) : $this->exportData(array('msg'=>'用户密码不能为空'),0);
-        $password_confirm=isset($_GET['password_confirm']) && trim($_GET['password_confirm']) != '' ? encyptPassword(trim($_GET['password_confirm'])) : $this->exportData(array('msg'=>'请输入确认密码'),0);
-      
-        $logindata['u_name'] = $username;
-        $logindata['u_password'] = $userpass;
-        if($userpass!=$password_confirm){
-            
-            $this->exportData(array('msg'=>'两次密码输入不相同'),0);
-        
-        }
-        else{
 
-        $dao_users = new \WDAO\Users(array('table'=>'users'));
-        
-        $info = $dao_users->infoData(array('key'=>'u_name','val'=>$username,'fields'=>'u_id'));
-        if($info){
-            
-            $this->exportData(array('msg'=>'用户已存在'),0);
-        }else{
-            /*用户不存在*/
 
-            $data = array();
-            $data['u_name'] = $username;
-            $data['u_pass'] = '';
-            $data['u_password'] = $userpass;
-            $data['u_in_time'] = $time;
-            $data['u_last_edit_time'] = $time;
-            $data['u_token'] = $time;
-            $u_id = $dao_users ->addUser($this,$data);
 
-            if ($u_id)
-            {
-                $token = $this->createToken($data['u_name'],$data['u_password']);
-                $this->exportData(array('token'=>$token,'u_img'=>$this ->web_config['u_img_url'].'0'.'.jpg','u_online'=>'0','u_name'=>$data['u_name'],'u_sex'=>'-1','u_id'=>"$u_id",'u_pass'=>'','u_idcard'=>'','u_password'=>$userpass,'haspwd'=>'1'),1);
-            }else{
-                $this->exportData(array('msg'=>'注册失败,请重新注册'),0);
-            }
-        }
-        }
 
-    }
-    //忘记密码
-    public function forget_Password(){
-        $phone_number = isset($_GET['phone_number']) && trim($_GET['phone_number']) != '' ? trim($_GET['phone_number']) : '';
-        $verify_code = isset($_GET['verify_code']) && trim($_GET['verify_code']) != '' ? trim($_GET['verify_code']) : '';
-        $userpass = isset($_GET['userpass']) && trim($_GET['userpass']) != '' ? encyptPassword(trim($_GET['userpass'])) : '';
-        $password_confirm = isset($_GET['password_confirm']) && trim($_GET['password_confirm']) != '' ? encyptPassword(trim($_GET['password_confirm'])) : '';
-       
-        $dao_users = new \WDAO\Users(array('table'=>'users'));
-        /*验证验证码*/
-        if(isset($phone_number) && !empty($num = intval($phone_number)) && !empty($verify_code) && !empty($userpass) && !empty($password_confirm))
-        {
-        $res = $dao_users ->checkVerifies($phone_number,trim($verify_code),$this ->web_config['verify_code_time']);
-            if($res === true){
-               if($userpass!=$password_confirm)
-                {
-                    $this->exportData(array('msg'=>'两次密码输入不相同'),0);
-                }
-                $info = $dao_users->infoData(array('key'=>'u_mobile','val'=>$phone_number,'fields'=>'u_id'));
-                if($info)
-                {
-                    $res = $dao_users ->updateData(array('u_password' => $userpass), array('u_id' => $info['u_id']));
-                }
-                else
-                {
-                    $this->exportData(array('msg'=>'用户不存在,请注册'),0);
-                }
-            }else{
-                switch ($res) {
-                    case '-1':
-                        $this ->exportData( array('msg'=>'系统错误请联系管理员'),0);
-                        break;
-                    case '-2':
-                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
-                        break;
-                    default:
-                        $this ->exportData( array('msg'=>'验证码不正确或验证码已过有效期'),0);
-                        break;
-                }
-            }
-            
-        }
-        elseif(isset($phone_number) && !empty($num = intval($phone_number)) )/*手机号发送验证码*/
-        {
-            $this ->sendVerifyCode('用户您好!您正在重置密码,验证码为',$num);
-        }
-        else
-        {
-            $this ->exportData( array('msg'=>'参数不足,密码修改失败'),0);
-        }
-        if($res){
-            $this ->exportData( array('msg'=>'密码重置成功'),1);
-        }else{
-            $this ->exportData( array('msg'=>'密码重置失败,请联系管理员'),0);
-        }
-        
-    }
-    //修改用户密码
-    public function setPass()
-    {
-        $u_id = isset($_GET['u_id']) && intval($_GET['u_id']) != '' ? trim($_GET['u_id']) : $this->exportData(array('msg'=>'用户名id为空'),0);
-        $u_password = isset($_GET['u_password']) && trim($_GET['u_password']) != '' ? encyptPassword(trim($_GET['u_password'])) : $this->exportData(array('msg'=>'用户密码不能为空'),0);
-        $password_confirm=isset($_GET['password_confirm']) && trim($_GET['password_confirm']) != '' ? encyptPassword(trim($_GET['password_confirm'])) : $this->exportData(array('msg'=>'请输入确认密码'),0);
-        if($u_password!=$password_confirm){
-            
-            $this->exportData(array('msg'=>'两次密码输入不相同'),0);
-        
-        }
-        $dao_users = new \WDAO\Users(array('table'=>'users'));
-        $u_info = $dao_users -> infoData(array('key'=>'u_id','val'=>$u_id,'fields'=>'u_id,u_password'));
-        $data = array();
-        $data['u_password'] = encyptPassword($u_password);
-        $res = $dao_users ->updateData($data,array('u_id'=>$u_id));
-        if($res){
-                $this ->exportData( array('msg'=>'设置密码成功'),1);
-        }else{
-                $this ->exportData( array('msg'=>'设置密码失败'),0);
-        }
 
-       
 
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
