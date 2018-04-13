@@ -540,18 +540,18 @@ class Articles extends \CLASSES\ManageBase
         $data['a_end_time'] = isset($_POST['a_end_time']) && intval($_POST['a_end_time']) > 0 ?strtotime($_POST['a_end_time']):0;
 
         /*判断长度*/
-        if(isset($data['a_info']) && mb_strlen($data['a_info'],'utf8') > 30){
-            msg("文章简介的最大字符长度为30!", $status = 0, $jump);
-        }
-        if(isset($data['a_title']) && mb_strlen($data['a_title'],'utf8') > 40){
-            msg("文章标题的最大字符长度为40!", $status = 0, $jump);
-        }
-        if(isset($data['a_link']) && mb_strlen($data['a_link'],'utf8') > 40){
-            msg("文章链接的最大字符长度为40!", $status = 0, $jump);
-        }
-        if(isset($data['a_link']) && mb_strlen($data['a_link'],'utf8') > 40){
-            msg("文章链接的最大字符长度为40!", $status = 0, $jump);
-        }
+//        if(isset($data['a_info']) && mb_strlen($data['a_info'],'utf8') > 30){
+//            msg("文章简介的最大字符长度为30!", $status = 0, $jump);
+//        }
+//        if(isset($data['a_title']) && mb_strlen($data['a_title'],'utf8') > 40){
+//            msg("文章标题的最大字符长度为40!", $status = 0, $jump);
+//        }
+//        if(isset($data['a_link']) && mb_strlen($data['a_link'],'utf8') > 40){
+//            msg("文章链接的最大字符长度为40!", $status = 0, $jump);
+//        }
+//        if(isset($data['a_link']) && mb_strlen($data['a_link'],'utf8') > 40){
+//            msg("文章链接的最大字符长度为40!", $status = 0, $jump);
+//        }
 
 
         if(isset($_FILES['a_img']['name'][0])&&!empty($_FILES['a_img']['name'][0])){

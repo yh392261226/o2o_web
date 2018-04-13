@@ -48,6 +48,10 @@ class Articles extends \CLASSES\WebBase
             if($article_list_arr['data'][0]['a_desc']){
                 $article_list_arr['data'][0]['a_desc'] = strip_tags($article_list_arr['data'][0]['a_desc']);
             }
+            if (isset($article_list_arr['data'][0]['a_img']))
+            {
+                $article_list_arr['data'][0]['a_img'] =  STATICURL . '/images/' . $article_list_arr['data'][0]['a_img'];
+            }
         }
         unset($article_list_arr['pager']);
         $this->exportData( $article_list_arr['data'],1);
