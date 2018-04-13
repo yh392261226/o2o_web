@@ -16,7 +16,7 @@ define('FRAMEWORKPATH', WEBPATH . '/../../framework');
 define('LIBRARIESPATH', WEBPATH . '/../../libraries');
 define('APPPATH', WEBPATH . '/..');
 define('STATICPATH','/views/static/');
-define('STATICURL', '');
+define('STATICURL', 'http://static-app.gangjianwang.com');
 define('MANAGEURL', STATICURL . '/manager/');//定义后台静态文件路径
 // define('UPLOADURL', STATICURL . '/uploads/');//定义上传路径
 define('HOSTURL', 'http://' . $_SERVER['HTTP_HOST']); //定义网站家域名
