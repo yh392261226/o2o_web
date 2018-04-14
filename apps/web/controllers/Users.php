@@ -167,16 +167,13 @@ class Users extends \CLASSES\WebBase
         $ext_info = $dao_ext_info -> infoData(array('fields'=>'uei_info,u_id,uei_province,uei_city,uei_area,uei_address','key'=>'u_id','val' => $u_id,'pager'=>false));
 
         $user_area_name = '';
-        if(!empty($ext_info['uei_city'])){
-            $dao_regions = new \WDAO\Users(array('table'=>'regions'));
-            $city_name = $dao_regions ->infoData(array('fields'=>'r_id,r_name','key'=>'r_id','val' => $ext_info['uei_city'],'pager'=>false));
-            if(!empty($ext_info['uei_city'])){
-                $area_name = $dao_regions ->infoData(array('fields'=>'r_id,r_name','key'=>'r_id','val' => $ext_info['uei_area'],'pager'=>false));
-                $user_area_name = $city_name['r_name'].$area_name['r_name'];
-            }else{
-                $user_area_name = $city_name['r_name'];
-            }
-        }
+        include_once MANAGEPATH . '/regions.php';
+        if (isset($ext_info['uei_province']) && $ext_info['uei_province'] > 0) $user_area_name .= $regions[$ext_info['uei_province']]['r_name'];
+        $user_area_name .= ' ';
+        if (isset($ext_info['uei_city']) && $ext_info['uei_city'] > 0) $user_area_name .= $regions[$ext_info['uei_city']]['r_name'];
+        $user_area_name .= ' ';
+        if (isset($ext_info['uei_area']) && $ext_info['uei_area'] > 0) $user_area_name .= $regions[$ext_info['uei_area']]['r_name'];
+        
         $ext_info['user_area_name'] = $user_area_name;
         unset($ext_info['u_id']);
 
