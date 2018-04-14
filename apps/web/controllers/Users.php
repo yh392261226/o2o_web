@@ -200,14 +200,14 @@ class Users extends \CLASSES\WebBase
     public function usersInfoEdit()
     {
         $data_users = array();
-        if(isset($_REQUEST['u_online']) && !empty($_REQUEST['u_id'])){
+        if(isset($_REQUEST['u_online']) && !empty($_REQUEST['u_id'])) {
 
             $data_r = array();
-            $data_r['u_online'] = $_REQUEST['u_online'] ;
-            $data_r['u_id'] = $_REQUEST['u_id'] ;
+            $data_r['u_online'] = $_REQUEST['u_online'];
+            $data_r['u_id'] = $_REQUEST['u_id'];
             unset($_REQUEST);
             $_REQUEST = $data_r;
-
+        }
         elseif (empty($_REQUEST['u_id'])  || empty($_REQUEST['u_true_name']) || empty($_REQUEST['uei_province']) || empty($_REQUEST['uei_city']) || empty($_REQUEST['uei_area'])){
              $this->exportData( array('msg'=>'参数不足'),0);
         }
