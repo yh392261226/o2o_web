@@ -205,7 +205,7 @@ class Users extends \CLASSES\WebBase
             unset($_REQUEST);
             $_REQUEST = $data_r;
         }
-        elseif (empty($_REQUEST['u_id'])  || empty($_REQUEST['u_true_name']) || empty($_REQUEST['uei_province']) || empty($_REQUEST['uei_city']) || empty($_REQUEST['uei_area'])){
+        elseif (empty($_REQUEST['u_id'])  || empty($_REQUEST['u_true_name']) || empty($_REQUEST['uei_province']) || empty($_REQUEST['uei_city']) ){
              $this->exportData( array('msg'=>'参数不足'),0);
         }
 
